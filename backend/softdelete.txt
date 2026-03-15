@@ -1,0 +1,17 @@
+public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+{
+    // On récupère uniquement les entrées qui implémentent ISoftDelete
+    var softDeleteEntries = ChangeTracker.Entries<ISoftDelete>()
+        .Where(e => e.State == EntityState.Deleted);
+
+    foreach (var entry in softDeleteEntries)
+    {
+        // 1. On empêche la suppression physique
+        entry.State = EntityState.Modified;
+        
+        // 2. On effectue la suppression logique
+        entry.Entity.IsDeleted = true;
+    }
+
+    return base.SaveChangesAsync(cancellationToken);
+}

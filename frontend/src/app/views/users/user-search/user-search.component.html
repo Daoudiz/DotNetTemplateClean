@@ -1,0 +1,201 @@
+<c-card class="mb-4 shadow-sm">
+    <c-card-header><strong>Recherche Multicritères</strong></c-card-header>
+    <c-card-body>
+        <form [formGroup]="searchForm" (ngSubmit)="onSearch()" class="row g-3">
+            <div class="col-md-4">
+                <label cLabel>Matricule</label>
+                <input cFormControl type="number" inputmode="numeric" 
+           pattern="[0-9]*" formControlName="matricule">
+            </div>
+            <div class="col-md-4">
+                <label cLabel>Nom</label>
+                <input cFormControl type="text" formControlName="nom">
+            </div>
+            <div class="col-md-4">
+                <label cLabel>Prénom</label>
+                <input cFormControl type="text" formControlName="prenom">
+            </div>
+
+            <div class="col-md-4">
+                <label cLabel>Direction</label>
+                <select cSelect formControlName="directionId" (change)="onDirectionChange()">
+                    <option [ngValue]="null">Toutes les directions</option>
+                    @for (dir of directions(); track dir.id) {
+                    <option [ngValue]="dir.id">{{ dir.code }}</option>
+                    }
+                </select>
+            </div>
+            
+            <div class="col-md-4">
+                <label cLabel>Division</label>
+                <select cSelect formControlName="divisionId" (change)="onDivisionChange()"
+                    [disabled]="!searchForm.get('directionId')?.value">
+                    <option [ngValue]="null">Toutes les divisions</option>
+                    @for (div of divisions(); track div.id) {
+                    <option [ngValue]="div.id">{{ div.code }}</option>
+                    }
+                </select>
+            </div>
+            
+            <div class="col-md-4">
+                <label cLabel>Service</label>
+                <select cSelect formControlName="serviceId" [disabled]="!searchForm.get('divisionId')?.value">
+                    <option [ngValue]="null">Tous les services</option>
+                    @for (ser of services(); track ser.id) {
+                    <option [ngValue]="ser.id">{{ ser.code }}</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-12 border-top pt-3 mt-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <div>
+                        <button cButton color="success" type="button" class="text-white shadow-sm" (click)="openCreateModal()">
+                            <svg cIcon name="cilUserFollow" class="me-2"></svg>
+                            Ajouter un utilisateur
+                        </button>
+                    </div>
+            
+                    <div>
+                        <button cButton color="primary" type="submit" [disabled]="loading()">
+                            @if (loading()) {
+                            <c-spinner size="sm" class="me-2"></c-spinner>
+                            Recherche...
+                            } @else {
+                            <svg cIcon name="cilSearch" class="me-2"></svg>
+                            Rechercher
+                            }
+                        </button>
+                        <button cButton color="secondary" type="button" class="ms-2" (click)="onReset()">
+                            Vider
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            
+        </form>
+    </c-card-body>
+</c-card>
+
+<c-card class="mb-4">
+    <c-card-body>
+        <p-table #dt             
+            [value]="(users$ | async) || []"        
+            styleClass="custom-coreui-table p-datatable-sm"     
+            [lazy]="isLazyMode()" 
+            (onLazyLoad)="loadUsersLazy($event)"
+            [paginator]="true" 
+            [rows]="10" 
+            [totalRecords]="totalRecords()" 
+            [loading]="loading()"
+            [alwaysShowPaginator]="true"
+            [globalFilterFields]="['matricule', 'lastName', 'firstName']"
+            [rowsPerPageOptions]="[10, 20, 50]" 
+            styleClass="p-datatable-sm">
+        <ng-template pTemplate="caption">
+            <div style="all: unset; display: block; background: transparent;">
+                <!-- <div class="d-flex justify-content-end mb-3">
+                    <div class="col-md-4">
+                        <input #globalSearchInput cFormControl type="text" (input)="onGlobalFilter($event)" placeholder="Recherche globale...">
+                    </div>
+                </div> -->
+            </div>
+        </ng-template>
+            <ng-template pTemplate="header">
+                <tr class="bg-light">
+                    <th style="width: 10%">Matricule</th>
+                    <th style="width: 25%">Nom & Prénom</th>
+                    <th style="width: 25%">Date Recrutement</th>
+                    <th style="width: 15%">Rôle</th>
+                    <th style="width: 15%">Etat</th>
+                    <th class="text-center" style="width: 10%">Actions</th>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-user>
+                <tr>
+                    <td><span class="badge bg-light text-dark border">{{ user.matricule }}</span></td>
+                    <td><strong>{{ user.nom | uppercase }}</strong> {{ user.prenom }}</td>
+                    <td>{{ user.dateRecrutement | date:'dd/MM/yyyy' }}</td>
+                    <td>{{ user.roles }}</td>
+                    <td>
+                    <span class="badge" [ngClass]="user.isLocked ? 'bg-danger' : 'bg-success'">
+                        {{ user.isLocked ? 'Verrouillé' : 'Actif' }}
+                    </span>
+                    </td>
+                    <td class="text-center">
+                    <button cButton color="warning" size="sm" variant="outline" class="me-1" (click)="openEditModal(user)">
+                        <svg cIcon name="cilPencil"></svg>
+                    </button>
+                    
+                        <button cButton [color]="user.isLocked ? 'success' : 'danger'" size="sm" variant="outline"
+                            (click)="onToggleUserStatus(user)"
+                            [cTooltip]="user.isLocked ? 'Activer l\'utilisateur' : 'Désactiver l\'utilisateur'">
+                            <svg cIcon [name]=" user.isLocked ? 'cilUserFollow' : 'cilUserUnfollow'"></svg>
+                        </button>
+                    </td>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="5" class="text-center py-5">
+                        @if (!hasSearched()) {
+                        <div class="text-muted">
+                            <div class="mb-3">
+                                <svg cIcon name="cilSearch" size="3xl" class="text-secondary opacity-50"></svg>
+                            </div>                            
+                            <p>Saisissez des critères dans le formulaire ci-dessus pour rechercher des utilisateurs.
+                            </p>
+                        </div>
+                        } @else if (!loading()) {
+                        <div class="text-warning">
+                            <div class="mb-3">
+                                <svg cIcon name="cilInfo" size="3xl"></svg>
+                            </div>
+                            <h5>Aucun résultat trouvé</h5>
+                            <p>Nous n'avons trouvé aucun collaborateur correspondant à vos critères.</p>
+                            <button cButton color="secondary" variant="outline" size="sm"
+                                (click)="onReset()">Réinitialiser les filtres</button>
+                        </div>
+                        }
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </c-card-body>
+</c-card>
+
+<c-modal id="createUserModal" [visible]="isUserModalOpen()" (visibleChange)="onModalVisibilityChange($event)" size="xl"
+    alignment="center" [scrollable]="true">
+    <c-modal-header [class]="isEditMode() ? 'bg-warning text-dark' : 'bg-primary text-white'">
+        <h5 cModalTitle>
+            <svg cIcon [name]="isEditMode() ? 'cilPencil' : 'cilUserPlus'" class="me-2"></svg>
+            {{ isEditMode() ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur' }}
+        </h5>
+        <button (click)="closeUserModal()" cButtonClose [white]="!isEditMode()"></button>
+    </c-modal-header>
+    <c-modal-body class="p-0">
+        <app-user-create #userComp [userToEdit]="selectedUser()" (onClose)="selectedUser.set(null)"
+            (userCreated)="onUserCreatedSuccess()" (cancel)="closeUserModal()">
+        </app-user-create>
+    </c-modal-body>
+    <c-modal-footer>
+        <button cButton color="danger" (click)="userComp.onCancel()">
+            Annuler
+        </button>
+        <button cButton [color]="isEditMode() ? 'warning' : 'primary'" class="px-5"
+            [disabled]="userComp.userForm.invalid || loading()" 
+            (click)="userComp.onSubmit()">
+
+            @if (loading()) {
+            <c-spinner size="sm" class="me-2"></c-spinner>
+            En cours...
+            } @else {
+            <i class="fas fa-save me-2"></i>
+            {{ isEditMode() ? 'Enregistrer les modifications' : 'Créer l\'utilisateur' }}
+            }
+        </button>
+    </c-modal-footer>
+</c-modal>

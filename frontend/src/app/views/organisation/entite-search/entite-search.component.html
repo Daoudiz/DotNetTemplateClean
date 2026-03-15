@@ -1,0 +1,189 @@
+<c-card class="mb-4 shadow-sm">
+    <c-card-header><strong>Recherche des Unités Organisationnelles</strong></c-card-header>
+    <c-card-body>
+        <form [formGroup]="searchForm" (ngSubmit)="onSearch()" class="row g-3">
+
+            <div class="col-md-6">
+                <label cLabel>Code ou Libellé</label>
+                <input cFormControl type="text" formControlName="searchTerm" placeholder="Code ou Libellé...">
+            </div>
+
+            <div class="col-md-6">
+                <label cLabel>Type d'unité</label>
+                <select cSelect formControlName="typeEntiteId">
+                    <option [ngValue]="null">Tous les types</option>
+                    @for (type of typeEntite(); track type.id) {
+                    <option [ngValue]="type.id">{{ type.libelle }}</option>
+                    }
+                </select>
+            </div> 
+
+            <div class="col-md-12">
+                <label cLabel>Rattachement (Unité Parente)</label>
+                <p-treeSelect 
+                    [options]="nodes()" 
+                    formControlName="parentId" 
+                    placeholder="Sélectionner une unité..."
+                    styleClass="w-100" 
+                    containerStyleClass="w-100"
+                    [filter]="true"                   
+                    appendTo="body">
+                </p-treeSelect>
+               <!-- <small class="text-muted">La recherche inclura l'unité sélectionnée et tous ses services
+                    rattachés.</small>-->
+            </div>
+
+            <div class="col-12 border-top pt-3 mt-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <div>
+                        <button cButton color="success" type="button" class="text-white shadow-sm"
+                            (click)="openCreateModal()">
+                            <svg cIcon name="cilPlus" class="me-2"></svg>
+                            Ajouter une unité
+                        </button>
+                    </div>
+
+                    <div>
+                        <button cButton color="primary" type="submit" [disabled]="loading()">
+                            @if (loading()) {
+                            <c-spinner size="sm" class="me-2"></c-spinner> Recherche...
+                            } @else {
+                            <svg cIcon name="cilSearch" class="me-2"></svg> Rechercher
+                            }
+                        </button>
+                        <button cButton color="secondary" type="button" class="ms-2" (click)="onReset()">
+                            Vider
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </c-card-body>
+    </c-card>
+
+<c-card class="mb-4">
+    <c-card-body>
+        <p-table #dt 
+        [value]="(entites$ | async) || []" 
+        styleClass="custom-coreui-table p-datatable-sm" 
+        [lazy]="isLazyMode()"
+        (onLazyLoad)="loadEntitesLazy($event)" 
+        [paginator]="true" 
+        [rows]="pageSize()" 
+        [totalRecords]="totalRecords()"
+        [loading]="loading()" 
+        [alwaysShowPaginator]="true" 
+        [globalFilterFields]="['libelle', 'code']"
+        [rowsPerPageOptions]="[10, 20, 50]"
+        styleClass="p-datatable-sm">
+        <ng-template pTemplate="caption">
+            <div style="all: unset; display: block; background: transparent;">                
+            </div>
+        </ng-template>
+
+            <ng-template pTemplate="header">
+                <tr class="bg-light">
+                    <th style="width: 15%">Code</th>
+                    <th style="width: 30%">Libellé</th>
+                    <th style="width: 20%">Type</th>
+                    <th style="width: 25%">Rattaché à</th>
+                    <th class="text-center" style="width: 10%">Actions</th>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-unit>
+                <tr>
+                    <td><span class="badge bg-light text-dark border">{{ unit.code }}</span></td>
+                    <td><strong>{{ unit.libelle }}</strong></td>
+                    <td>{{ unit.typeEntiteLibelle }}</td>
+                    <td>
+                        @if (unit.rattachementEntiteLibelle) {
+                        <span class="text-muted small"><i class="cil-arrow-right"></i> {{ unit.rattachementEntiteLibelle }}</span>
+                        } @else {
+                        <span class="badge bg-info-gradient text-white">Racine</span>
+                        }
+                    </td>
+                    <td class="text-center">
+                        <button cButton color="warning" size="sm" variant="outline" class="me-1" (click)="openEditModal(unit)">
+                            <svg cIcon name="cilPencil"></svg>
+                        </button>
+                        <button cButton color="danger" size="sm" variant="outline"
+                                (click)="onDeleteEntite(unit)"
+                                cTooltip="Supprimer l'unité">
+                            <svg cIcon name="cilTrash"></svg>
+                        </button>
+                    </td>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="5" class="text-center py-5">
+                        @if (!hasSearched()) {
+                        <div class="text-muted">
+                            <div class="mb-3">
+                                <svg cIcon name="cilSearch" size="3xl" class="text-secondary opacity-50"></svg>
+                            </div>
+                            <p>Saisissez des critères dans le formulaire ci-dessus pour rechercher des entités.
+                            </p>
+                        </div>
+                        } @else if (!loading()) {
+                        <div class="text-warning">
+                            <div class="mb-3">
+                                <svg cIcon name="cilInfo" size="3xl"></svg>
+                            </div>
+                            <h5>Aucun résultat trouvé</h5>
+                            <p>Nous n'avons trouvé aucun collaborateur correspondant à vos critères.</p>
+                            <button cButton color="secondary" variant="outline" size="sm" (click)="onReset()">Réinitialiser les
+                                filtres</button>
+                        </div>
+                        }
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </c-card-body>
+    </c-card>
+
+<c-modal id="createEntiteModal"
+         [visible]="isEntiteModalOpen()"
+         (visibleChange)="onEntiteModalVisibilityChange($event)"
+         size="lg"
+         alignment="center"
+         [scrollable]="false">
+  <c-modal-header [class]="isEditMode() ? 'bg-warning text-dark' : 'bg-primary text-white'">
+    <h5 cModalTitle>
+      <svg cIcon [name]="isEditMode() ? 'cilPencil' : 'cilPlus'" class="me-2"></svg>
+      {{ isEditMode() ? 'Modifier l\'unité organisationnelle' : 'Nouvelle unité organisationnelle' }}
+    </h5>
+    <button (click)="closeEntiteModal()" cButtonClose [white]="!isEditMode()"></button>
+  </c-modal-header>
+  <c-modal-body class="p-0">
+    <app-entite-create
+      #entiteComp
+      [entiteToEdit]="selectedEntite()"
+      [types]="typeEntite()"    
+      (entiteSaved)="onEntiteSavedSuccess()"
+      (cancel)="closeEntiteModal()">
+    </app-entite-create>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="danger" (click)="entiteComp.onCancel()">
+      Annuler
+    </button>
+    <button cButton
+            [color]="isEditMode() ? 'warning' : 'primary'"
+            class="px-5"
+            [disabled]="entiteComp.form.invalid || loading()"
+            (click)="entiteComp.onSubmit()">
+      @if (loading()) {
+        <c-spinner size="sm" class="me-2"></c-spinner>
+        En cours...
+      } @else {
+        <i class="fas fa-save me-2"></i>
+        {{ isEditMode() ? 'Enregistrer les modifications' : 'Créer l\'unité' }}
+      }
+    </button>
+  </c-modal-footer>
+</c-modal>
+<p-confirmDialog></p-confirmDialog>

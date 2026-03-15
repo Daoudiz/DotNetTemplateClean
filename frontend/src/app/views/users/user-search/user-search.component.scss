@@ -1,0 +1,25 @@
+::ng-deep .p-datatable.custom-coreui-table {
+    /* On garde l'essentiel pour le corps du tableau */
+
+    .p-datatable-wrapper {
+        /* C'est ce qui crée le cadre gris clair autour des données */
+        border: 1px solid var(--cui-border-color-translucent) !important;
+        border-radius: var(--cui-border-radius);
+        background-color: var(--cui-card-bg, #fff) !important;
+        overflow: hidden;
+        /* Pour que les coins du tableau soient arrondis */
+    }
+
+    .p-datatable-thead>tr>th {
+        /* On enlève la bordure du haut pour éviter le double trait avec le cadre */
+        border-top: none !important;
+        background-color: var(--cui-tertiary-bg) !important;
+    }
+
+    .p-datatable-tbody>tr>td {
+        /* Bordures fines entre les lignes */
+        border-color: var(--cui-border-color-translucent) !important;
+    }
+
+    
+}

@@ -1,0 +1,33 @@
+# Fichier .editorconfig pour Clean Architecture .NET
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+charset = utf-8
+
+[*.cs]
+# Utiliser les File-scoped namespaces (plus propre)
+csharp_style_namespace_declarations = file_scoped:error
+# Désactive l'avertissement : "Le namespace ne correspond pas à la structure des dossiers"
+dotnet_diagnostic.IDE0130.severity = none
+# Désactive l'avertissement CA1863 : Cache a 'CompositeFormat'
+dotnet_diagnostic.CA1863.severity = none
+
+# Désactive l'avertissement CA2007 : Utilisation de configureAwait(false)
+dotnet_diagnostic.CA2007.severity = none
+
+
+# Organisation des using
+dotnet_separate_import_directive_groups = true
+dotnet_sort_system_directives_first = true
+
+# Préférences de style
+csharp_prefer_simple_using_statement = true:suggestion
+csharp_style_expression_bodied_methods = when_on_single_line:suggestion
+
+# Supprimer les warnings inutiles sur les noms de fichiers
+dotnet_diagnostic.IDE0005.severity = warning
+

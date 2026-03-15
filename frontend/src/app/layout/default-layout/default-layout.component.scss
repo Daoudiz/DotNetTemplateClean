@@ -1,0 +1,51 @@
+:host {
+  /* On s'assure que le composant lui-même ne prend pas de place inutile */
+  display: flex;
+  align-items: center;
+
+  ::ng-deep {
+    .btn-avatar-dropdown {
+      padding: 0 !important;
+      border: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+
+      /* On force une taille fixe pour éviter les décalages */
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      /* Pour éviter que le bouton ne soit "écrasé" par le flex du parent */
+      flex-shrink: 0;
+      margin-left: 10px;
+      /* Petit espace à gauche si besoin */
+
+      &:hover,
+      &:focus,
+      &:active {
+        background: transparent !important;
+      }
+    }
+
+    .avatar-google {
+      /* On utilise des dimensions légèrement plus petites que le bouton 
+         pour laisser respirer l'élément */
+      width: 36px;
+      height: 36px;
+      background-color: #818587;
+      color: #f4f7fb;
+      border: 1px solid #dadce0;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 15px;
+      line-height: 1;
+      /* Très important pour le centrage vertical de la lettre */
+      text-transform: uppercase;
+    }
+  }
+}

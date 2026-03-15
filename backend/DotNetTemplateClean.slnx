@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/Solutions items/">
+    <File Path=".editorconfig" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/DotNetTemplateClean.Application/DotNetTemplateClean.Application.csproj" Id="c114b9ef-a1e6-4830-9a60-476c6387574c" />
+    <Project Path="src/DotNetTemplateClean.Domain/DotNetTemplateClean.Domain.csproj" Id="63ef4114-6490-45cb-9b64-4db46df5832c" />
+    <Project Path="src/DotNetTemplateClean.Infrastructure/DotNetTemplateClean.Infrastructure.csproj" />
+    <Project Path="src/DotNetTemplateClean.WebAPI/DotNetTemplateClean.WebAPI.csproj" Id="4cd7473f-b8c6-43f7-949a-37bbd317ea7c" />
+  </Folder>
+</Solution>

@@ -1,0 +1,11 @@
+/* Force l'affichage du message d' erreur et lui donne un peu d'espace */
+ .invalid-feedback {
+    display: block !important;
+    margin-bottom: 10px;
+}
+
+/* S'assure que le dernier élément du formulaire n'est pas "collé" au bord */
+form {
+    display: block;
+    overflow: visible;
+}

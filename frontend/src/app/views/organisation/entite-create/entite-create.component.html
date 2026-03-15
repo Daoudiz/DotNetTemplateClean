@@ -1,0 +1,68 @@
+<div class="card-body p-3">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off">
+
+    <h5 class="border-bottom pb-2 mb-3 text-primary">
+      <i class="fas fa-sitemap me-2"></i>
+      {{ isEditMode() ? 'Modifier une unité organisationnelle' : 'Nouvelle unité organisationnelle' }}
+    </h5>
+
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label class="form-label fw-bold">Code <span class="text-danger">*</span></label>
+        <input type="text" formControlName="code" class="form-control"
+        [class.is-invalid]="valService.isFieldInvalid(form, 'code')">
+                        @if (valService.isFieldInvalid(form, 'code')) {
+                        <div class="invalid-feedback d-block">
+                            {{ valService.getErrorMessage(form, 'code') }}
+                        </div>
+                        }
+      </div>
+
+      <div class="col-md-8 mb-3">
+        <label class="form-label fw-bold">Libellé <span class="text-danger">*</span></label>
+        <input type="text" formControlName="libelle" class="form-control"
+        [class.is-invalid]="valService.isFieldInvalid(form, 'libelle')">
+                        @if (valService.isFieldInvalid(form, 'libelle')) {
+                        <div class="invalid-feedback d-block">
+                            {{ valService.getErrorMessage(form, 'libelle') }}
+                        </div>
+                        }
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label class="form-label fw-bold">Type d'unité <span class="text-danger">*</span></label>
+        <select formControlName="typeEntiteId" class="form-select"
+        [class.is-invalid]="valService.isFieldInvalid(form, 'typeEntiteId')">
+          <option [ngValue]="null">-- Sélectionner un type --</option>
+          @for (type of types; track type.id) {
+            <option [ngValue]="type.id">{{ type.libelle }}</option>
+          }
+        </select>
+                        @if (valService.isFieldInvalid(form, 'typeEntiteId')) {
+                        <div class="invalid-feedback d-block">
+                            {{ valService.getErrorMessage(form, 'typeEntiteId') }}
+                        </div>
+                        }
+      </div>
+
+      <div class="col-md-8 mb-3">
+        <label class="form-label fw-bold">Rattachement (unité parente)</label>
+        <p-treeSelect
+          [options]="organizationTree()"
+          formControlName="rattachementEntiteId"
+          placeholder="Sélectionner une unité parente..."
+          styleClass="w-100"
+          containerStyleClass="w-100"
+          appendTo="body"
+          dataKey="key"
+          [filter]="true"
+          >
+        </p-treeSelect>
+      </div>
+    </div>
+
+  </form>
+</div>
+
