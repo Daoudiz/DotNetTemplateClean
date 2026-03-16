@@ -92,9 +92,15 @@ public class EntiteService(
         //Application des filtres de recherche
         if (!string.IsNullOrWhiteSpace(filters.SearchTerm))
         {
-            var search = filters.SearchTerm.Trim().ToUpperInvariant();
-            query = query.Where(x => (x.Code != null && x.Code.Contains(search, StringComparison.InvariantCultureIgnoreCase)) ||
-                                     (x.Libelle != null && x.Libelle.Contains(search, StringComparison.InvariantCultureIgnoreCase)));
+            var search = filters.SearchTerm.Trim();
+
+            query = query.Where(x =>
+                EF.Functions.Like(x.Code!, $"%{search}%") ||
+                EF.Functions.Like(x.Libelle!, $"%{search}%"));
+
+            //var search = filters.SearchTerm.Trim().ToUpperInvariant();
+            //query = query.Where(x => (x.Code != null && x.Code.Contains(search, StringComparison.InvariantCultureIgnoreCase)) ||
+            //                         (x.Libelle != null && x.Libelle.Contains(search, StringComparison.InvariantCultureIgnoreCase)));
         }
 
         if (filters.TypeEntiteId.HasValue)

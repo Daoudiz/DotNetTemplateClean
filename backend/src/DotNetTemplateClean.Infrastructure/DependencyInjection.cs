@@ -1,0 +1,96 @@
+
+using DotNetTemplateClean.Infrastructure;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Hosting;
+
+namespace Microsoft.Extensions.DependencyInjection;
+
+public static class DependencyInjection
+{
+
+    public static void AddInfrastructureServices(this IHostApplicationBuilder builder)
+    {
+        ArgumentNullException.ThrowIfNull(builder, nameof(builder));
+
+        // =========================================================================
+        //                              JWT Authentication
+        // =========================================================================
+        // Cette ligne est magique : elle dit à .NET de garder les noms de claims originaux (ex: "role")
+        JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+
+        var jwtKey = builder.Configuration["Jwt:Key"];
+        var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+        var jwtAudience = builder.Configuration["Jwt:Audience"]; // Récupère la nouvelle ligne
+
+
+
+        builder.Services
+            .AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                // Il sera 'false' en local (Dev) et 'true' sur le serveur (Prod)
+                options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
+
+
+                options.SaveToken = true;
+
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtIssuer,
+                    ValidAudience = jwtAudience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!)
+                    ),
+
+                    ClockSkew = TimeSpan.Zero // pas de tolérance sur l'expiration
+                };
+            });
+
+        //désactivé le comportement Stateful (Cookies/Pages) pour activer le comportement Stateless (JWT/API).
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme; // C'est lui qui empêche la redirection
+            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+        });
+
+
+
+        //Configure the ConnectionString and DbContext class
+        var connectionString = builder.Configuration.GetConnectionString("DBConnection");
+        builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        {
+            options.UseSqlServer(connectionString, sqlOptions =>
+            {
+                sqlOptions.EnableRetryOnFailure(
+                    maxRetryCount: 5,               // nombre max de tentatives
+                    maxRetryDelay: TimeSpan.FromSeconds(10),  // délai max entre tentatives
+                    errorNumbersToAdd: null          // codes SQL spécifiques à ajouter
+                );
+            });
+        });
+
+        builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
+
+        //Set up Identity as a services and enables DI of this services
+        builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+                        .AddEntityFrameworkStores<ApplicationDbContext>()
+                        .AddDefaultTokenProviders()
+                        .AddErrorDescriber<FrenchIdentityErrorDescriber>();
+        //Configure Identity
+        builder.Services.ConfigueIdentity(builder.Configuration);
+
+        //register JWT Token Service to generate tokens
+        builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+
+        //Register UserService for handling user-related operations (login, logout, profile)
+        builder.Services.AddScoped<IUserService, UserService>();
+    }
+}

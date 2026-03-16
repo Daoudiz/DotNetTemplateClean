@@ -20,5 +20,6 @@ public interface IEntiteService
     Task<ServiceResult<string>> DeleteEntiteAsync(int id, CancellationToken cancellationToken);
     Task<IEnumerable<TypeEntiteDto>> GetAllTypeEntite();
     Task<List<TreeNodeDto>> GetOrganizationTreeAsync();
+    Task<List<int>> GetFlattenedChildEntityIds(int parentId);
 
 }
