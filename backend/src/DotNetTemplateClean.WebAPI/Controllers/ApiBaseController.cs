@@ -6,7 +6,7 @@ namespace DotNetTemplateClean.WebAPI;
 
 [ApiController]
 [Route("api/[controller]")]
-internal class ApiBaseController : ControllerBase
+public class ApiBaseController : ControllerBase
 {
     protected ActionResult HandleResult<T>(ServiceResult<T> result)
     {

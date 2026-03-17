@@ -1,4 +1,4 @@
-﻿
+
 namespace DotNetTemplateClean.Application;
 
 public class UserMappingProfile : Profile

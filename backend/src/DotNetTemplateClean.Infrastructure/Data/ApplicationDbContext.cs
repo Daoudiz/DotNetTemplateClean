@@ -4,9 +4,9 @@ using System.Linq.Expressions;
 namespace DotNetTemplateClean.Infrastructure;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options,
-    IHttpContextAccessor httpContextAccessor) : IdentityDbContext<ApplicationUser>(options) , IApplicationDbContext
+                                  IUser user) : IdentityDbContext<ApplicationUser>(options) , IApplicationDbContext
 {
-    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+   
 
     public DbSet<Entite> Entites { get; set; }
     public DbSet<Fonction> Fonctions { get; set; }
@@ -20,6 +20,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         //Configurer Identity en premier
         base.OnModelCreating(builder);
+
+        // On dit à EF : "La classe Entite correspond à la table Entities en base"
+        builder.Entity<Entite>().ToTable("Entities");
 
         var identityTypes = new[]
         {
@@ -84,11 +87,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .Where(e => e.Entity is IAuditableEntity &&
                        (e.State == EntityState.Added || e.State == EntityState.Modified));
 
-       var User = _httpContextAccessor?.HttpContext?.User;
-        var identityName = User?.Identity?.Name
-               ?? User?.FindFirst("name")?.Value
-               ?? User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
-               ?? "System";
+       //var User = _httpContextAccessor?.HttpContext?.User;
+       // var identityName = User?.Identity?.Name
+       //        ?? User?.FindFirst("name")?.Value
+       //        ?? User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+       //        ?? "System";
         //var identityName = User.Identity?.Name ?? "System";
         var now = DateTime.UtcNow;
 
@@ -98,7 +101,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
             if (entry.State == EntityState.Added)
             {
-                entity.CreatedBy = identityName;
+                entity.CreatedBy = user.Id;
                 entity.CreatedDate = now;
             }
             else
@@ -108,7 +111,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 entry.Property(nameof(IAuditableEntity.CreatedDate)).IsModified = false;
             }
 
-            entity.UpdatedBy = identityName;
+            entity.UpdatedBy = user.Id;
             entity.UpdatedDate = now;
         }
     }

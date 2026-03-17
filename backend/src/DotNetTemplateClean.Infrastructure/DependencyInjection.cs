@@ -12,6 +12,7 @@ public static class DependencyInjection
     {
         ArgumentNullException.ThrowIfNull(builder, nameof(builder));
 
+       
         // =========================================================================
         //                              JWT Authentication
         // =========================================================================
@@ -27,8 +28,10 @@ public static class DependencyInjection
         builder.Services
             .AddAuthentication(options =>
             {
+                // On définit tout ici une seule fois
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             })
             .AddJwtBearer(options =>
             {
@@ -51,18 +54,18 @@ public static class DependencyInjection
 
                     ClockSkew = TimeSpan.Zero // pas de tolérance sur l'expiration
                 };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnAuthenticationFailed = context =>
+                    {
+                        Console.WriteLine("Échec authentification : " + context.Exception.Message);
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
-        //désactivé le comportement Stateful (Cookies/Pages) pour activer le comportement Stateless (JWT/API).
-        builder.Services.AddAuthentication(options =>
-        {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme; // C'est lui qui empêche la redirection
-            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-        });
-
-
-
+       
         //Configure the ConnectionString and DbContext class
         var connectionString = builder.Configuration.GetConnectionString("DBConnection");
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -79,12 +82,17 @@ public static class DependencyInjection
 
         builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
-        //Set up Identity as a services and enables DI of this services
-        builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-                        .AddEntityFrameworkStores<ApplicationDbContext>()
-                        .AddDefaultTokenProviders()
-                        .AddErrorDescriber<FrenchIdentityErrorDescriber>();
+
+
+
         //Configure Identity
+        builder.Services.AddIdentityCore<ApplicationUser>()
+                       .AddRoles<IdentityRole>()
+                       .AddSignInManager<SignInManager<ApplicationUser>>()
+                       .AddEntityFrameworkStores<ApplicationDbContext>()
+                       .AddDefaultTokenProviders()
+                       .AddErrorDescriber<FrenchIdentityErrorDescriber>();
+
         builder.Services.ConfigueIdentity(builder.Configuration);
 
         //register JWT Token Service to generate tokens

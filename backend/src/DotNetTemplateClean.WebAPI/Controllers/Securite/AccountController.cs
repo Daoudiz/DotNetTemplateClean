@@ -1,8 +1,10 @@
 
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using DotNetTemplateClean.Application;
 using System.Security.Claims;
+
+using DotNetTemplateClean.Application;
+
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 
 namespace DotNetTemplateClean.WebAPI;
@@ -10,7 +12,7 @@ namespace DotNetTemplateClean.WebAPI;
 [ApiController]
 [Authorize]
 [Route("api/[controller]")]
-internal class AccountController(IUserService UserService) : ApiBaseController
+public class AccountController(IUserService UserService) : ApiBaseController
 {
     // Simple health check
     [HttpGet]
@@ -40,6 +42,7 @@ internal class AccountController(IUserService UserService) : ApiBaseController
         return HandleResult(result);
     }
     // GET: api/acount/profile
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Authorize]
     [HttpGet("profile")]
     public async Task<ActionResult<ProfilViewModel?>> GetProfile()

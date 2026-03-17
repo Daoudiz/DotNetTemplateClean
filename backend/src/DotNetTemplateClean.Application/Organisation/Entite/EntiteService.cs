@@ -1,10 +1,13 @@
 
 
+using FluentValidation;
+
 namespace DotNetTemplateClean.Application;
 
 public class EntiteService(
                             IApplicationDbContext context,
                             IOptions<SearchSettings> searchOptions,
+                            IValidator<OrganizationUnitSaveDto> validator,
                               IMapper mapper ) : IEntiteService
 {
     public async Task<IEnumerable<Entite>> GetAllEntities()  
@@ -146,6 +149,16 @@ public class EntiteService(
     public async Task<ServiceResult<string>> CreateEntiteAsync(OrganizationUnitSaveDto dto, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(dto);
+
+        //Validation centralisée
+        var validationResult = await validator.ValidateAsync(dto, cancellationToken);
+
+        if (!validationResult.IsValid)
+        {
+            return ServiceResult.Failure<string>(
+                string.Join(" | ", validationResult.Errors.Select(e => e.ErrorMessage)),
+                400);
+        }
 
         //Logique métier pour vérifier l'unicité du libellé et du code
         if (!await IsLibelleUniqueAsync(dto.Libelle, cancellationToken).ConfigureAwait(false))
