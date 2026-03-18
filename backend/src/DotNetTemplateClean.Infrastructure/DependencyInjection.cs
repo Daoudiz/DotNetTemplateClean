@@ -82,7 +82,7 @@ public static class DependencyInjection
 
         builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
-
+        builder.Services.AddScoped<ApplicationDbContextInitialiser>();
 
 
         //Configure Identity
@@ -100,5 +100,7 @@ public static class DependencyInjection
 
         //Register UserService for handling user-related operations (login, logout, profile)
         builder.Services.AddScoped<IUserService, UserService>();
+
+        builder.Services.AddScoped<IRoleService, RoleService>();
     }
 }

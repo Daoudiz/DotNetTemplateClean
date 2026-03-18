@@ -1,8 +1,6 @@
 
 using System.Security.Claims;
-
 using DotNetTemplateClean.Application;
-
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

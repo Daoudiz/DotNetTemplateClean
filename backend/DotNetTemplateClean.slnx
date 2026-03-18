@@ -10,4 +10,7 @@
     <Project Path="src/DotNetTemplateClean.Infrastructure/DotNetTemplateClean.Infrastructure.csproj" />
     <Project Path="src/DotNetTemplateClean.WebAPI/DotNetTemplateClean.WebAPI.csproj" Id="4cd7473f-b8c6-43f7-949a-37bbd317ea7c" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="src/Application.UnitTests/Application.UnitTests.csproj" Id="b5c67ce1-039c-4dbc-b3ac-934f82c80775" />
+  </Folder>
 </Solution>

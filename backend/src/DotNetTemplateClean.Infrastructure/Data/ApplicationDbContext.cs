@@ -19,10 +19,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         ArgumentNullException.ThrowIfNull(builder, nameof(builder));
 
         //Configurer Identity en premier
-        base.OnModelCreating(builder);
-
-        // On dit à EF : "La classe Entite correspond à la table Entities en base"
-        builder.Entity<Entite>().ToTable("Entities");
+        base.OnModelCreating(builder);        
 
         var identityTypes = new[]
         {

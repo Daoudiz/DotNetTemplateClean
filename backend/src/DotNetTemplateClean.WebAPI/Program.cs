@@ -1,4 +1,7 @@
+using DotNetTemplateClean.Infrastructure;
 using DotNetTemplateClean.WebAPI;
+
+using Microsoft.EntityFrameworkCore;
 
 using Serilog;
 using Serilog.Events;
@@ -106,9 +109,26 @@ try
 
     var enableSeed = builder.Configuration.GetValue<bool>("SeedData:EnableBogus");
 
+    if (app.Environment.IsDevelopment() && enableSeed)
+    {
+        Log.Information("Initialisation de la base de données de développement...");
+        await app.InitialiseDbDevAsync();
+
+    }
+
+    // Init DB and Seed Reference Data via paramètre CLI (prod )
+    if (args.Contains("--seed-reference-data"))
+    {
+        Console.WriteLine("Application des migrations...");
+        await app.InitialiseDbProdAsync();
+
+        Console.WriteLine("Reference data seed completed.");
+        return; // termine l’exécution si c’était juste pour le seed
+    }
+
     Log.Information("Application prête ! Lancement...");
 
-    app.Run();
+    await app.RunAsync();
 }
 
 catch (Exception ex) when (ex.GetType().Name is not "HostAbortedException")
@@ -118,7 +138,7 @@ catch (Exception ex) when (ex.GetType().Name is not "HostAbortedException")
 }
 finally
 {
-    Log.CloseAndFlush();
+    await Log.CloseAndFlushAsync();
 }
 
 public partial class Program { }

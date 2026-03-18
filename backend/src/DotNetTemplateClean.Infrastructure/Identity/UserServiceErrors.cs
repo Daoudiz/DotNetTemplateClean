@@ -26,3 +26,10 @@ internal static class Auth
     public const string TokenExpired = "Votre session a expiré, veuillez vous reconnecter.";
     public const string TwoFARequired = "Double authentification requise.";
 }
+
+public static class Role
+{
+    public const string RoleNameMissed = "Le nom du rôle est obligatoire.";
+    public const string RoleAlreadyExists = "Ce rôle existe déjà.";
+    public const string RoleNotFound = "Rôle introuvable.";
+}
