@@ -52,7 +52,9 @@ jobs:
       run: dotnet restore
 
     - name: Build backend
+      working-directory: backend
       run: dotnet build --no-restore --configuration Release
 
     - name: Test backend
+      working-directory: backend
       run: dotnet test --no-build --configuration Release
