@@ -2,6 +2,7 @@
   <ItemGroup>
     <PackageVersion Include="coverlet.collector" Version="8.0.1" />
     <PackageVersion Include="CsvHelper" Version="33.1.0" />
+    <PackageVersion Include="FluentAssertions" Version="8.9.0" />
     <PackageVersion Include="FluentValidation" Version="12.1.1" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.5" />
     <PackageVersion Include="Microsoft.AspNetCore.Http" Version="2.3.9" />
@@ -22,6 +23,8 @@
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.4" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
     <PackageVersion Include="Microsoft.OpenApi" Version="3.4.0" />
+    <PackageVersion Include="NUnit" Version="4.5.1" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="6.1.0" />
     <PackageVersion Include="Scrutor" Version="7.0.0" />
     <PackageVersion Include="Serilog" Version="4.3.1" />
     <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
@@ -32,8 +35,5 @@
     <PackageVersion Include="Swashbuckle.AspNetCore.SwaggerGen" Version="10.1.5" />
     <PackageVersion Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.1.5" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.16.0" />
-    <PackageVersion Include="xunit" Version="2.9.3" />
-    <PackageVersion Include="xunit.core" Version="2.9.3" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
   </ItemGroup>
 </Project>

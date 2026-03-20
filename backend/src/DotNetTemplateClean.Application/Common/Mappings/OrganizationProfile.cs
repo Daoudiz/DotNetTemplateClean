@@ -1,4 +1,4 @@
-﻿namespace DotNetTemplateClean.Application;
+namespace DotNetTemplateClean.Application;
 
 public class OrganizationProfile : Profile
 {
@@ -20,7 +20,7 @@ public class OrganizationProfile : Profile
         // ==========================================
         // SENS : ÉCRITURE (SaveDto -> Entite)
         // ==========================================
-        CreateMap<OrganizationUnitSaveDto, Entite>()
+        CreateMap<OrganizationUnitSaveDto, Entite>(MemberList.Source)
 
             //  On ignore l'ID si c'est une création (Id est nul ou 0)
             .ForMember(dest => dest.Id, opt => opt.Condition(src => src.Id > 0))

@@ -49,5 +49,5 @@ public class TreeNodeDto
     public int Data { get; set; } // L'ID de l'entité
     public string ExpandedIcon { get; set; } = "pi pi-folder-open";
     public string CollapsedIcon { get; set; } = "pi pi-folder";
-    public ICollection<TreeNodeDto> Children { get; } = new List<TreeNodeDto>();
+    public ICollection<TreeNodeDto> Children { get; } = [];
 }
