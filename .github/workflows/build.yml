@@ -1,0 +1,57 @@
+name: Build
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout
+    - name: Checkout code
+      uses: actions/checkout@v6
+
+    # Cache NuGet
+    - name: Cache NuGet packages
+      uses: actions/cache@v5
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/Directory.Packages.props', '**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    # Setup Node (frontend séparé)
+    - name: Setup Node
+      uses: actions/setup-node@v6
+      with:
+        node-version: '24.x'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install frontend dependencies
+      working-directory: frontend
+      run: npm ci
+
+    - name: Build frontend
+      working-directory: frontend
+      run: npm run build
+
+    # Setup .NET
+    - name: Install .NET
+      uses: actions/setup-dotnet@v5
+
+    - name: Restore backend
+      run: dotnet restore
+
+    - name: Build backend
+      run: dotnet build --no-restore --configuration Release
+
+    - name: Test backend
+      run: dotnet test --no-build --configuration Release
