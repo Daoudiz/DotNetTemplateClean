@@ -48,6 +48,7 @@ jobs:
       uses: actions/setup-dotnet@v5
 
     - name: Restore backend
+      working-directory: backend
       run: dotnet restore
 
     - name: Build backend
