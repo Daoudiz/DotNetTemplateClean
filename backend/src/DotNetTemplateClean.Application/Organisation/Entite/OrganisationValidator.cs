@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace DotNetTemplateClean.Application;
 public class CreateEntiteValidator : AbstractValidator<OrganizationUnitSaveDto>
 {

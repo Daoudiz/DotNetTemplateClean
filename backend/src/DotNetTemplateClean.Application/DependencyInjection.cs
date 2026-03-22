@@ -2,7 +2,6 @@
 using System.Reflection;
 using DotNetTemplateClean.Application;
 using Microsoft.Extensions.Hosting;
-using FluentValidation;
 
 namespace Microsoft.Extensions.DependencyInjection;
 

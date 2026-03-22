@@ -57,13 +57,9 @@ internal class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextIniti
             }
         }
 
-        public async Task SeedDevAsync()
-        {
-            await TrySeedAsync();
-           
-        }
+    public async Task SeedDevAsync() => await TrySeedAsync();
 
-        public async Task TrySeedAsync()
+    public async Task TrySeedAsync()
         {
             // On ne vérifie qu'une seule chose : si la base est vide
             if (await context.TypeEntites.AnyAsync()) return;
