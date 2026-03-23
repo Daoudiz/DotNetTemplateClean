@@ -119,12 +119,19 @@ try
     // Init DB and Seed Reference Data via paramètre CLI (prod )
     if (args.Contains("--seed-reference-data"))
     {
+#pragma warning disable CA1303
         Console.WriteLine("Application des migrations...");
+#pragma warning restore CA1303
         await app.InitialiseDbProdAsync();
 
+#pragma warning disable CA1303
         Console.WriteLine("Reference data seed completed.");
+#pragma warning restore CA1303
         return; // termine l’exécution si c’était juste pour le seed
     }
+
+    //app.MapDefaultEndpoints();
+    app.MapEndpoints(typeof(Program).Assembly);
 
     Log.Information("Application prête ! Lancement...");
 
