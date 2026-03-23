@@ -159,21 +159,10 @@ public class EntiteService(
                 string.Join(" | ", validationResult.Errors.Select(e => e.ErrorMessage)),
                 400);
         }
-
-        //Logique métier pour vérifier l'unicité du libellé et du code
-        if (!await IsLibelleUniqueAsync(dto.Libelle, cancellationToken).ConfigureAwait(false))
-        {
-            return ServiceResult.Failure<string>(string.Format(CultureInfo.InvariantCulture, AppErrorMessages.Entite.LibelleNotUnique, dto.Libelle), 409);
-        }
-
-        if (!await IsCodeUniqueAsync(dto.Code, cancellationToken).ConfigureAwait(false))
-        {
-            return ServiceResult.Failure<string>(string.Format(CultureInfo.InvariantCulture, AppErrorMessages.Entite.CodeNotUnique, dto.Code), 409);        //Vérifier que la parent possède un rang strictement supérieur au rang de l'entité à créer
-
-        }
+       
         if (!await IsParentRangGreaterAsync(dto.TypeEntiteId, dto.RattachementEntiteId!.Value).ConfigureAwait(false))
         {
-            return ServiceResult.Failure<string>(AppErrorMessages.Entite.ParentRangInvalid, 409);
+            return ServiceResult.Failure<string>(AppErrorMessages.Entite.ParentRangInvalid, 400);
         }
 
         var entite = mapper.Map<Entite>(dto);
@@ -192,7 +181,7 @@ public class EntiteService(
         // Id is required for update
         if (!dto.Id.HasValue)
         {
-            return ServiceResult.Failure<string>(AppErrorMessages.Entite.EntiteNotFound, 400 );
+            return ServiceResult.Failure<string>(AppErrorMessages.Entite.EntiteNotFound, 404 );
         }
 
         // Retrieve existing entity
@@ -209,7 +198,7 @@ public class EntiteService(
             {
                 return ServiceResult.Failure<string>(string.Format(CultureInfo.InvariantCulture,
                                                                    AppErrorMessages.Entite.LibelleNotUnique, dto.Libelle),
-                                                                            409);
+                                                                            400);
             }
         }
 
@@ -218,14 +207,14 @@ public class EntiteService(
         {
             if (!await IsCodeUniqueAsync(dto.Code, cancellationToken))
             {
-                return ServiceResult.Failure<string>(string.Format(CultureInfo.InvariantCulture, AppErrorMessages.Entite.CodeNotUnique, dto.Code), 409);
+                return ServiceResult.Failure<string>(string.Format(CultureInfo.InvariantCulture, AppErrorMessages.Entite.CodeNotUnique, dto.Code), 400);
             }
         }
 
         //Vérifier que la parent possède un rang hiearachiquement strictement supérieur au rang de l'entité à créer
         if (!await IsParentRangGreaterAsync(dto.TypeEntiteId, dto.RattachementEntiteId!.Value))
         {
-            return ServiceResult.Failure<string>(AppErrorMessages.Entite.ParentRangInvalid, 409);
+            return ServiceResult.Failure<string>(AppErrorMessages.Entite.ParentRangInvalid, 400);
         }
 
         // Map incoming values onto the tracked entity
@@ -370,7 +359,7 @@ public class EntiteService(
     }
 
     public async Task<bool> IsLibelleUniqueAsync(string libelle, CancellationToken concellationTotekn)
-    => !await context.Entites.AnyAsync(e => e.Libelle.Equals(libelle, StringComparison.OrdinalIgnoreCase), concellationTotekn).ConfigureAwait(false);
+    => !await context.Entites.AnyAsync(e => EF.Functions.Like(e.Libelle, libelle), concellationTotekn).ConfigureAwait(false);
     
 
     public async Task<bool> IsCodeUniqueAsync(string code, CancellationToken concellationTotekn)

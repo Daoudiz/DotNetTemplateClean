@@ -58,7 +58,7 @@ try
 
     var app = builder.Build();
 
-    app.UseMiddleware<ExceptionMiddleware>();
+    //app.UseMiddleware<ExceptionMiddleware>();
 
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
@@ -102,6 +102,8 @@ try
     //Autorise le serveur à servir les fichiers physiques (JS, CSS, Images)
     app.UseStaticFiles();
 
+    app.UseExceptionHandler(options => { });
+
     app.MapControllers();
 
     //LA LIGNE CRUCIALE : Si aucune route API n'est trouvée, renvoie l'index d'Angular
@@ -129,6 +131,9 @@ try
 #pragma warning restore CA1303
         return; // termine l’exécution si c’était juste pour le seed
     }
+
+   
+
 
     //app.MapDefaultEndpoints();
     app.MapEndpoints(typeof(Program).Assembly);

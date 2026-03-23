@@ -1,6 +1,7 @@
 
 using DotNetTemplateClean.Application;
 using DotNetTemplateClean.WebAPI;
+
 using Microsoft.OpenApi.Models;
 
 
@@ -62,6 +63,7 @@ public static class DependencyInjection
 
         builder.Services.AddHttpContextAccessor();
 
+        builder.Services.AddExceptionHandler<ProblemDetailsExceptionHandler>();
 
         builder.Services.AddEndpointsApiExplorer();
     }

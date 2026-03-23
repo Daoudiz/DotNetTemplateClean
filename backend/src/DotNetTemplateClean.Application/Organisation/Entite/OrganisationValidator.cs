@@ -20,21 +20,6 @@ public class CreateEntiteValidator : AbstractValidator<OrganizationUnitSaveDto>
         RuleFor(x => x.TypeEntiteId)
             .GreaterThan(0);
 
-        RuleFor(x => x)
-            .MustAsync(async (dto, ct) =>
-            {
-                if (dto.RattachementEntiteId == null)
-                    return true;
-
-                var parent = await context.Entites
-                    .Where(e => e.Id == dto.RattachementEntiteId)
-                    .Select(e => new { e.TypeEntiteId })
-                    .FirstOrDefaultAsync(ct);
-
-                if (parent == null) return false;
-
-                return parent.TypeEntiteId > dto.TypeEntiteId;
-            })
-            .WithMessage("Le rang du parent est invalide.");
+       
     }
 }
