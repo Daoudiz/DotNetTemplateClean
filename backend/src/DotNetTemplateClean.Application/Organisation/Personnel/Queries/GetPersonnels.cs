@@ -1,5 +1,7 @@
 
 
+using Ardalis.GuardClauses;
+
 using CleanArchitecture.Application.Common.Mappings;
 using CleanArchitecture.Application.Common.Models;
 
@@ -19,6 +21,7 @@ public class GetPersonnelsWithFiltersQueryHandler(IApplicationDbContext context,
     public async Task<PaginatedList<PersonnelListDto>> Handle(GetPersonnelsWithFiltersQuery request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request, nameof(request));
+           
 
         var query = context.Personnels.AsNoTracking();
 
@@ -43,11 +46,15 @@ public class GetPersonnelsWithFiltersQueryHandler(IApplicationDbContext context,
                 a.EntiteId == request.EntiteId && a.DateFinAffectation == null));
         }
 
+        throw new ValidationException();
+
         // Projection et exécution
         return await query
                 .ProjectTo<PersonnelListDto>(mapper.ConfigurationProvider)
                 .OrderBy(p => p.Nom)
-                .PaginatedListAsync(request.PageNumber, request.PageSize, isFull: false, cancellationToken);        
+                .PaginatedListAsync(request.PageNumber, request.PageSize, isFull: false, cancellationToken);
+
+       
     }
 }
 

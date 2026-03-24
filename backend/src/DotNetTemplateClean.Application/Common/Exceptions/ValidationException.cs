@@ -1,7 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
+
 using FluentValidation.Results;
 
 namespace DotNetTemplateClean.Application;
 
+[SuppressMessage("Design", "CA1032:Implement standard exception constructors")]
 public class ValidationException : Exception
 {
     public ValidationException()

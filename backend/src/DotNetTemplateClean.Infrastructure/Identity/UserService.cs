@@ -1,5 +1,8 @@
 
 using System.Globalization;
+
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Options;
 
 namespace DotNetTemplateClean.Infrastructure;
@@ -9,6 +12,8 @@ public class UserService(ApplicationDbContext  context,
                         UserManager<ApplicationUser> UserManager,
                         SignInManager<ApplicationUser> SignInManager,
                         RoleManager<IdentityRole> RoleManager,
+                        IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory,
+                        IAuthorizationService authorizationService,
                          IJwtTokenService TokenService,
                         IOptions<SearchSettings> SearchOptions) :  IUserService
 {
@@ -281,7 +286,7 @@ public class UserService(ApplicationDbContext  context,
 
             return ServiceResult.Success<string>("Utilisateur mis à jour avec succès.");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is DbUpdateException or SqlException)
         {
             // En cas d'erreur technique imprévue (ex: perte SQL), on annule tout
             await transaction.RollbackAsync(ct);
@@ -413,6 +418,29 @@ public class UserService(ApplicationDbContext  context,
 
         // On retourne un succès. On utilise 'bool' ou 'object?' comme type générique.
         return ServiceResult.Success<bool>(true, 204);
+    }
+
+    public async Task<bool> AuthorizeAsync(string userId, string policyName)
+    {
+        var user = await UserManager.FindByIdAsync(userId);
+
+        if (user == null)
+        {
+            return false;
+        }
+
+        var principal = await userClaimsPrincipalFactory.CreateAsync(user);
+
+        var result = await authorizationService.AuthorizeAsync(principal, policyName);
+
+        return result.Succeeded;
+    }
+
+    public async Task<string?> GetUserNameAsync(string userId)
+    {
+        var user = await UserManager.FindByIdAsync(userId);
+
+        return user?.UserName;
     }
 
     #region Helpers

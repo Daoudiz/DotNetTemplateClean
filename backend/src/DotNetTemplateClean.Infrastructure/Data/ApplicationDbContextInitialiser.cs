@@ -52,10 +52,12 @@ internal class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextIniti
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while initialising the database.");
+#pragma warning disable CA1848 // Template should be a static expression
+            logger.LogError(ex, "An error occurred while initialising the database.");
                 throw;
-            }
+#pragma warning restore CA1848 // Template should be a static expression
         }
+    }
 
     public async Task SeedDevAsync() => await TrySeedAsync();
 

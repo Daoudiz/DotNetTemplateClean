@@ -1,6 +1,10 @@
 
 using System.Reflection;
+
+using CleanArchitecture.Application.Common.Behaviours;
+
 using DotNetTemplateClean.Application;
+
 using Microsoft.Extensions.Hosting;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -22,6 +26,10 @@ public static class DependencyInjection
 
         builder.Services.AddMediatR(cfg => {
             cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+            cfg.AddOpenRequestPreProcessor(typeof(LoggingBehaviour<>));
+            cfg.AddOpenBehavior(typeof(UnhandledExceptionBehaviour<,>));            
+            cfg.AddOpenBehavior(typeof(ValidationBehaviour<,>));
+            cfg.AddOpenBehavior(typeof(PerformanceBehaviour<,>));
         });
     }
 

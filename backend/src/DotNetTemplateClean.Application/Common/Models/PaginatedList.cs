@@ -22,6 +22,7 @@ public class PaginatedList<T>
 
     public bool HasNextPage => PageNumber < TotalPages;
 
+#pragma warning disable CA1000 // Mark members as static
     public static async Task<PaginatedList<T>> CreateAsync(IQueryable<T> source, int pageNumber, int pageSize, bool isFull = false, CancellationToken cancellationToken = default)
     {
         var count = await source.CountAsync(cancellationToken);
@@ -29,4 +30,5 @@ public class PaginatedList<T>
 
         return new PaginatedList<T>(items, count, pageNumber, pageSize, isFull);
     }
+#pragma warning restore CA1000 // Mark members as static
 }

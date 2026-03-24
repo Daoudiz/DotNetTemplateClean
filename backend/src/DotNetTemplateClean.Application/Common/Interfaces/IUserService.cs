@@ -13,5 +13,8 @@ public interface IUserService
     Task<ServiceResult<bool>> UnlockUserAsync(string userId);
     Task<ServiceResult<ProfilViewModel>> GetUserProfileAsync(string userId, string userRole);
     Task<ServiceResult<LoginResponseDto>> LoginAsync(LoginViewModel model);
-    Task<ServiceResult<bool>> LogoutAsync();       
+    Task<ServiceResult<bool>> LogoutAsync();
+    Task<bool> AuthorizeAsync(string userId, string policyName);
+
+    Task<string?> GetUserNameAsync(string userId);
 }
