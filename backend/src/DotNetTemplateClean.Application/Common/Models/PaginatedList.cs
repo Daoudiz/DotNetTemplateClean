@@ -1,4 +1,4 @@
-namespace CleanArchitecture.Application.Common.Models;
+namespace DotNetTemplateClean.Application;
 
 public class PaginatedList<T>
 {

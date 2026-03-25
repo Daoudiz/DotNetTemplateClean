@@ -1,4 +1,3 @@
-using System.Collections.ObjectModel;
 
 namespace DotNetTemplateClean.Application;
 
@@ -13,7 +12,7 @@ public record CreatePersonnelCommand : IRequest<int>
     public string? Grade { get; init; }   
 
     // Liste des affectations initiales
-    public ReadOnlyCollection<CreateAffectationDto> Affectations { get; init; } = [];
+    public IList<CreateAffectationDto> Affectations { get; init; } = [];
 }
 
 public record CreateAffectationDto(int EntiteId, int FonctionId, DateTime DateDebut, string Nature);

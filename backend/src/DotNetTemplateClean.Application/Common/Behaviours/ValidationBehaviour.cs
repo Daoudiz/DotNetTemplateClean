@@ -1,6 +1,5 @@
-using ValidationException = DotNetTemplateClean.Application.ValidationException;
 
-namespace CleanArchitecture.Application.Common.Behaviours;
+namespace DotNetTemplateClean.Application;
 
 public class ValidationBehaviour<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull

@@ -1,8 +1,6 @@
 
 using System.Reflection;
 
-using CleanArchitecture.Application.Common.Behaviours;
-
 using DotNetTemplateClean.Application;
 
 using Microsoft.Extensions.Hosting;

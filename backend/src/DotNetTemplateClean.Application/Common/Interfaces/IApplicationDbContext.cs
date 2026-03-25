@@ -1,11 +1,11 @@
-﻿
+
 namespace DotNetTemplateClean.Application;
 
 public interface IApplicationDbContext
 {
     DbSet<Entite> Entites { get; }
     DbSet<Fonction> Fonctions { get; }
-    DbSet<AffectationPersonnel> Affectations { get;  }
+    DbSet<AffectationPersonnel> AffectationsPersonnel { get;  }
     DbSet<TypeEntite> TypeEntites { get;  }
     DbSet<Personnel> Personnels { get;  }
   

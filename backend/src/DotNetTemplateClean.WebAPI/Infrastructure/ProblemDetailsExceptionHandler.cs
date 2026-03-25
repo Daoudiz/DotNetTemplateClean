@@ -50,7 +50,13 @@ public class ProblemDetailsExceptionHandler : IExceptionHandler
                 //Detail = ioe.Message, // Le message "Impossible de supprimer..." remontera ici
                 Type = "https://tools.ietf.org/html/rfc9110#section-15.5.10"
             }),
-            _ => (-1, null)
+            _ => (StatusCodes.Status500InternalServerError, new ProblemDetails
+            {
+                Status = StatusCodes.Status500InternalServerError,
+                Title = "Internal Server Error",
+                Detail = exception.Message
+            })
+            //_ => (-1, null)
         };
 
         if (problemDetails is null) return false;

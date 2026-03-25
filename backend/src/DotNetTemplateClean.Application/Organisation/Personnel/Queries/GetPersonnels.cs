@@ -1,9 +1,5 @@
 
 
-using Ardalis.GuardClauses;
-
-using CleanArchitecture.Application.Common.Mappings;
-using CleanArchitecture.Application.Common.Models;
 
 namespace DotNetTemplateClean.Application;
 
@@ -46,7 +42,7 @@ public class GetPersonnelsWithFiltersQueryHandler(IApplicationDbContext context,
                 a.EntiteId == request.EntiteId && a.DateFinAffectation == null));
         }
 
-        throw new ValidationException();
+       
 
         // Projection et exécution
         return await query

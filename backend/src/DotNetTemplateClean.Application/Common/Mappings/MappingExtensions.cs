@@ -1,6 +1,5 @@
-using CleanArchitecture.Application.Common.Models;
 
-namespace CleanArchitecture.Application.Common.Mappings;
+namespace DotNetTemplateClean.Application;
 
 public static class MappingExtensions
 {

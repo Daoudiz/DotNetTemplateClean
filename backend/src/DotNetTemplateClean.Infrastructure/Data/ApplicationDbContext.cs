@@ -10,7 +10,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
     public DbSet<Entite> Entites { get; set; }
     public DbSet<Fonction> Fonctions { get; set; }
-    public DbSet<AffectationPersonnel> Affectations { get; set; }
+    public DbSet<AffectationPersonnel> AffectationsPersonnel { get; set; }
     public DbSet<TypeEntite> TypeEntites { get; set; }
     public DbSet<Personnel> Personnels { get; set; }
 
