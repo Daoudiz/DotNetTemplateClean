@@ -1,4 +1,5 @@
 using DotNetTemplateClean.Application;
+using DotNetTemplateClean.Domain;
 
 using MediatR;
 
@@ -21,6 +22,8 @@ public class Personnel: IEndpointGroup
         groupBuilder.MapPost(CreatePersonnel);
         groupBuilder.MapPut(UpdatePersonnel,"/{id}" );
         groupBuilder.MapDelete(DeletePersonnel, "/{id}").WithName("DeletePersonnel");
+        groupBuilder.MapGet(GetStatutPersonnelEnum,"/statutpersonnel");
+        
     }
 
     public static async Task<Ok<PaginatedList<PersonnelListDto>>> GetPersonnels(
@@ -70,5 +73,12 @@ public class Personnel: IEndpointGroup
         ArgumentNullException.ThrowIfNull(sender);
         await sender.Send(new DeletePersonnelCommand(id));
         return TypedResults.NoContent();
+    }
+
+    public static async Task<Ok<List<EnumItemDto>>> GetStatutPersonnelEnum()
+    {
+        var result = EnumHelper.GetEnumWithDisplayNames<StatutPersonnel>().ToList();
+
+        return TypedResults.Ok(result);
     }
 }

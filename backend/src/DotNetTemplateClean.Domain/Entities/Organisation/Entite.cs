@@ -16,6 +16,8 @@ public class Entite : AuditableEntity<int>
 
     // N-ary association: Affectation between Personnel, Entite and Fonction
     public ICollection<AffectationPersonnel> Affectations { get;  } = [];
+
+    public virtual ICollection<Personnel> Personnel { get; } = [];
 }
 
 

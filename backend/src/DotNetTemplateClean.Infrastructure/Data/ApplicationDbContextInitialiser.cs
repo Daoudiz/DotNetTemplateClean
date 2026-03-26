@@ -85,14 +85,14 @@ internal class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextIniti
             // LES FONCTIONS
             var fonctions = new List<Fonction>
             {
-                new() { Code = "DG", Designation = "Directeur Générale", Domaine = "Management", Type = "Management", TypeEntite = dgType, CreatedDate = seedDate },
-                new() { Code = "DR", Designation = "Directeur", Domaine = "Management", Type = "Management", TypeEntite = dirType, CreatedDate = seedDate },
-                new() { Code = "CDIV", Designation = "Chef de division", Domaine = "Management", Type = "Management", TypeEntite = divType, CreatedDate = seedDate },
-                new() { Code = "CDS", Designation = "Chef de service", Domaine = "Management", Type = "Management", TypeEntite = srvType, CreatedDate = seedDate },
-                new() { Code = "RLAB", Designation = "Responsable laboratoire", Domaine = "Technique", Type = "Métier", TypeEntite = labType, CreatedDate = seedDate },
-                new() { Code = "AQ", Designation = "Attaché qualité", Domaine = "Qualité", Type = "Métier", CreatedDate = seedDate },
-                new() { Code = "OPL", Designation = "Opérateur laboratoire", Domaine = "Technique", Type = "Métier", CreatedDate = seedDate },
-                new() { Code = "MET", Designation = "Responsable métrologie", Domaine = "Métrologie", Type = "Métier", CreatedDate = seedDate }
+                new() { Code = "DG", Designation = "Directeur Générale", Domaine = FonctionDomaine.Management, Type = TypeFonction.Management, TypeEntite = dgType, CreatedDate = seedDate },
+                new() { Code = "DR", Designation = "Directeur", Domaine = FonctionDomaine.Management, Type = TypeFonction.Management, TypeEntite = dirType, CreatedDate = seedDate },
+                new() { Code = "CDIV", Designation = "Chef de division", Domaine = FonctionDomaine.Management, Type = TypeFonction.Management, TypeEntite = divType, CreatedDate = seedDate },
+                new() { Code = "CDS", Designation = "Chef de service", Domaine = FonctionDomaine.Management, Type = TypeFonction.Management, TypeEntite = srvType, CreatedDate = seedDate },
+                new() { Code = "RLAB", Designation = "Responsable laboratoire", Domaine = FonctionDomaine.ManagementLaboratoire, Type = TypeFonction.Technique, TypeEntite = labType, CreatedDate = seedDate },
+                new() { Code = "AQ", Designation = "Attaché qualité", Domaine = FonctionDomaine.Qualité, Type = TypeFonction.Support, CreatedDate = seedDate },
+                new() { Code = "OPL", Designation = "Opérateur laboratoire", Domaine = FonctionDomaine.RadioLogie, Type = TypeFonction.Technique, CreatedDate = seedDate },
+                new() { Code = "MET", Designation = "Responsable métrologie", Domaine = FonctionDomaine.Métrologie, Type = TypeFonction.Technique, CreatedDate = seedDate }
             };
 
             // On ajoute tout dans le contexte

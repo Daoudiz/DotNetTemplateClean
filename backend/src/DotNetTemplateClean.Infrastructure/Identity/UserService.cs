@@ -133,7 +133,7 @@ public class UserService(ApplicationDbContext  context,
             DateRecrutement = userCreationDto.DateRecrutement,
             EntiteId = userCreationDto.Service
                        ?? userCreationDto.Division
-                       ?? userCreationDto.Direction
+                       ?? userCreationDto.Direction ?? 1
         };
 
         var createResult = await UserManager.CreateAsync(user, userCreationDto.Password);

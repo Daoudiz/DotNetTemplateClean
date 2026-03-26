@@ -14,7 +14,7 @@ public record UserCreationDto
     public string UserName { get; init; } = string.Empty;
     public string Password { get; init; } = string.Empty;
     public string UserRole { get; init; } = string.Empty; // L'ID du rôle
-    public int Direction { get; init; }
+    public int? Direction { get; init; }
     public int? Division { get; init; }
     public int? Service { get; init; }
     public bool TwoFactorEnabled { get; init; }

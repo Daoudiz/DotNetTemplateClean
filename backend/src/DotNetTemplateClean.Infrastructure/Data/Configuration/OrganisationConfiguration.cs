@@ -58,8 +58,34 @@ public class OrganisationRelationsConfiguration :
                .OnDelete(DeleteBehavior.Restrict)
                .IsRequired(); // Un utilisateur doit forcément appartenir à une entité
 
-      
+        //Relation avec le Personnel (Affectations)
+        builder.HasMany(e => e.Personnel)
+               .WithOne(p => p.Entite)
+               .HasForeignKey(p => p.EntiteId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .IsRequired(); // Un personnel doit forcément appartenir à une entité
+
+    }
+#pragma warning disable CA1822 
+    public void Configure (EntityTypeBuilder<Fonction> builder)
+    {
+        ArgumentNullException.ThrowIfNull(builder, nameof(builder));
+
+        //Config enums as strings for better readability in the database
+        builder.Property(f => f.Domaine)
+             .HasConversion<string>();
+
+        builder.Property(f => f.Type)
+             .HasConversion<string>();
     }
 
- 
+    //Configure enums for Personnel as strings for better readability in the database
+    public void Configure(EntityTypeBuilder<Personnel> builder)
+    {
+        ArgumentNullException.ThrowIfNull(builder, nameof(builder));
+        builder.Property(p => p.Statut)
+             .HasConversion<string>();
+        
+    }
+#pragma warning restore CA1822  
 }

@@ -8,8 +8,15 @@ public record CreatePersonnelCommand : IRequest<int>
     public required string Prenom { get; init; }
     public DateTime? DateRecrutement { get; init; }
     public DateTime? DateNaissance { get; init; }
+    public string Email { get; init; } = string.Empty;
+    public int EntiteId { get; init; } // ID de l'entité d'affectation principale
     public string? Statut { get; init; }
-    public string? Grade { get; init; }   
+    public string? Grade { get; init; }
+
+    public bool CreateUser { get; init; }  // Option pour créer un compte utilisateur lié
+
+    // ID role pour l'attribution d'un rôle lors de la création du compte utilisateur
+    public string? UserRole { get; init; }
 
     // Liste des affectations initiales
     public IList<CreateAffectationDto> Affectations { get; init; } = [];
@@ -17,7 +24,7 @@ public record CreatePersonnelCommand : IRequest<int>
 
 public record CreateAffectationDto(int EntiteId, int FonctionId, DateTime DateDebut, string Nature);
 
-public class CreatePersonnelCommandHandler(IApplicationDbContext context)
+public class CreatePersonnelCommandHandler(IApplicationDbContext context, IUserService userService)
     : IRequestHandler<CreatePersonnelCommand, int>
 {
     public async Task<int> Handle(CreatePersonnelCommand request, CancellationToken cancellationToken)
@@ -50,6 +57,25 @@ public class CreatePersonnelCommandHandler(IApplicationDbContext context)
         }
 
         context.Personnels.Add(entity);
+
+        if(request.CreateUser)
+        {
+            var user = new UserCreationDto
+            {
+                Matricule = int.Parse(request.Matricule),
+                FirstName = request.Prenom,
+                LastName = request.Nom,
+                DateRecrutement = request.DateRecrutement ?? DateTime.Now,
+                Email = request.Email,
+                UserName = request.Email, // Utiliser l'email comme nom d'utilisateur
+                Password = request.Nom + "@2026", // Mot de passe par défaut (à changer à la première connexion)
+                UserRole = request.UserRole!,
+                Service = request.EntiteId, // Associer l'utilisateur à l'entité d'affectation principale
+                TwoFactorEnabled = false
+            };
+
+           await userService.CreateUserWithRoleAsync(user);
+        }
 
         await context.SaveChangesAsync(cancellationToken);
 

@@ -5,8 +5,8 @@ public class Fonction : AuditableEntity<int>
 {
     public required string Code { get; set; }
     public required string Designation { get; set; }
-    public string? Domaine { get; set; }
-    public string? Type   { get; set; }
+    public FonctionDomaine? Domaine { get; set; }
+    public TypeFonction? Type   { get; set; }
 
     // The Fonction participates in AffectationPersonnel (no direct Personnel-Fonction relation)
     public ICollection<AffectationPersonnel> Affectations { get;  } = [];
