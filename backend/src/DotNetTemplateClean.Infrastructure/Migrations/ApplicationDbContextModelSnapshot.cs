@@ -242,14 +242,14 @@ namespace DotNetTemplateClean.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("Domaine")
-                        .HasColumnType("int");
+                    b.Property<string>("Domaine")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("Type")
-                        .HasColumnType("int");
+                    b.Property<string>("Type")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("TypeEntiteId")
                         .HasColumnType("int");

@@ -7,7 +7,9 @@ namespace DotNetTemplateClean.Infrastructure;
 
 public class OrganisationRelationsConfiguration :
     IEntityTypeConfiguration<AffectationPersonnel>,
-    IEntityTypeConfiguration<Entite>
+    IEntityTypeConfiguration<Entite>,
+    IEntityTypeConfiguration<Personnel>,
+    IEntityTypeConfiguration<Fonction>
 
     /*IEntityTypeConfiguration<TypeEntite>,
     IEntityTypeConfiguration<Fonction>*/
