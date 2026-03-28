@@ -19,6 +19,15 @@ export const routes: Routes = [
           title: 'Gestion des entités',
           roles: ['Admin']
         }
+      },
+      {
+        path: 'personnel/search',
+        loadComponent: () => import('./personnel-search/personnel-search.component').then(m => m.PersonnelSearchComponent),
+        canActivate: [roleGuard],
+        data: {
+          title: 'Recherche des personnels',
+          roles: ['Admin']
+        }
       }
     ]
   }

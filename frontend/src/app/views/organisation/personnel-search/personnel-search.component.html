@@ -1,0 +1,145 @@
+<c-card class="mb-4 shadow-sm">
+  <c-card-header><strong>Recherche des Personnels</strong></c-card-header>
+  <c-card-body>
+    <form [formGroup]="searchForm" (ngSubmit)="onSearch()" class="row g-3">
+      <div class="col-md-6">
+        <label cLabel>Matricule, nom ou prenom</label>
+        <input
+          #globalSearchInput
+          cFormControl
+          type="text"
+          formControlName="searchTerm"
+          placeholder="Rechercher un personnel..."
+        >
+      </div>
+
+      <div class="col-md-6">
+        <label cLabel>Entite</label>
+        <p-treeSelect
+          [options]="nodes()"
+          formControlName="entiteId"
+          placeholder="Selectionner une entite..."
+          styleClass="w-100"
+          containerStyleClass="w-100"
+          [filter]="true"
+          appendTo="body">
+        </p-treeSelect>
+      </div>
+
+      <div class="col-12 border-top pt-3 mt-4">
+        <div class="d-flex flex-wrap justify-content-end align-items-center gap-2">
+          <div>
+            <button cButton color="primary" type="submit" [disabled]="loading()">
+              @if (loading()) {
+                <c-spinner size="sm" class="me-2"></c-spinner>
+                Recherche...
+              } @else {
+                <svg cIcon name="cilSearch" class="me-2"></svg>
+                Rechercher
+              }
+            </button>
+            <button cButton color="secondary" type="button" class="ms-2" (click)="onReset()">
+              Vider
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </c-card-body>
+</c-card>
+
+<c-card class="mb-4">
+  <c-card-body>
+    <p-table
+      #dt
+      [value]="(personnels$ | async) || []"
+      [lazy]="true"
+      (onLazyLoad)="loadPersonnelLazy($event)"
+      [paginator]="true"
+      [rows]="pageSize()"
+      [totalRecords]="totalRecords()"
+      [loading]="loading()"
+      [alwaysShowPaginator]="true"
+      [rowsPerPageOptions]="[10, 20, 50]"
+      styleClass="custom-coreui-table p-datatable-sm">
+
+      <ng-template pTemplate="caption">
+        <div style="all: unset; display: block; background: transparent;"></div>
+      </ng-template>
+
+      <ng-template pTemplate="header">
+        <tr class="bg-light">
+          <th style="width: 12%">Matricule</th>
+          <th style="width: 22%">Nom & Prenom</th>
+          <th style="width: 16%">Date recrutement</th>
+          <th style="width: 14%">Statut</th>
+          <th style="width: 14%">Grade</th>
+          <th style="width: 22%">Affectations</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-personnel>
+        <tr>
+          <td><span class="badge bg-light text-dark border">{{ personnel.matricule }}</span></td>
+          <td><strong>{{ personnel.nom | uppercase }}</strong> {{ personnel.prenom }}</td>
+          <td>
+            @if (personnel.dateRecrutement) {
+              {{ personnel.dateRecrutement | date:'dd/MM/yyyy' }}
+            } @else {
+              <span class="text-muted">Non renseignee</span>
+            }
+          </td>
+          <td>
+            @if (personnel.statut) {
+              {{ personnel.statut }}
+            } @else {
+              <span class="text-muted">Non renseigne</span>
+            }
+          </td>
+          <td>
+            @if (personnel.grade) {
+              {{ personnel.grade }}
+            } @else {
+              <span class="text-muted">Non renseigne</span>
+            }
+          </td>
+          <td>
+            @if (getAffectationLabels(personnel).length > 0) {
+              @for (label of getAffectationLabels(personnel); track label) {
+                <div class="small">{{ label }}</div>
+              }
+            } @else {
+              <span class="text-muted">Aucune affectation</span>
+            }
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6" class="text-center py-5">
+            @if (!hasSearched()) {
+              <div class="text-muted">
+                <div class="mb-3">
+                  <svg cIcon name="cilSearch" size="3xl" class="text-secondary opacity-50"></svg>
+                </div>
+                <p>Saisissez des criteres dans le formulaire ci-dessus pour rechercher des personnels.</p>
+              </div>
+            } @else if (!loading()) {
+              <div class="text-warning">
+                <div class="mb-3">
+                  <svg cIcon name="cilInfo" size="3xl"></svg>
+                </div>
+                <h5>Aucun resultat trouve</h5>
+                <p>Nous n'avons trouve aucun personnel correspondant a vos criteres.</p>
+                <button cButton color="secondary" variant="outline" size="sm" (click)="onReset()">
+                  Reinitialiser les filtres
+                </button>
+              </div>
+            }
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </c-card-body>
+</c-card>

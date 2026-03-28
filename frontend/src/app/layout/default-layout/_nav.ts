@@ -437,6 +437,11 @@ export const navItems: INavData[] = [
         // L'URL DOIT être le chemin complet : racine + enfant + petit-enfant
         url: '/organisation/entities/search',
         icon: 'nav-icon-bullet'
+      },
+      {
+        name: 'Personnel',
+        url: '/organisation/personnel/search',
+        icon: 'nav-icon-bullet'
       }
     ]
   },

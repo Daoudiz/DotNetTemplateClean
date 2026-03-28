@@ -3,7 +3,12 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { WebUtilsService } from '../helpers/web-utils.service';
-import { GetPersonnelsWithFiltersQuery, PersonnelListDto } from '../../models/organisation/personnel.model';
+import {
+    CreatePersonnelRequest,
+    GetPersonnelsWithFiltersQuery,
+    PersonnelListDto,
+    UpdatePersonnelRequest
+} from '../../models/organisation/personnel.model';
 import { PaginatedList } from '../../models/generic/generics';
 
 @Injectable({ providedIn: 'root' })
@@ -15,6 +20,18 @@ export class PersonnelService {
     getPersonnel(filters: GetPersonnelsWithFiltersQuery): Observable<PaginatedList<PersonnelListDto>> {
         const params = this.webUtils.toHttpParams(filters);
 
-        return this.http.get<PaginatedList<PersonnelListDto>>(`${this.apiUrl}/personnel/GetPersonnels`, { params });
+        return this.http.get<PaginatedList<PersonnelListDto>>(`${this.apiUrl}`, { params });
+    }
+
+    createPersonnel(data: CreatePersonnelRequest): Observable<number> {
+        return this.http.post<number>(this.apiUrl, data);
+    }
+
+    updatePersonnel(id: number, data: UpdatePersonnelRequest): Observable<void> {
+        return this.http.put<void>(`${this.apiUrl}/${id}`, { ...data, id });
+    }
+
+    deletePersonnel(id: number): Observable<void> {
+        return this.http.delete<void>(`${this.apiUrl}/${id}`);
     }
 }

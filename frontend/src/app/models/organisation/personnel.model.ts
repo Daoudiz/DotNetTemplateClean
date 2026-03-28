@@ -24,3 +24,43 @@ export interface GetPersonnelsWithFiltersQuery {
     pageSize: number;
 }
 
+export interface CreateAffectationRequest {
+    entiteId: number;
+    fonctionId: number;
+    dateDebut: string;
+    nature: string;
+}
+
+export interface UpdateAffectationRequest {
+    id: number;
+    entiteId: number;
+    fonctionId: number;
+    dateDebut: string;
+    nature: string;
+}
+
+export interface CreatePersonnelRequest {
+    matricule: string;
+    nom: string;
+    prenom: string;
+    dateRecrutement?: string | null;
+    dateNaissance?: string | null;
+    email: string;
+    entiteId: number;
+    statut?: string | null;
+    grade?: string | null;
+    createUser: boolean;
+    userRole?: string | null;
+    affectations: CreateAffectationRequest[];
+}
+
+export interface UpdatePersonnelRequest {
+    matricule: string;
+    nom: string;
+    prenom: string;
+    dateRecrutement?: string | null;
+    dateNaissance?: string | null;
+    statut?: string | null;
+    grade?: string | null;
+    affectations: UpdateAffectationRequest[];
+}

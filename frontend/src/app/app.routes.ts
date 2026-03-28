@@ -37,6 +37,9 @@ export const routes: Routes = [
       },
       {
         path: 'organisation',
+        data: {
+          title: 'Organisation'
+        },
         loadChildren: () => import('./views/organisation/routes').then((m) => m.routes)
       },      
      

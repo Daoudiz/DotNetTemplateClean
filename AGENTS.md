@@ -24,7 +24,6 @@ Codex should know:
 - Use strict typing and optional properties if applicable.
 
 ## Services General Requirements
-- Frontend services are located in ./frontend/src/app/service.
 - Use Angular `HttpClient`.
 - Build query params strings automatically from filters.
 - Return an Observable with pagination results.
@@ -32,7 +31,6 @@ Codex should know:
 - Use URL format: `${this.apiUrl}/entityName/endpointName` (replace entityName/endpointName with the correct backend endpoint).
 
 ## Service Conventions
-##Use dependency injection (`providedIn: 'root'`).
 ##Catch HTTP errors and forward them appropriately.
 - Follow Angular best practices for service methods.
 
