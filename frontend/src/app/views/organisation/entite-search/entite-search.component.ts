@@ -2,7 +2,7 @@
 * @file entite-search.component.ts
 * @description Module de recherche avancée des entités.
 * Intègre une gestion de filtres hiérarchiques et une réactivité basée sur les Signals.
-* @module EntityManagement
+* @module Gestion des unités organisationnelles
 * @author Zakaria DAOUDI
 * © 2026 - Hope
 *******************************************************************************************/
@@ -34,6 +34,7 @@ import {  EntiteItemSearchResponse,
         } from '../../../models/organisation/organisation-model';
 import { NotificationService } from '../../../services/notification.service';
 import { EntiteCreateComponent } from '../entite-create/entite-create.component';
+
 
 @Component({
   selector: 'app-entite-search',
@@ -121,20 +122,11 @@ private readonly resetAction$ = new Subject<void>();
 
   onSearch(): void {
     this.hasSearched.set(true);
-    const table = this.table();
+    
+    this.table()?.reset(); 
 
-    // 1. On récupère les filtres actuels du formulaire
-    const currentFilters = this.searchForm.value;
-
-    // 2. On déclenche l'action de recherche (le pipe switchMap va s'occuper du reste)
-    this.searchAction$.next({
-      ...currentFilters,
-      pageNumber: (table?.first ?? 0) / (table?.rows ?? this.pageSize()) + 1,
-      pageSize: table?.rows ?? this.pageSize()
-    });
-
-    // 3. Optionnel : si tu veux vraiment revenir en page 1 après une suppression
-    // table?.reset(); 
+  // On déclenche l'action de recherche (le pipe switchMap va s'occuper du reste)
+    this.searchAction$.next(this.getParams());
   }
     
     onReset(): void {
@@ -187,33 +179,9 @@ private readonly resetAction$ = new Subject<void>();
       if (!this.isLazyMode() && first !== 0) return;
 
       const rows = event.rows ?? this.pageSize();
-      this.pageSize.set(rows);
-  
-      const pageNumber = Math.floor(first / rows) + 1;
-      const pageSize = rows;
-
-    //Extraction sécurisée des valeurs du formulaire
-    const formValues = this.searchForm.value;
-
-    //Traitement spécifique pour le parent sélectionné dans le TreeSelect
-    // On vérifie si 'parent' existe et si c'est un objet (TreeNode)
-    let parentId = null;
-    console.log('formValues', formValues);
-    if (formValues.parentId) {
-      // Si PrimeNG a stocké l'objet TreeNode, l'ID est généralement dans 'data' ou 'key'
-      // Adaptez 'data' ou 'key' selon votre configuration de TreeNode
-      parentId = formValues.parentId.key ?? formValues.parentId.data ?? formValues.parentId;
-      console.log('parentId', parentId);
-    }
-  
-      const criteria: EntiteSearchRequest = {
-        ...formValues,
-        parentId: parentId,
-        pageNumber: pageNumber,
-        pageSize: pageSize
-      };
-  
-      this.searchAction$.next(criteria);
+      this.pageSize.set(rows); 
+     
+      this.searchAction$.next(this.getParams());
     } 
     
   //#endregion
@@ -329,4 +297,34 @@ private readonly resetAction$ = new Subject<void>();
   }
 
   //#endregion
+
+  //#region --- HELPERS & UTILITAIRES ---
+  private getParams(): EntiteSearchRequest {
+    const formValues = this.searchForm.value;
+    const table = this.table();
+
+    // Calcul de la pagination
+    const rows = table?.rows ?? this.pageSize();
+    const first = table?.first ?? 0;
+    const pageNumber = Math.floor(first / rows) + 1;
+
+    // NETTOYAGE CRUCIAL DU PARENTID
+    let cleanParentId = null;
+    if (formValues.parentId) {
+      // On extrait la clé si c'est un objet PrimeNG, sinon on garde la valeur
+      cleanParentId = formValues.parentId.key ?? formValues.parentId.data ?? formValues.parentId;
+    }
+
+    return {
+      ...formValues,
+      parentId: cleanParentId,
+      pageNumber: pageNumber,
+      pageSize: rows
+    };
+  }
+
+  //#endregion
+
 }
+
+
