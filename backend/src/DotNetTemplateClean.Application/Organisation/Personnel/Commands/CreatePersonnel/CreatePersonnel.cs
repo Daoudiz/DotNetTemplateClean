@@ -29,56 +29,83 @@ public class CreatePersonnelCommandHandler(IApplicationDbContext context, IUserS
 {
     public async Task<int> Handle(CreatePersonnelCommand request, CancellationToken cancellationToken)
     {
+        
         ArgumentNullException.ThrowIfNull(request, nameof(request));
 
-        //Instanciation de l'entité Personnel
-        var entity = new Personnel
-        {
-            Matricule = request.Matricule,
-            Nom = request.Nom,
-            Prenom = request.Prenom,
-            DateRecrutement = request.DateRecrutement,
-            DateNaissance = request.DateNaissance,
-            Statut = request.Statut,
-            Grade = request.Grade,            
-        };
+        int personnelId = 0;
 
-        // Création des affectations liées
-        foreach (var aff in request.Affectations)
+        await context.ExecuteInTransactionAsync(async () =>
         {
-            entity.Affectations.Add(new AffectationPersonnel
+            
+            //Instanciation de l'entité Personnel
+            var entity = new Personnel
             {
-                EntiteId = aff.EntiteId,
-                FonctionId = aff.FonctionId,
-                DateDebutAffectation = aff.DateDebut,
-                Nature = aff.Nature
-                // Le PersonnelId sera injecté automatiquement par EF Core lors du Save
-            });
-        }
-
-        context.Personnels.Add(entity);
-
-        if(request.CreateUser)
-        {
-            var user = new UserCreationDto
-            {
-                Matricule = int.Parse(request.Matricule),
-                FirstName = request.Prenom,
-                LastName = request.Nom,
-                DateRecrutement = request.DateRecrutement ?? DateTime.Now,
-                Email = request.Email,
-                UserName = request.Email, // Utiliser l'email comme nom d'utilisateur
-                Password = request.Nom + "@2026", // Mot de passe par défaut (à changer à la première connexion)
-                UserRole = request.UserRole!,
-                Service = request.EntiteId, // Associer l'utilisateur à l'entité d'affectation principale
-                TwoFactorEnabled = false
+                Matricule = request.Matricule,
+                Nom = request.Nom,
+                Prenom = request.Prenom,
+                DateRecrutement = request.DateRecrutement,
+                DateNaissance = request.DateNaissance,
+                Statut = request.Statut,
+                Grade = request.Grade,
+                EntiteId = request.EntiteId
             };
 
-           await userService.CreateUserWithRoleAsync(user);
-        }
+            // Création des affectations liées
+            foreach (var aff in request.Affectations)
+            {
+                entity.Affectations.Add(new AffectationPersonnel
+                {
+                    EntiteId = aff.EntiteId,
+                    FonctionId = aff.FonctionId,
+                    DateDebutAffectation = aff.DateDebut,
+                    Nature = aff.Nature
+                    // Le PersonnelId sera injecté automatiquement par EF Core lors du Save
+                });
+            }
 
-        await context.SaveChangesAsync(cancellationToken);
+            
 
-        return entity.Id;
+            if (request.CreateUser)
+            {
+                var user = new UserCreationDto
+                {
+                    Matricule = int.Parse(request.Matricule, CultureInfo.InvariantCulture),
+                    FirstName = request.Prenom,
+                    LastName = request.Nom,
+                    DateRecrutement = request.DateRecrutement ?? DateTime.Now,
+                    Email = request.Email,
+                    UserName = request.Email, // Utiliser l'email comme nom d'utilisateur
+                    Password = request.Prenom + "@2026", // Mot de passe par défaut (à changer à la première connexion)
+                    UserRole = request.UserRole!,
+                    Service = request.EntiteId, // Associer l'utilisateur à l'entité d'affectation principale
+                    TwoFactorEnabled = false
+                };
+
+                var result = await userService.CreateUserWithRoleAsync(user);
+
+                if (result.IsSuccess)
+                {
+                   
+                    // Associer le Personnel à l'utilisateur créé
+                    entity.IdentityId = result.Value;
+                    context.Personnels.Add(entity);
+                    await context.SaveChangesAsync(cancellationToken);
+
+
+                }
+                else
+                {
+
+                    throw new InvalidOperationException($"Failed to create user: {result.ErrorMessage}");
+                }
+
+            }
+
+            personnelId = entity.Id;
+
+        }, cancellationToken);
+
+        return personnelId;
+
     }
 }

@@ -6,7 +6,6 @@ namespace DotNetTemplateClean.Infrastructure;
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options,
                                   IUser user) : IdentityDbContext<ApplicationUser>(options) , IApplicationDbContext
 {
-   
 
     public DbSet<Entite> Entites { get; set; }
     public DbSet<Fonction> Fonctions { get; set; }
@@ -113,4 +112,24 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         }
     }
 
+    // Dans ton projet INFRASTRUCTURE
+    public async Task ExecuteInTransactionAsync(Func<Task> action, CancellationToken cancellationToken)
+    {
+        var strategy = Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            using var transaction = await Database.BeginTransactionAsync(cancellationToken);
+            try
+            {
+                await action();
+                await transaction.CommitAsync(cancellationToken);
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
+        });
+    }
 }
