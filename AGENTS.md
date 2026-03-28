@@ -2,29 +2,40 @@
 # AGENTS.md — Angular Frontend Generation Spec
 
 ## Project Overview
-This repository contains a .NET backend for a REST API that use .NET 10
+This repository contains a .NET backend for a REST API that uses .NET 10.
 The frontend is a separate Angular 21 application.
 
 Codex should know:
-- Backend is C# minimal API returning JSON
-- Angular app is located in ./frontend (relative path)
-- .NET web api is located in ./backend
+- Backend is a C# minimal API returning JSON with MediatR.
+- Angular app is located in ./frontend (relative path).
+- .NET Web API is located in ./backend.
 
 ## Backend API Standards
-- Endpoints return JSON
-- Pagination uses a PaginatedList<T> model
-- Query parameters follow standard HTTP query format
+- Endpoints return JSON.
+- Pagination uses a PaginatedList<T> model.
+- Query parameters follow standard HTTP query format and should be URL-encoded.
 - Naming conventions:
-  - DTOs use PascalCase
-  - Angular models should use camelCase
-  
-## Services general Requirements
-frontend interfaces are : 
-- located in ./frontend/src/app/models
-- Use Angular `HttpClient` service
-- Build query params string automatically from filters
-- Use strict typing
-- Return an Observable with pagination result
+  - DTOs use PascalCase.
+  - Angular models should use camelCase.
+
+## Interfaces Generation Requirements
+- Generate TypeScript interfaces for all backend DTOs.
+- Preserve property names and types.
+- Use strict typing and optional properties if applicable.
+
+## Services General Requirements
+- Frontend services are located in ./frontend/src/app/service.
+- Use Angular `HttpClient`.
+- Build query params strings automatically from filters.
+- Return an Observable with pagination results.
+- Follow strict typing.
+- Use URL format: `${this.apiUrl}/entityName/endpointName` (replace entityName/endpointName with the correct backend endpoint).
+
+## Service Conventions
+##Use dependency injection (`providedIn: 'root'`).
+##Catch HTTP errors and forward them appropriately.
+- Follow Angular best practices for service methods.
+
 
 
 
