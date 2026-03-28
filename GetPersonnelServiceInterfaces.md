@@ -1,5 +1,3 @@
-
-
 ## Generation Requirements
 ### TypeScript Interfaces
 Create interfaces for:
