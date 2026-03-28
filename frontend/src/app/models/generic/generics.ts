@@ -4,3 +4,11 @@ export interface PagedResult<T> {
     totalCount: number;
     isFullResult: boolean;
 }
+
+export interface PaginatedList<T> {
+    items: T[];
+    pageNumber: number;
+    totalPages: number;
+    totalCount: number;
+    isFullResult: boolean;
+}
