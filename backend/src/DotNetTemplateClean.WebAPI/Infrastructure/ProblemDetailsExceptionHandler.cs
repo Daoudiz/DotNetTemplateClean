@@ -62,7 +62,9 @@ public class ProblemDetailsExceptionHandler : IExceptionHandler
         if (problemDetails is null) return false;
 
         httpContext.Response.StatusCode = statusCode;
-        await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
+        await httpContext.Response.WriteAsJsonAsync(problemDetails,
+                                                    problemDetails.GetType(),
+                                                    cancellationToken);
         return true;
     }
 }
