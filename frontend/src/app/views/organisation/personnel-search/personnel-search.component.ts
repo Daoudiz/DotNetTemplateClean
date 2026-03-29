@@ -15,6 +15,7 @@ import { catchError, finalize, map, switchMap, tap } from 'rxjs/operators';
 
 import { Table, TableLazyLoadEvent, TableModule } from 'primeng/table';
 import { TreeSelectModule } from 'primeng/treeselect';
+import { TooltipModule as PrimeTooltipModule } from 'primeng/tooltip';
 
 import {
   AlertModule,
@@ -23,7 +24,6 @@ import {
   FormModule,
   GridModule,
   SpinnerModule,
-  TooltipModule,
   UtilitiesModule
 } from '@coreui/angular';
 import { IconModule } from '@coreui/icons-angular';
@@ -45,7 +45,7 @@ import { OrganizationTreeNode } from '../../../models/organisation/organisation-
     ButtonModule,
     TableModule,
     SpinnerModule,
-    TooltipModule,
+    PrimeTooltipModule,
     UtilitiesModule,
     IconModule,
     AlertModule,
@@ -54,6 +54,7 @@ import { OrganizationTreeNode } from '../../../models/organisation/organisation-
     DatePipe
   ],
   templateUrl: './personnel-search.component.html',
+  styleUrl: './personnel-search.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PersonnelSearchComponent implements OnInit {
@@ -74,6 +75,7 @@ export class PersonnelSearchComponent implements OnInit {
   readonly hasSearched = signal<boolean>(false);
   readonly totalRecords = signal<number>(0);
   readonly pageSize = signal<number>(10);
+  readonly tooltipPersonnel = signal<PersonnelListDto | null>(null);
 
   searchForm!: FormGroup;
   //#endregion
@@ -206,6 +208,24 @@ export class PersonnelSearchComponent implements OnInit {
         return parts.join(' - ');
       })
       .filter((label) => label.length > 0);
+  }
+
+  setTooltipPersonnel(personnel: PersonnelListDto): void {
+    this.tooltipPersonnel.set(personnel);
+  }
+
+  getAffectationSummary(personnel: PersonnelListDto): string {
+    const labels = this.getAffectationLabels(personnel);
+
+    if (labels.length === 0) {
+      return 'Aucune affectation';
+    }
+
+    if (labels.length === 1) {
+      return labels[0];
+    }
+
+    return `${labels[0]} (+${labels.length - 1})`;
   }
   //#endregion
 }

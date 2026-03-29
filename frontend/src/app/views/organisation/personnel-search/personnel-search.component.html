@@ -67,6 +67,19 @@
         <div style="all: unset; display: block; background: transparent;"></div>
       </ng-template>
 
+      <ng-template #affectationsTooltip>
+        @if (tooltipPersonnel(); as selectedPersonnel) {
+          <div class="personnel-affectations-tooltip-content">
+            <div class="fw-semibold border-bottom pb-1">Fonction(s)</div>
+            <ul class="personnel-affectations-tooltip-list">
+              @for (label of getAffectationLabels(selectedPersonnel); track label) {
+                <li class="personnel-affectations-tooltip-item">{{ label }}</li>
+              }
+            </ul>
+          </div>
+        }
+      </ng-template>
+
       <ng-template pTemplate="header">
         <tr class="bg-light">
           <th style="width: 12%">Matricule</th>
@@ -74,7 +87,7 @@
           <th style="width: 16%">Date recrutement</th>
           <th style="width: 14%">Statut</th>
           <th style="width: 14%">Grade</th>
-          <th style="width: 22%">Affectations</th>
+          <th style="width: 22%">Fonction(s)</th>
         </tr>
       </ng-template>
 
@@ -105,9 +118,19 @@
           </td>
           <td>
             @if (getAffectationLabels(personnel).length > 0) {
-              @for (label of getAffectationLabels(personnel); track label) {
-                <div class="small">{{ label }}</div>
-              }
+              <span
+                class="badge rounded-pill text-bg-info cursor-pointer text-wrap"
+                [pTooltip]="affectationsTooltip"
+                tooltipPosition="top"
+                [autoHide]="false"
+                [fitContent]="false"
+                appendTo="body"
+                tooltipStyleClass="personnel-affectations-tooltip"
+                (mouseenter)="setTooltipPersonnel(personnel)"
+                (focus)="setTooltipPersonnel(personnel)"
+                tabindex="0">
+                {{ getAffectationSummary(personnel) }}
+              </span>
             } @else {
               <span class="text-muted">Aucune affectation</span>
             }

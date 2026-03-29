@@ -15,3 +15,41 @@
 .select-week .calendar-row.current {
   cursor: pointer;
 }
+
+.personnel-affectations-tooltip {
+  width: min(24rem, calc(100vw - 2rem));
+  max-width: min(24rem, calc(100vw - 2rem));
+}
+
+.personnel-affectations-tooltip .p-tooltip {
+  width: min(24rem, calc(100vw - 2rem));
+  max-width: min(24rem, calc(100vw - 2rem));
+}
+
+.personnel-affectations-tooltip .p-tooltip-text {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  display: block;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  box-sizing: border-box;
+}
+
+.personnel-affectations-tooltip-content {
+  width: 100%;
+  max-width: 100%;
+}
+
+.personnel-affectations-tooltip-list {
+  margin: 0.5rem 0 0;
+  padding-left: 1rem;
+}
+
+.personnel-affectations-tooltip-item {
+  margin-bottom: 0.35rem;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
