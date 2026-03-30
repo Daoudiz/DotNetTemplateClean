@@ -10,6 +10,8 @@ public partial class UseEnumsAddEntiteToPersonnel : Migration
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
     {
+        ArgumentNullException.ThrowIfNull(migrationBuilder, nameof(migrationBuilder));
+
         migrationBuilder.AddColumn<string>(
             name: "Email",
             table: "Personnels",
@@ -41,6 +43,8 @@ public partial class UseEnumsAddEntiteToPersonnel : Migration
     /// <inheritdoc />
     protected override void Down(MigrationBuilder migrationBuilder)
     {
+        ArgumentNullException.ThrowIfNull(migrationBuilder, nameof(migrationBuilder));
+
         migrationBuilder.DropForeignKey(
             name: "FK_Personnels_Entites_EntiteId",
             table: "Personnels");
