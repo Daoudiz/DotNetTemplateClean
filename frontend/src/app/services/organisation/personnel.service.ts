@@ -7,7 +7,7 @@ import {
     CreatePersonnelRequest,
     GetPersonnelsWithFiltersQuery,
     PersonnelListDto,
-    UpdatePersonnelRequest
+    UpdatePersonnelRequest, StatutPersonnel
 } from '../../models/organisation/personnel.model';
 import { PaginatedList } from '../../models/generic/generics';
 
@@ -33,5 +33,12 @@ export class PersonnelService {
 
     deletePersonnel(id: number): Observable<void> {
         return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    }
+
+    /**
+     * Retrieves the list of personnel statuses from the backend.
+     */
+    getStatutPersonnel(): Observable<StatutPersonnel[]> {
+        return this.http.get<StatutPersonnel[]>(`${this.apiUrl}/statutpersonnel`);
     }
 }

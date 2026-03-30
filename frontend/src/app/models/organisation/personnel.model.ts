@@ -64,3 +64,8 @@ export interface UpdatePersonnelRequest {
     grade?: string | null;
     affectations: UpdateAffectationRequest[];
 }
+
+export interface StatutPersonnel {
+    value: string;
+    displayName: string;
+}
