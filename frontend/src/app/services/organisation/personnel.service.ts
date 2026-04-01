@@ -7,7 +7,9 @@ import {
     CreatePersonnelRequest,
     GetPersonnelsWithFiltersQuery,
     PersonnelListDto,
-    UpdatePersonnelRequest, StatutPersonnel
+    UpdatePersonnelRequest,
+    StatutPersonnel,
+    PrimeNgTreeNode
 } from '../../models/organisation/personnel.model';
 import { PaginatedList } from '../../models/generic/generics';
 
@@ -40,5 +42,13 @@ export class PersonnelService {
      */
     getStatutPersonnel(): Observable<StatutPersonnel[]> {
         return this.http.get<StatutPersonnel[]>(`${this.apiUrl}/statutpersonnel`);
+    }
+
+    /**
+     * Fetches the Fonctions tree structure compatible with PrimeNG p-treeselect
+     * @returns Observable of array of PrimeNgTreeNode representing the hierarchy
+     */
+    getFonctionsTree(): Observable<PrimeNgTreeNode[]> {
+        return this.http.get<PrimeNgTreeNode[]>(`${environment.apiUrl}/fonctions/tree`);
     }
 }

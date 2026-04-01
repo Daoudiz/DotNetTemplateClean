@@ -23,6 +23,7 @@ import {
   CardModule,
   FormModule,
   GridModule,
+  ModalModule,
   SpinnerModule,
   UtilitiesModule
 } from '@coreui/angular';
@@ -30,6 +31,8 @@ import { IconModule } from '@coreui/icons-angular';
 
 import { OrganizationService } from '../../../services/organisation/organisation.service';
 import { PersonnelService } from '../../../services/organisation/personnel.service';
+import { NotificationService } from '../../../services/notification.service';
+import { PersonnelCreateComponent } from '../personnel-create/personnel-create.component';
 import { GetPersonnelsWithFiltersQuery, PersonnelListDto } from '../../../models/organisation/personnel.model';
 import { OrganizationTreeNode } from '../../../models/organisation/organisation-model';
 
@@ -49,7 +52,9 @@ import { OrganizationTreeNode } from '../../../models/organisation/organisation-
     UtilitiesModule,
     IconModule,
     AlertModule,
+    ModalModule,
     TreeSelectModule,
+    PersonnelCreateComponent,
     UpperCasePipe,
     DatePipe
   ],
@@ -63,6 +68,7 @@ export class PersonnelSearchComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly personnelService = inject(PersonnelService);
   private readonly organisationService = inject(OrganizationService);
+  private readonly notification = inject(NotificationService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly table = viewChild<Table>('dt');
@@ -76,6 +82,7 @@ export class PersonnelSearchComponent implements OnInit {
   readonly totalRecords = signal<number>(0);
   readonly pageSize = signal<number>(10);
   readonly tooltipPersonnel = signal<PersonnelListDto | null>(null);
+  readonly isPersonnelModalOpen = signal<boolean>(false);
 
   searchForm!: FormGroup;
   //#endregion
@@ -226,6 +233,27 @@ export class PersonnelSearchComponent implements OnInit {
     }
 
     return `${labels[0]} (+${labels.length - 1})`;
+  }
+  //#endregion
+
+  //#region --- GESTION DES MODALES (Personnel) ---
+  openCreateModal(): void {
+    this.isPersonnelModalOpen.set(true);
+  }
+
+  closePersonnelModal(): void {
+    this.isPersonnelModalOpen.set(false);
+  }
+
+  onPersonnelModalVisibilityChange(visible: boolean): void {
+    if (this.isPersonnelModalOpen() !== visible) {
+      this.isPersonnelModalOpen.set(visible);
+    }
+  }
+
+  onPersonnelSavedSuccess(): void {
+    this.isPersonnelModalOpen.set(false);
+    this.onSearch();
   }
   //#endregion
 }

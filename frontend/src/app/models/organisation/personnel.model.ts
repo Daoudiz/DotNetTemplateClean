@@ -69,3 +69,21 @@ export interface StatutPersonnel {
     value: string;
     displayName: string;
 }
+
+// Fonction Tree Models
+export interface FonctionNodeData {
+    id: number;
+    code: string;
+    designation: string;
+    type?: string | null;
+}
+
+export interface PrimeNgTreeNode {
+    key: string;
+    label: string;
+    data?: FonctionNodeData;
+    children: PrimeNgTreeNode[];
+    expandedIcon?: string;
+    collapsedIcon?: string;
+    selectable?: boolean;
+}

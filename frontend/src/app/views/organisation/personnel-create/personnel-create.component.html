@@ -1,0 +1,511 @@
+<div class="card-body p-3">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off">
+
+    <!-- STEPPER HEADER -->
+    <div class="stepper-header mb-4">
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="stepper-step" [class.active]="currentStep() === 1">
+          <div class="step-number">1</div>
+          <div class="step-label">Personnel</div>
+        </div>
+        <div class="stepper-line"></div>
+        <div class="stepper-step" [class.active]="currentStep() === 2">
+          <div class="step-number">2</div>
+          <div class="step-label">Affectations</div>
+        </div>
+        <div class="stepper-line"></div>
+        <div class="stepper-step" [class.active]="currentStep() === 3">
+          <div class="step-number">3</div>
+          <div class="step-label">Confirmation</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 1: PERSONNEL INFORMATION -->
+    @if (currentStep() === 1) {
+      <div class="step-content">
+        <h5 class="border-bottom pb-2 mb-3 text-primary">
+          <i class="fas fa-user me-2"></i>
+          Informations du personnel
+        </h5>
+
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label class="form-label fw-bold">Matricule <span class="text-danger">*</span></label>
+            <input type="text" formControlName="matricule" class="form-control"
+            [class.is-invalid]="valService.isFieldInvalid(form, 'matricule')">
+                            @if (valService.isFieldInvalid(form, 'matricule')) {
+                            <div class="invalid-feedback d-block">
+                                {{ valService.getErrorMessage(form, 'matricule') }}
+                            </div>
+                            }
+          </div>
+
+          <div class="col-md-4 mb-3">
+            <label class="form-label fw-bold">Nom <span class="text-danger">*</span></label>
+            <input type="text" formControlName="nom" class="form-control"
+            [class.is-invalid]="valService.isFieldInvalid(form, 'nom')">
+                            @if (valService.isFieldInvalid(form, 'nom')) {
+                            <div class="invalid-feedback d-block">
+                                {{ valService.getErrorMessage(form, 'nom') }}
+                            </div>
+                            }
+          </div>
+
+          <div class="col-md-4 mb-3">
+            <label class="form-label fw-bold">Prénom <span class="text-danger">*</span></label>
+            <input type="text" formControlName="prenom" class="form-control"
+            [class.is-invalid]="valService.isFieldInvalid(form, 'prenom')">
+                            @if (valService.isFieldInvalid(form, 'prenom')) {
+                            <div class="invalid-feedback d-block">
+                                {{ valService.getErrorMessage(form, 'prenom') }}
+                            </div>
+                            }
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label class="form-label fw-bold">Email <span class="text-danger">*</span></label>
+            <input type="email" formControlName="email" class="form-control"
+            [class.is-invalid]="valService.isFieldInvalid(form, 'email')">
+                            @if (valService.isFieldInvalid(form, 'email')) {
+                            <div class="invalid-feedback d-block">
+                                {{ valService.getErrorMessage(form, 'email') }}
+                            </div>
+                            }
+          </div>
+
+          <div class="col-md-4 mb-3">
+            <label class="form-label fw-bold">Date recrutement</label>
+            <input type="date" formControlName="dateRecrutement" class="form-control">
+          </div>
+
+          <div class="col-md-4 mb-3">
+            <label class="form-label fw-bold">Date naissance</label>
+            <input type="date" formControlName="dateNaissance" class="form-control">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label class="form-label fw-bold">Entité <span class="text-danger">*</span></label>
+            <p-treeSelect
+              [options]="organizationTree()"
+              formControlName="entiteId"
+              placeholder="Sélectionner une entité..."
+              styleClass="w-100"
+              containerStyleClass="w-100"
+              appendTo="body"
+              dataKey="key"
+              [filter]="true"
+              [class.ng-invalid]="valService.isFieldInvalid(form, 'entiteId')">
+            </p-treeSelect>
+            @if (valService.isFieldInvalid(form, 'entiteId')) {
+              <div class="invalid-feedback d-block">
+                  {{ valService.getErrorMessage(form, 'entiteId') }}
+              </div>
+            }
+          </div>
+
+          <div class="col-md-4 mb-3">
+            <label class="form-label fw-bold">Statut</label>
+            <select formControlName="statut" class="form-select">
+              <option [ngValue]="null">-- Sélectionner un statut --</option>
+              @for (stat of statuts(); track stat.value) {
+                <option [ngValue]="stat.value">{{ stat.displayName }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="col-md-4 mb-3">
+            <label class="form-label fw-bold">Grade</label>
+            <input type="text" formControlName="grade" class="form-control">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-lg-6 mb-3">
+            <label class="form-label fw-bold" style="font-size: 0.95rem;">Création utilisateur</label>
+            <div class="form-check d-flex align-items-right py-2 px-3 " >
+              <input type="checkbox" formControlName="createUser" class="form-check-input checkbox-input" id="createUserCheck">
+              <label class="form-check-label ms-3 mb-0 checkbox-label" for="createUserCheck">
+                Créer utilisateur
+              </label>
+            </div>
+          </div>
+
+          <div class="col-lg-6 mb-3">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <label class="form-label fw-bold mb-0" style="font-size: 0.95rem;">Rôle utilisateur</label>
+              @if (!isUserRoleEnabled()) {
+                <span class="badge bg-secondary-light text-secondary" style="font-size: 0.75rem;">Désactivé</span>
+              } @else {
+                <span class="badge bg-success-light text-success" style="font-size: 0.75rem;">Actif</span>
+              }
+            </div>
+            <select formControlName="userRole" 
+                    class="form-select" 
+                    [class.disabled-state]="!isUserRoleEnabled()"
+                    [disabled]="!isUserRoleEnabled()">
+              <option [ngValue]="null">-- Sélectionner un rôle --</option>
+              @for (role of roles(); track role.id || role) {
+                <option [ngValue]="role.id || role">{{ role.name || role }}</option>
+              }
+            </select>
+            @if (!isUserRoleEnabled()) {
+              <small class="text-muted d-block mt-2" style="font-size: 0.85rem;">
+                <i class="fas fa-info-circle me-1"></i>
+                Cochez "Créer un utilisateur" pour activer
+              </small>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- STEP 2: AFFECTATIONS -->
+    @if (currentStep() === 2) {
+      <div class="step-content">
+        <h5 class="border-bottom pb-2 mb-3 text-primary">
+          <i class="fas fa-sitemap me-2"></i>
+          Affectations
+        </h5>
+
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered">
+            <thead class="table-light">
+              <tr>
+                <th style="width: 40%">Entité</th>
+                <th style="width: 40%">Fonction</th>
+                <th style="width: 20%" class="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody formArrayName="affectations">
+              @for (affectation of affectationsFormArray.controls; let i = $index; track i) {
+                <tr [formGroupName]="i">
+                  <td>
+                    <p-treeSelect
+                      [options]="organizationTree()"
+                      formControlName="entiteId"
+                      placeholder="Sélectionner une entité..."
+                      styleClass="w-100"
+                      containerStyleClass="w-100"
+                      appendTo="body"
+                      dataKey="key"
+                      [filter]="true">
+                    </p-treeSelect>
+                    @if (getAffectationControl(i, 'entiteId')?.invalid && getAffectationControl(i, 'entiteId')?.touched) {
+                      <div class="invalid-feedback d-block">
+                        Entité requise
+                      </div>
+                    }
+                  </td>
+                  <td>
+                    <p-treeSelect
+                      [options]="fonctionsTree()"
+                      formControlName="fonctionId"
+                      placeholder="Sélectionner une fonction..."
+                      styleClass="w-100"
+                      containerStyleClass="w-100"
+                      appendTo="body"
+                      dataKey="key"
+                      [filter]="true">
+                    </p-treeSelect>
+                    @if (getAffectationControl(i, 'fonctionId')?.invalid && getAffectationControl(i, 'fonctionId')?.touched) {
+                      <div class="invalid-feedback d-block">
+                        Fonction requise
+                      </div>
+                    }
+                  </td>
+                  <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-danger"
+                            [disabled]="affectationsFormArray.length === 1"
+                            (click)="removeAffectation(i)">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mb-3">
+          <button type="button" class="btn btn-sm btn-success"
+                  (click)="addAffectation()">
+            <i class="fas fa-plus me-2"></i>
+            Ajouter une affectation
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- STEP 3: CONFIRMATION & SUBMISSION -->
+    @if (currentStep() === 3) {
+      <div class="step-content">
+        <h5 class="border-bottom pb-2 mb-3 text-primary">
+          <i class="fas fa-check-circle me-2"></i>
+          Confirmation
+        </h5>
+
+        <div class="alert alert-info" role="alert">
+          <i class="fas fa-info-circle me-2"></i>
+          Veuillez vérifier les informations ci-dessous avant de confirmer la création du personnel.
+        </div>
+
+        <!-- SUMMARY SECTION -->
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <div class="card bg-light">
+              <div class="card-header bg-primary text-white">
+                <h6 class="mb-0">Informations Personnel</h6>
+              </div>
+              <div class="card-body">
+                <div class="mb-2">
+                  <strong>Matricule:</strong> {{ form.get('matricule')?.value || '-' }}
+                </div>
+                <div class="mb-2">
+                  <strong>Nom:</strong> {{ form.get('nom')?.value || '-' }}
+                </div>
+                <div class="mb-2">
+                  <strong>Prénom:</strong> {{ form.get('prenom')?.value || '-' }}
+                </div>
+                <div class="mb-2">
+                  <strong>Email:</strong> {{ form.get('email')?.value || '-' }}
+                </div>
+                <div class="mb-2">
+                  <strong>Statut:</strong> {{ form.get('statut')?.value || '-' }}
+                </div>
+                <div class="mb-2">
+                  <strong>Grade:</strong> {{ form.get('grade')?.value || '-' }}
+                </div>
+                @if (form.get('createUser')?.value) {
+                  <div class="mb-2">
+                    <strong>Rôle Utilisateur:</strong> {{ form.get('userRole')?.value || '-' }}
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card bg-light">
+              <div class="card-header bg-primary text-white">
+                <h6 class="mb-0">Affectations ({{ affectationsFormArray.length }})</h6>
+              </div>
+              <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                @if (affectationsFormArray.length > 0) {
+                  <ul class="list-unstyled">
+                    @for (affectation of affectationsFormArray.controls; let i = $index; track i) {
+                      <li class="mb-2 pb-2 border-bottom">
+                        <small>
+                          <strong>#{{ i + 1 }}:</strong>
+                          Entité: {{ affectation.get('entiteId')?.value?.label || '-' }},
+                          Fonction: {{ affectation.get('fonctionId')?.value?.label || '-' }}
+                        </small>
+                      </li>
+                    }
+                  </ul>
+                } @else {
+                  <p class="text-muted">Aucune affectation</p>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+  </form>
+</div>
+
+<style>
+  .stepper-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  .stepper-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+  }
+
+  .step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+  }
+
+  .stepper-step.active .step-number {
+    background-color: #0d6efd;
+    color: white;
+  }
+
+  .step-label {
+    font-size: 0.85rem;
+    text-align: center;
+    color: #6c757d;
+  }
+
+  .stepper-step.active .step-label {
+    color: #0d6efd;
+    font-weight: bold;
+  }
+
+  .stepper-line {
+    flex: 1;
+    height: 2px;
+    background-color: #e9ecef;
+    margin: 0 1rem;
+  }
+
+  .step-content {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .invalid-feedback {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
+
+  .p-treeselect.ng-invalid.ng-touched {
+    border-color: #dc3545;
+  }
+
+  /* Roles Dropdown Disabled State Styling */
+  .form-select.disabled-state {
+    opacity: 0.65;
+    background-color: #e9ecef;
+    cursor: not-allowed;
+    color: #6c757d;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    border-color: #c3c7cd;
+  }
+
+  .form-select.disabled-state:hover {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+  }
+
+  .form-select.disabled-state option {
+    color: #6c757d;
+    background-color: #e9ecef;
+  }
+
+  .form-select:disabled {
+    opacity: 0.65;
+    background-color: #e9ecef;
+    cursor: not-allowed;
+    color: #6c757d;
+    border-color: #c3c7cd;
+    pointer-events: none;
+  }
+
+  .form-select:disabled option {
+    color: #6c757d;
+    background-color: #e9ecef;
+  }
+
+  /* Badge styling for enabled/disabled state */
+  .badge.bg-secondary-light {
+    background-color: rgba(108, 117, 125, 0.15) !important;
+  }
+
+  .badge.text-secondary {
+    color: #6c757d !important;
+  }
+
+  .badge.bg-success-light {
+    background-color: rgba(25, 135, 84, 0.15) !important;
+  }
+
+  .badge.text-success {
+    color: #198754 !important;
+  }
+
+  /* Checkbox Container Styling */
+  .checkbox-container {
+    gap: 0.75rem;
+    transition: all 0.2s ease;
+    min-height: auto;
+  }
+
+  .checkbox-container:hover {
+    background-color: #e8f0ff;
+  }
+
+  /* Checkbox Input Styling */
+  .checkbox-input {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: 0.125rem;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .checkbox-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+  }
+
+  .checkbox-input:hover {
+    cursor: pointer;
+    border-color: #0d6efd;
+  }
+
+  /* Checkbox Label Styling */
+  .checkbox-label {
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #212529 !important;
+    font-weight: 500;
+    white-space: nowrap;
+    user-select: none;
+    margin-bottom: 0;
+  }
+
+  .checkbox-label:hover {
+    color: #0d6efd;
+    transition: color 0.2s ease;
+  }
+
+  /* Smooth transition for enabled state */
+  .form-select {
+    transition: all 0.3s ease;
+  }
+
+  .form-select:not(:disabled) {
+    opacity: 1;
+    background-color: #fff;
+    color: #212529;
+  }
+
+  .form-select:not(:disabled):hover {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+  }
+</style>

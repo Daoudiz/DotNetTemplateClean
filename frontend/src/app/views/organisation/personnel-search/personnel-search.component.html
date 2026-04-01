@@ -27,7 +27,15 @@
       </div>
 
       <div class="col-12 border-top pt-3 mt-4">
-        <div class="d-flex flex-wrap justify-content-end align-items-center gap-2">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+          <div>
+            <button cButton color="success" type="button" class="text-white shadow-sm"
+              (click)="openCreateModal()">
+              <svg cIcon name="cilPlus" class="me-2"></svg>
+              Créer personnel
+            </button>
+          </div>
+
           <div>
             <button cButton color="primary" type="submit" [disabled]="loading()">
               @if (loading()) {
@@ -166,3 +174,74 @@
     </p-table>
   </c-card-body>
 </c-card>
+
+<c-modal id="createPersonnelModal"
+         [visible]="isPersonnelModalOpen()"
+         (visibleChange)="onPersonnelModalVisibilityChange($event)"
+         size="lg"
+         alignment="center"
+         [scrollable]="false">
+  <c-modal-header class="bg-primary text-white">
+    <h5 cModalTitle>
+      <svg cIcon name="cilPlus" class="me-2"></svg>
+      Nouveau personnel
+    </h5>
+    <button (click)="closePersonnelModal()" cButtonClose white="true"></button>
+  </c-modal-header>
+  <c-modal-body class="p-0">
+    <app-personnel-create
+      #personnelComp
+      (personnelSaved)="onPersonnelSavedSuccess()"
+      (cancel)="closePersonnelModal()">
+    </app-personnel-create>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="danger" (click)="personnelComp.onCancel()">
+      Annuler
+    </button>
+
+    <!-- Step 1 & 2 navigation buttons -->
+    @if (personnelComp.currentStep() < 3) {
+      @if (personnelComp.shouldShowBackButton()) {
+        <button cButton
+                color="secondary"
+                (click)="personnelComp.previousStep()">
+          <i class="fas fa-arrow-left me-2"></i>
+          Retour
+        </button>
+      }
+
+      <button cButton
+              color="primary"
+              [disabled]="!personnelComp.canGoNext() || personnelComp.loading()"
+              (click)="personnelComp.nextStep()">
+        Suivant
+        <i class="fas fa-arrow-right ms-2"></i>
+      </button>
+    }
+
+    <!-- Step 3 confirmation button -->
+    @if (personnelComp.currentStep() === 3) {
+      <button cButton
+              color="secondary"
+              (click)="personnelComp.previousStep()">
+        <i class="fas fa-arrow-left me-2"></i>
+        Retour
+      </button>
+
+      <button cButton
+              color="success"
+              class="px-5"
+              [disabled]="!personnelComp.isFormValid() || personnelComp.loading()"
+              (click)="personnelComp.onSubmit()">
+        @if (personnelComp.loading()) {
+          <c-spinner size="sm" class="me-2"></c-spinner>
+          Création en cours...
+        } @else {
+          <i class="fas fa-check me-2"></i>
+          Confirmer
+        }
+      </button>
+    }
+  </c-modal-footer>
+</c-modal>
