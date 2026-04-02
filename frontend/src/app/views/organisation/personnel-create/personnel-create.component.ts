@@ -14,7 +14,8 @@ import {
     FormBuilder,
     Validators,
     ReactiveFormsModule,
-    FormArray
+    FormArray,
+    AbstractControl
 } from '@angular/forms';
 import { TreeSelectModule } from 'primeng/treeselect';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -190,7 +191,20 @@ export class PersonnelCreateComponent {
                     if (this.affectationsFormArray.length === 0) {
                         this.addAffectation();
                     }
-                    this.form.reset();
+                    this.form.reset({
+                        matricule: '',
+                        nom: '',
+                        prenom: '',
+                        dateRecrutement: '',
+                        dateNaissance: '',
+                        email: '',
+                        statut: '',
+                        grade: '',
+                        entiteId: null,
+                        createUser: false,
+                        userRole: '',
+                        affectations: this.affectationsFormArray.getRawValue()
+                    });
                 });
             });
     }
@@ -237,11 +251,42 @@ export class PersonnelCreateComponent {
     removeAffectation(index: number): void {
         if (this.affectationsFormArray.length > 1) {
             this.affectationsFormArray.removeAt(index);
+            this.notification.info('Affectation supprimée');
+        } else {
+            this.notification.warn('Au moins une affectation est requise');
         }
     }
 
     getAffectationControl(index: number, controlName: string) {
         return this.affectationsFormArray.at(index).get(controlName);
+    }
+
+    getSelectedNodeLabel(control: AbstractControl | null): string {
+        const value = control?.value;
+
+        if (!value) {
+            return '-';
+        }
+
+        if (typeof value === 'string' || typeof value === 'number') {
+            return String(value);
+        }
+
+        if (typeof value.label === 'string' && value.label.trim()) {
+            return value.label;
+        }
+
+        if (value.data && typeof value.data === 'object') {
+            if (typeof value.data.designation === 'string' && value.data.designation.trim()) {
+                return value.data.designation;
+            }
+
+            if (typeof value.data.libelle === 'string' && value.data.libelle.trim()) {
+                return value.data.libelle;
+            }
+        }
+
+        return '-';
     }
 
 //#endregion
@@ -252,25 +297,26 @@ export class PersonnelCreateComponent {
 
         if (this.form.invalid || this.affectationsFormArray.length === 0) {
             this.form.markAllAsTouched();
+            this.affectationsFormArray.markAllAsTouched();
+            this.notification.error('Veuillez remplir tous les champs requis');
             return;
         }
 
         const raw = this.form.getRawValue();
-        const { entiteId, affectations, createUser, userRole, ...rest } = raw;
-
+        const { entiteId, createUser, userRole, ...rest } = raw;
         // Extract entiteId from the tree node
-        const entiteIdValue = entiteId?.key ? Number(entiteId.key) : null;
+        const entiteIdValue = this.extractNodeId(entiteId);
         
         if (!entiteIdValue) {
             this.notification.error('Entité requise');
             return;
         }
 
-        // Transform affectations from form array to API format with validation
-        const affectationsPayload: CreateAffectationRequest[] = affectations
-            .map((aff: any) => {
-                const entiteIdAff = aff.entiteId?.key ? Number(aff.entiteId.key) : null;
-                const fonctionIdAff = aff.fonctionId?.key ? Number(aff.fonctionId.key) : null;
+        // Transform affectations from live FormArray controls to avoid losing selected values
+        const affectationsPayload: CreateAffectationRequest[] = this.affectationsFormArray.controls
+            .map((control) => {
+                const entiteIdAff = this.extractNodeId(control.get('entiteId')?.value);
+                const fonctionIdAff = this.extractNodeId(control.get('fonctionId')?.value);
 
                 if (!entiteIdAff || !fonctionIdAff) {
                     return null;
@@ -313,6 +359,75 @@ export class PersonnelCreateComponent {
                 this.personnelSaved.emit();
                 this.onCancel();
             });
+    }
+
+    private extractNodeId(node: unknown): number | null {
+        if (node == null) {
+            return null;
+        }
+
+        if (typeof node === 'number') {
+            return Number.isNaN(node) ? null : node;
+        }
+
+        if (typeof node === 'string') {
+            const parsed = this.parseIdValue(node);
+            return parsed;
+        }
+
+        if (typeof node !== 'object') {
+            return null;
+        }
+
+        const treeNode = node as {
+            key?: string | number | null;
+            id?: string | number | null;
+            data?: unknown;
+        };
+
+        if (treeNode.key != null) {
+            const parsed = this.parseIdValue(treeNode.key);
+            return parsed;
+        }
+
+        if (treeNode.id != null) {
+            const parsed = this.parseIdValue(treeNode.id);
+            return parsed;
+        }
+
+        if (typeof treeNode.data === 'number') {
+            return Number.isNaN(treeNode.data) ? null : treeNode.data;
+        }
+
+        if (treeNode.data && typeof treeNode.data === 'object') {
+            const dataNode = treeNode.data as { id?: string | number | null };
+
+            if (dataNode.id != null) {
+                const parsed = this.parseIdValue(dataNode.id);
+                return parsed;
+            }
+        }
+
+        return null;
+    }
+
+    private parseIdValue(value: string | number): number | null {
+        if (typeof value === 'number') {
+            return Number.isNaN(value) ? null : value;
+        }
+
+        const directValue = Number(value);
+        if (!Number.isNaN(directValue)) {
+            return directValue;
+        }
+
+        const trailingDigitsMatch = value.match(/(\d+)$/);
+        if (!trailingDigitsMatch) {
+            return null;
+        }
+
+        const extractedValue = Number(trailingDigitsMatch[1]);
+        return Number.isNaN(extractedValue) ? null : extractedValue;
     }
 
     onCancel(): void {
