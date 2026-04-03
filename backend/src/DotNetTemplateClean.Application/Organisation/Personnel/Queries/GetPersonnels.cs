@@ -23,7 +23,7 @@ public class GetPersonnelsWithFiltersQueryHandler(IApplicationDbContext context,
 
         var query = context.Personnels.AsNoTracking();
 
-        // 2. Filtre par recherche textuelle (Nom, Prénom ou Matricule)
+        //Filtre par recherche textuelle (Nom, Prénom ou Matricule)
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))
         {
             var term = $"%{request.SearchTerm.Trim()}%";
@@ -35,9 +35,7 @@ public class GetPersonnelsWithFiltersQueryHandler(IApplicationDbContext context,
             );
         }
 
-        // 3. Filtre par Entité (Tree List)
-        // Attention : Si c'est une tree list, on filtre souvent sur l'entité actuelle 
-        // ou ses enfants. Ici, on fait le cas simple de l'entité directe.
+        //Filtre par Entité (Tree List) et tous ses enfants       
         if (request.EntiteId.HasValue)
         {   
             var allChildEntiteIds = await entiteService.GetFlattenedChildEntityIds(request.EntiteId.Value);
