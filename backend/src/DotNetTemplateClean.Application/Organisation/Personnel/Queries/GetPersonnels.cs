@@ -12,7 +12,9 @@ public record GetPersonnelsWithFiltersQuery : IRequest<PaginatedList<PersonnelLi
     public int PageSize { get; init; } = 10;
 }
 
-public class GetPersonnelsWithFiltersQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<GetPersonnelsWithFiltersQuery, PaginatedList<PersonnelListDto>>
+public class GetPersonnelsWithFiltersQueryHandler(IApplicationDbContext context,
+                                                                IMapper mapper,
+                                                                IEntiteService entiteService ) : IRequestHandler<GetPersonnelsWithFiltersQuery, PaginatedList<PersonnelListDto>>
 {
     public async Task<PaginatedList<PersonnelListDto>> Handle(GetPersonnelsWithFiltersQuery request, CancellationToken cancellationToken)
     {
@@ -37,9 +39,12 @@ public class GetPersonnelsWithFiltersQueryHandler(IApplicationDbContext context,
         // Attention : Si c'est une tree list, on filtre souvent sur l'entité actuelle 
         // ou ses enfants. Ici, on fait le cas simple de l'entité directe.
         if (request.EntiteId.HasValue)
-        {
-            query = query.Where(p => p.Affectations.Any(a =>
-                a.EntiteId == request.EntiteId && a.DateFinAffectation == null));
+        {   
+            var allChildEntiteIds = await entiteService.GetFlattenedChildEntityIds(request.EntiteId.Value);
+            query = query.Where(x=>allChildEntiteIds.Contains(x.EntiteId));
+
+            //query = query.Where(p => p.Affectations.Any(a =>
+            //    a.EntiteId == request.EntiteId && a.DateFinAffectation == null));
         }
 
        
