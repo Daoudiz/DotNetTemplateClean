@@ -96,7 +96,7 @@ public class CreatePersonnelCommandHandler(IApplicationDbContext context, IUserS
                 else
                 {
 
-                    throw new InvalidOperationException($"Failed to create user: {result.ErrorMessage}");
+                    throw new InvalidOperationException($"Impossible de créer l'utilisateur: {result.ErrorMessage}");
                 }
 
             }
