@@ -169,7 +169,7 @@
 
 <c-modal id="createUserModal" [visible]="isUserModalOpen()" (visibleChange)="onModalVisibilityChange($event)" size="xl"
     alignment="center" [scrollable]="true">
-    <c-modal-header [class]="isEditMode() ? 'bg-warning text-dark' : 'bg-primary text-white'">
+    <c-modal-header [class]="isEditMode() ? 'bg-warning text-dark' : 'bg-success text-white'">
         <h5 cModalTitle>
             <svg cIcon [name]="isEditMode() ? 'cilPencil' : 'cilUserPlus'" class="me-2"></svg>
             {{ isEditMode() ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur' }}
@@ -185,7 +185,7 @@
         <button cButton color="danger" (click)="userComp.onCancel()">
             Annuler
         </button>
-        <button cButton [color]="isEditMode() ? 'warning' : 'primary'" class="px-5"
+        <button cButton [color]="isEditMode() ? 'warning' : 'success'" class="px-5"
             [disabled]="userComp.userForm.invalid || loading()" 
             (click)="userComp.onSubmit()">
 

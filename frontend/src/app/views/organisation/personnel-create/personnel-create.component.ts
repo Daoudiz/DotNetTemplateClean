@@ -43,7 +43,8 @@ import { OrganizationTreeNode, TypeEntite } from '../../../models/organisation/o
     selector: 'app-personnel-create',
     standalone: true,
     imports: [CommonModule, ReactiveFormsModule, TreeSelectModule],
-    templateUrl: './personnel-create.component.html'
+    templateUrl: './personnel-create.component.html',
+    styleUrl: './personnel-create.component.scss'
 })
 export class PersonnelCreateComponent {
 
@@ -287,6 +288,25 @@ export class PersonnelCreateComponent {
         }
 
         return '-';
+    }
+
+    getSelectedRoleLabel(): string {
+        const selectedRole = this.form.get('userRole')?.value;
+
+        if (!selectedRole) {
+            return '-';
+        }
+
+        const matchingRole = this.roles().find((role) => {
+            const roleId = role?.id ?? role;
+            return roleId === selectedRole;
+        });
+
+        if (!matchingRole) {
+            return String(selectedRole);
+        }
+
+        return matchingRole.name || matchingRole.displayName || String(matchingRole.id || matchingRole);
     }
 
 //#endregion

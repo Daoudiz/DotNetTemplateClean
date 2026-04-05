@@ -1,0 +1,243 @@
+.stepper-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.stepper-step {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+}
+
+.step-number {
+  display: flex;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+  border-radius: 50%;
+  background-color: #e9ecef;
+  color: #6c757d;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.stepper-step.active .step-number {
+  background-color: #0d6efd;
+  color: #fff;
+}
+
+.step-label {
+  color: #6c757d;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.stepper-step.active .step-label {
+  color: #0d6efd;
+  font-weight: bold;
+}
+
+.stepper-line {
+  flex: 1;
+  height: 2px;
+  margin: 0 1rem;
+  background-color: #e9ecef;
+}
+
+.step-content {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.section-label {
+  font-size: 0.95rem;
+}
+
+.status-badge {
+  font-size: 0.75rem;
+}
+
+.help-text {
+  font-size: 0.85rem;
+}
+
+.affectation-col-wide {
+  width: 40%;
+}
+
+.affectation-col-actions {
+  width: 20%;
+}
+
+.summary-scroll {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.invalid-feedback {
+  margin-top: 0.25rem;
+  color: #dc3545;
+  font-size: 0.875rem;
+}
+
+.p-treeselect.ng-invalid.ng-touched {
+  border-color: #dc3545;
+}
+
+.form-select.disabled-state {
+  cursor: not-allowed;
+  border-color: #c3c7cd;
+  background-color: #e9ecef;
+  color: #6c757d;
+  opacity: 0.65;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.form-select.disabled-state:hover {
+  cursor: not-allowed;
+  background-color: #e9ecef;
+}
+
+.form-select.disabled-state option {
+  background-color: #e9ecef;
+  color: #6c757d;
+}
+
+.form-select:disabled {
+  cursor: not-allowed;
+  border-color: #c3c7cd;
+  background-color: #e9ecef;
+  color: #6c757d;
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+.form-select:disabled option {
+  background-color: #e9ecef;
+  color: #6c757d;
+}
+
+.badge.bg-secondary-light {
+  background-color: rgba(108, 117, 125, 0.15) !important;
+}
+
+.badge.text-secondary {
+  color: #6c757d !important;
+}
+
+.badge.bg-success-light {
+  background-color: rgba(25, 135, 84, 0.15) !important;
+}
+
+.badge.text-success {
+  color: #198754 !important;
+}
+
+.checkbox-container {
+  gap: 0.75rem;
+  min-height: auto;
+  transition: all 0.2s ease;
+}
+
+.checkbox-container:hover {
+  background-color: #e8f0ff;
+}
+
+.checkbox-input {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.125rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.checkbox-input:checked {
+  border-color: #0d6efd;
+  background-color: #0d6efd;
+}
+
+.checkbox-input:hover {
+  cursor: pointer;
+  border-color: #0d6efd;
+}
+
+.checkbox-label {
+  margin-bottom: 0;
+  cursor: pointer;
+  color: #212529 !important;
+  font-size: 0.9rem;
+  font-weight: 500;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.checkbox-label:hover {
+  color: #0d6efd;
+  transition: color 0.2s ease;
+}
+
+.form-select {
+  transition: all 0.3s ease;
+}
+
+.form-select:not(:disabled) {
+  background-color: #fff;
+  color: #212529;
+  opacity: 1;
+}
+
+.form-select:not(:disabled):hover {
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+}
+
+.remove-affectation-btn {
+  display: inline-flex;
+  width: 2.1rem;
+  height: 2.1rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid rgba(220, 53, 69, 0.35);
+  border-radius: 50%;
+  background-color: #fff5f5;
+  background-size: 0.85rem;
+  opacity: 1;
+  transition: all 0.2s ease;
+}
+
+.remove-affectation-btn:not(:disabled) {
+  box-shadow: 0 1px 3px rgba(220, 53, 69, 0.15);
+}
+
+.remove-affectation-btn:not(:disabled):hover {
+  transform: scale(1.08);
+  border-color: #dc3545;
+  background-color: #dc3545;
+  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+}
+
+.remove-affectation-btn:disabled {
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.45;
+}
+
+.remove-affectation-btn:focus {
+  box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.2);
+}
