@@ -43,6 +43,7 @@ public class CreatePersonnelCommandHandler(IApplicationDbContext context, IUserS
                 Matricule = request.Matricule,
                 Nom = request.Nom,
                 Prenom = request.Prenom,
+                Email = request.Email,
                 DateRecrutement = request.DateRecrutement,
                 DateNaissance = request.DateNaissance,
                 Statut = request.Statut,

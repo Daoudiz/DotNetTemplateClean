@@ -19,6 +19,7 @@ public class Personnel: IEndpointGroup
 
         // Définition de la route GET
         groupBuilder.MapGet(GetPersonnels);
+        groupBuilder.MapGet(GetPersonnelById, "/{id:int}");
         groupBuilder.MapPost(CreatePersonnel);
         groupBuilder.MapPut(UpdatePersonnel,"/{id}" );
         groupBuilder.MapDelete(DeletePersonnel, "/{id}").WithName("DeletePersonnel");
@@ -34,6 +35,15 @@ public class Personnel: IEndpointGroup
 
         // [AsParameters] lie automatiquement les params d'URL (?SearchTerm=...) à la Query
         var result = await sender.Send(query);
+
+        return TypedResults.Ok(result);
+    }
+
+    public static async Task<Ok<PersonnelDetailsDto>> GetPersonnelById(ISender sender, int id)
+    {
+        ArgumentNullException.ThrowIfNull(sender);
+
+        var result = await sender.Send(new GetPersonnelByIdQuery(id));
 
         return TypedResults.Ok(result);
     }

@@ -54,7 +54,7 @@ public class ProblemDetailsExceptionHandler : IExceptionHandler
             {
                 Status = StatusCodes.Status500InternalServerError,
                 Title = "Internal Server Error",
-                Detail = exception.Message
+                //Detail = exception.Message
             })
             //_ => (-1, null)
         };

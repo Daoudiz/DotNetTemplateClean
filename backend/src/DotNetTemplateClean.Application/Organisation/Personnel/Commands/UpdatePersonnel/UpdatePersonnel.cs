@@ -1,6 +1,3 @@
-
-using System.Collections.ObjectModel;
-
 using Ardalis.GuardClauses;
 
 namespace DotNetTemplateClean.Application;
@@ -17,7 +14,7 @@ public record UpdatePersonnelCommand : IRequest
     public string? Grade { get; init; }
 
     // Liste des affectations initiales
-    public ReadOnlyCollection<UpdateAffectationDto> Affectations { get; init; } = [];
+    public IList<UpdateAffectationDto> Affectations { get; init; } = [];
 }
 
 public record UpdateAffectationDto(int Id, int EntiteId, int FonctionId, DateTime DateDebut, string Nature);
@@ -28,7 +25,9 @@ public class UpdatePersonnelCommandHandler(IApplicationDbContext context)
     public async Task Handle(UpdatePersonnelCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request, nameof(request));
-        var updatedPersonnel = await context.Personnels.FindAsync([request.Id], cancellationToken);
+        var updatedPersonnel = await context.Personnels
+            .Include(x => x.Affectations)
+            .SingleOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
         
         Guard.Against.NotFound ( request.Id, updatedPersonnel);
 

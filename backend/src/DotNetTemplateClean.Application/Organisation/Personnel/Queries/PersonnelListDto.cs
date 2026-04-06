@@ -4,6 +4,7 @@ namespace DotNetTemplateClean.Application;
 
 public class PersonnelListDto
 {
+    public int Id { get; init; }
     public required string Matricule { get; init; }
     public  required string Nom { get; init; }
     public  required string Prenom { get; init; }
