@@ -6,6 +6,7 @@ import { WebUtilsService } from '../helpers/web-utils.service';
 import {
     CreatePersonnelRequest,
     GetPersonnelsWithFiltersQuery,
+    PersonnelDetailsDto,
     PersonnelListDto,
     UpdatePersonnelRequest,
     StatutPersonnel,
@@ -23,6 +24,10 @@ export class PersonnelService {
         const params = this.webUtils.toHttpParams(filters);
 
         return this.http.get<PaginatedList<PersonnelListDto>>(`${this.apiUrl}`, { params });
+    }
+
+    getPersonnelById(id: number): Observable<PersonnelDetailsDto> {
+        return this.http.get<PersonnelDetailsDto>(`${this.apiUrl}/${id}`);
     }
 
     createPersonnel(data: CreatePersonnelRequest): Observable<number> {

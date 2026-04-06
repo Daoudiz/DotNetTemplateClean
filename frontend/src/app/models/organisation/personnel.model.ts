@@ -7,6 +7,7 @@ export interface AffectationDto {
 }
 
 export interface PersonnelListDto {
+    id: number;
     matricule: string;
     nom: string;
     prenom: string;
@@ -63,6 +64,28 @@ export interface UpdatePersonnelRequest {
     statut?: string | null;
     grade?: string | null;
     affectations: UpdateAffectationRequest[];
+}
+
+export interface PersonnelEditAffectationDto {
+    id: number;
+    entiteId: number;
+    fonctionId: number;
+    dateDebut: string;
+    nature: string;
+}
+
+export interface PersonnelDetailsDto {
+    id: number;
+    matricule: string;
+    nom: string;
+    prenom: string;
+    dateRecrutement?: string | null;
+    dateNaissance?: string | null;
+    email: string;
+    entiteId: number;
+    statut?: string | null;
+    grade?: string | null;
+    affectations: PersonnelEditAffectationDto[];
 }
 
 export interface StatutPersonnel {

@@ -13,6 +13,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, Subject, merge, of } from 'rxjs';
 import { catchError, finalize, map, switchMap, tap } from 'rxjs/operators';
 
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmationService } from 'primeng/api';
 import { Table, TableLazyLoadEvent, TableModule } from 'primeng/table';
 import { TreeSelectModule } from 'primeng/treeselect';
 import { TooltipModule as PrimeTooltipModule } from 'primeng/tooltip';
@@ -54,6 +56,7 @@ import { OrganizationTreeNode } from '../../../models/organisation/organisation-
     AlertModule,
     ModalModule,
     TreeSelectModule,
+    ConfirmDialogModule,
     PersonnelCreateComponent,
     UpperCasePipe,
     DatePipe
@@ -70,6 +73,7 @@ export class PersonnelSearchComponent implements OnInit {
   private readonly organisationService = inject(OrganizationService);
   private readonly notification = inject(NotificationService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly confirmationService = inject(ConfirmationService);
 
   readonly table = viewChild<Table>('dt');
   readonly globalSearchInput = viewChild<ElementRef>('globalSearchInput');
@@ -82,6 +86,8 @@ export class PersonnelSearchComponent implements OnInit {
   readonly totalRecords = signal<number>(0);
   readonly pageSize = signal<number>(10);
   readonly tooltipPersonnel = signal<PersonnelListDto | null>(null);
+  readonly selectedPersonnel = signal<PersonnelListDto | null>(null);
+  readonly isEditMode = signal<boolean>(false);
   readonly isPersonnelModalOpen = signal<boolean>(false);
 
   searchForm!: FormGroup;
@@ -157,8 +163,6 @@ export class PersonnelSearchComponent implements OnInit {
 
     const rows = event.rows ?? this.pageSize();
     this.pageSize.set(rows);
-
-    console.log('Params:', this.getParams()); 
 
     this.searchAction$.next(this.getParams());
   }
@@ -238,22 +242,64 @@ export class PersonnelSearchComponent implements OnInit {
 
   //#region --- GESTION DES MODALES (Personnel) ---
   openCreateModal(): void {
+    this.isEditMode.set(false);
+    this.selectedPersonnel.set(null);
+    this.isPersonnelModalOpen.set(true);
+  }
+
+  openEditModal(personnel: PersonnelListDto): void {
+    this.isEditMode.set(true);
+    this.selectedPersonnel.set(personnel);
     this.isPersonnelModalOpen.set(true);
   }
 
   closePersonnelModal(): void {
     this.isPersonnelModalOpen.set(false);
+    if (!this.isPersonnelModalOpen()) {
+      this.selectedPersonnel.set(null);
+    }
   }
 
   onPersonnelModalVisibilityChange(visible: boolean): void {
     if (this.isPersonnelModalOpen() !== visible) {
       this.isPersonnelModalOpen.set(visible);
+      if (!visible) {
+        this.selectedPersonnel.set(null);
+      }
     }
   }
 
   onPersonnelSavedSuccess(): void {
     this.isPersonnelModalOpen.set(false);
     this.onSearch();
+  }
+
+  onDeletePersonnel(personnel: PersonnelListDto): void {
+    this.confirmationService.confirm({
+      message: `Etes-vous sur de vouloir supprimer le personnel "<strong>${personnel.nom} ${personnel.prenom}</strong>" ?`,
+      header: 'Confirmation de suppression',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Supprimer',
+      rejectLabel: 'Annuler',
+      acceptButtonStyleClass: 'p-button-danger',
+      accept: () => {
+        this.executeDelete(personnel.id);
+      }
+    });
+  }
+
+  private executeDelete(id: number): void {
+    this.loading.set(true);
+
+    this.personnelService.deletePersonnel(id)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.loading.set(false))
+      )
+      .subscribe(() => {
+        this.notification.success('Personnel supprime avec succes');
+        this.onSearch();
+      });
   }
   //#endregion
 }

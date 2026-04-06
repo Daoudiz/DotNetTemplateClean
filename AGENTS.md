@@ -18,6 +18,13 @@ Codex should know:
   - DTOs use PascalCase.
   - Angular models should use camelCase.
 
+## Angular Styling Rules (Strict)
+
+- Inline styles in HTML templates are strictly forbidden.
+- All styles must be moved to the component SCSS file.
+- Always use `styleUrls` in Angular components.
+- Any generated code that includes inline styles must be refactored into SCSS.
+
 ## Interfaces Generation Requirements
 - Generate TypeScript interfaces for all backend DTOs.
 - Preserve property names and types.

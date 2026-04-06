@@ -32,7 +32,7 @@
             <button cButton color="success" type="button" class="text-white shadow-sm"
               (click)="openCreateModal()">
               <svg cIcon name="cilPlus" class="me-2"></svg>
-              Créer personnel
+              Creer personnel
             </button>
           </div>
 
@@ -91,11 +91,12 @@
       <ng-template pTemplate="header">
         <tr class="bg-light">
           <th style="width: 12%">Matricule</th>
-          <th style="width: 22%">Nom & Prenom</th>
+          <th style="width: 20%">Nom & Prenom</th>
           <th style="width: 16%">Date recrutement</th>
-          <th style="width: 14%">Statut</th>
-          <th style="width: 14%">Grade</th>
-          <th style="width: 22%">Fonction(s)</th>
+          <th style="width: 12%">Statut</th>
+          <th style="width: 12%">Grade</th>
+          <th style="width: 18%">Fonction(s)</th>
+          <th class="text-center" style="width: 10%">Actions</th>
         </tr>
       </ng-template>
 
@@ -143,12 +144,31 @@
               <span class="text-muted">Aucune affectation</span>
             }
           </td>
+          <td class="text-center">
+            <button cButton
+                    color="primary"
+                    size="sm"
+                    variant="outline"
+                    class="me-1"
+                    cTooltip="Modifier le personnel"
+                    (click)="openEditModal(personnel)">
+              <svg cIcon name="cilPencil"></svg>
+            </button>
+            <button cButton
+                    color="danger"
+                    size="sm"
+                    variant="outline"
+                    cTooltip="Supprimer le personnel"
+                    (click)="onDeletePersonnel(personnel)">
+              <svg cIcon name="cilTrash"></svg>
+            </button>
+          </td>
         </tr>
       </ng-template>
 
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td colspan="6" class="text-center py-5">
+          <td colspan="7" class="text-center py-5">
             @if (!hasSearched()) {
               <div class="text-muted">
                 <div class="mb-3">
@@ -181,16 +201,17 @@
          size="lg"
          alignment="center"
          [scrollable]="false">
-  <c-modal-header class="bg-success text-white">
+  <c-modal-header [class]="isEditMode() ? 'bg-warning text-dark' : 'bg-success text-white'">
     <h5 cModalTitle>
-      <svg cIcon name="cilPlus" class="me-2"></svg>
-      Nouveau personnel
+      <svg cIcon [name]="isEditMode() ? 'cilPencil' : 'cilPlus'" class="me-2"></svg>
+      {{ isEditMode() ? 'Modifier le personnel' : 'Nouveau personnel' }}
     </h5>
-    <button (click)="closePersonnelModal()" cButtonClose white="true"></button>
+    <button (click)="closePersonnelModal()" cButtonClose [white]="!isEditMode()"></button>
   </c-modal-header>
   <c-modal-body class="p-0">
     <app-personnel-create
       #personnelComp
+      [personnelToEdit]="selectedPersonnel()"
       (personnelSaved)="onPersonnelSavedSuccess()"
       (cancel)="closePersonnelModal()">
     </app-personnel-create>
@@ -200,8 +221,21 @@
       Annuler
     </button>
 
-    <!-- Step 1 & 2 navigation buttons -->
-    @if (personnelComp.currentStep() < 3) {
+    @if (personnelComp.isEditMode()) {
+      <button cButton
+              color="warning"
+              class="px-5"
+              [disabled]="!personnelComp.isFormValid() || personnelComp.loading()"
+              (click)="personnelComp.onSubmit()">
+        @if (personnelComp.loading()) {
+          <c-spinner size="sm" class="me-2"></c-spinner>
+          Mise a jour en cours...
+        } @else {
+          <i class="fas fa-save me-2"></i>
+          Mettre a jour
+        }
+      </button>
+    } @else if (personnelComp.currentStep() < 3) {
       @if (personnelComp.shouldShowBackButton()) {
         <button cButton
                 color="secondary"
@@ -220,8 +254,7 @@
       </button>
     }
 
-    <!-- Step 3 confirmation button -->
-    @if (personnelComp.currentStep() === 3) {
+    @if (!personnelComp.isEditMode() && personnelComp.currentStep() === 3) {
       <button cButton
               color="secondary"
               (click)="personnelComp.previousStep()">
@@ -236,7 +269,7 @@
               (click)="personnelComp.onSubmit()">
         @if (personnelComp.loading()) {
           <c-spinner size="sm" class="me-2"></c-spinner>
-          Création en cours...
+          Creation en cours...
         } @else {
           <i class="fas fa-check me-2"></i>
           Confirmer
@@ -245,3 +278,4 @@
     }
   </c-modal-footer>
 </c-modal>
+<p-confirmDialog></p-confirmDialog>

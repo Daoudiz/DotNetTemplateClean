@@ -1,32 +1,10 @@
 <div class="card-body p-3">
   <form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off">
-
-    <!-- STEPPER HEADER -->
-    <div class="stepper-header mb-4">
-      <div class="d-flex justify-content-between align-items-center">
-        <div class="stepper-step" [class.active]="currentStep() === 1">
-          <div class="step-number">1</div>
-          <div class="step-label">Personnel</div>
-        </div>
-        <div class="stepper-line"></div>
-        <div class="stepper-step" [class.active]="currentStep() === 2">
-          <div class="step-number">2</div>
-          <div class="step-label">Affectations</div>
-        </div>
-        <div class="stepper-line"></div>
-        <div class="stepper-step" [class.active]="currentStep() === 3">
-          <div class="step-number">3</div>
-          <div class="step-label">Confirmation</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- STEP 1: PERSONNEL INFORMATION -->
-    @if (currentStep() === 1) {
+    <ng-template #administrativeFields>
       <div class="step-content">
-        <h5 class="border-bottom pb-2 mb-3 text-primary">
+        <h5 class="border-bottom pb-2 mb-3" [class]="isEditMode() ? 'text-warning' : 'text-primary'">
           <i class="fas fa-user me-2"></i>
-          Informations du personnel
+          {{ isEditMode() ? 'Informations administratives' : 'Informations du personnel' }}
         </h5>
 
         <div class="row">
@@ -34,33 +12,33 @@
             <label class="form-label fw-bold">Matricule <span class="text-danger">*</span></label>
             <input type="text" formControlName="matricule" class="form-control"
             [class.is-invalid]="valService.isFieldInvalid(form, 'matricule')">
-                            @if (valService.isFieldInvalid(form, 'matricule')) {
-                            <div class="invalid-feedback d-block">
-                                {{ valService.getErrorMessage(form, 'matricule') }}
-                            </div>
-                            }
+            @if (valService.isFieldInvalid(form, 'matricule')) {
+              <div class="invalid-feedback d-block">
+                {{ valService.getErrorMessage(form, 'matricule') }}
+              </div>
+            }
           </div>
 
           <div class="col-md-4 mb-3">
             <label class="form-label fw-bold">Nom <span class="text-danger">*</span></label>
             <input type="text" formControlName="nom" class="form-control"
             [class.is-invalid]="valService.isFieldInvalid(form, 'nom')">
-                            @if (valService.isFieldInvalid(form, 'nom')) {
-                            <div class="invalid-feedback d-block">
-                                {{ valService.getErrorMessage(form, 'nom') }}
-                            </div>
-                            }
+            @if (valService.isFieldInvalid(form, 'nom')) {
+              <div class="invalid-feedback d-block">
+                {{ valService.getErrorMessage(form, 'nom') }}
+              </div>
+            }
           </div>
 
           <div class="col-md-4 mb-3">
-            <label class="form-label fw-bold">Prénom <span class="text-danger">*</span></label>
+            <label class="form-label fw-bold">Prenom <span class="text-danger">*</span></label>
             <input type="text" formControlName="prenom" class="form-control"
             [class.is-invalid]="valService.isFieldInvalid(form, 'prenom')">
-                            @if (valService.isFieldInvalid(form, 'prenom')) {
-                            <div class="invalid-feedback d-block">
-                                {{ valService.getErrorMessage(form, 'prenom') }}
-                            </div>
-                            }
+            @if (valService.isFieldInvalid(form, 'prenom')) {
+              <div class="invalid-feedback d-block">
+                {{ valService.getErrorMessage(form, 'prenom') }}
+              </div>
+            }
           </div>
         </div>
 
@@ -69,11 +47,16 @@
             <label class="form-label fw-bold">Email <span class="text-danger">*</span></label>
             <input type="email" formControlName="email" class="form-control"
             [class.is-invalid]="valService.isFieldInvalid(form, 'email')">
-                            @if (valService.isFieldInvalid(form, 'email')) {
-                            <div class="invalid-feedback d-block">
-                                {{ valService.getErrorMessage(form, 'email') }}
-                            </div>
-                            }
+            @if (valService.isFieldInvalid(form, 'email')) {
+              <div class="invalid-feedback d-block">
+                {{ valService.getErrorMessage(form, 'email') }}
+              </div>
+            }
+            @if (isEditMode()) {
+              <small class="text-muted d-block mt-2">
+                L'email est affiche en lecture seule pendant la modification.
+              </small>
+            }
           </div>
 
           <div class="col-md-4 mb-3">
@@ -89,11 +72,11 @@
 
         <div class="row">
           <div class="col-md-4 mb-3">
-            <label class="form-label fw-bold">Entité <span class="text-danger">*</span></label>
+            <label class="form-label fw-bold">Entite <span class="text-danger">*</span></label>
             <p-treeSelect
               [options]="organizationTree()"
               formControlName="entiteId"
-              placeholder="Sélectionner une entité..."
+              placeholder="Selectionner une entite..."
               styleClass="w-100"
               containerStyleClass="w-100"
               appendTo="body"
@@ -103,7 +86,7 @@
             </p-treeSelect>
             @if (valService.isFieldInvalid(form, 'entiteId')) {
               <div class="invalid-feedback d-block">
-                  {{ valService.getErrorMessage(form, 'entiteId') }}
+                {{ valService.getErrorMessage(form, 'entiteId') }}
               </div>
             }
           </div>
@@ -111,7 +94,7 @@
           <div class="col-md-4 mb-3">
             <label class="form-label fw-bold">Statut</label>
             <select formControlName="statut" class="form-select">
-              <option [ngValue]="null">-- Sélectionner un statut --</option>
+              <option [ngValue]="null">-- Selectionner un statut --</option>
               @for (stat of statuts(); track stat.value) {
                 <option [ngValue]="stat.value">{{ stat.displayName }}</option>
               }
@@ -124,59 +107,68 @@
           </div>
         </div>
 
-        <div class="row">
-          <div class="col-lg-6 mb-3">
-            <label class="form-label fw-bold section-label">Création utilisateur</label>
-            <div class="form-check d-flex align-items-right py-2 px-3 ">
-              <input type="checkbox" formControlName="createUser" class="form-check-input checkbox-input" id="createUserCheck">
-              <label class="form-check-label ms-3 mb-0 checkbox-label" for="createUserCheck">
-                Créer utilisateur
-              </label>
+        @if (!isEditMode()) {
+          <div class="row">
+            <div class="col-lg-6 mb-3">
+              <label class="form-label fw-bold section-label">Creation utilisateur</label>
+              <div class="form-check d-flex align-items-right py-2 px-3">
+                <input type="checkbox" formControlName="createUser" class="form-check-input checkbox-input" id="createUserCheck">
+                <label class="form-check-label ms-3 mb-0 checkbox-label" for="createUserCheck">
+                  Creer utilisateur
+                </label>
+              </div>
             </div>
-          </div>
 
-          <div class="col-lg-6 mb-3">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-              <label class="form-label fw-bold mb-0 section-label">Rôle utilisateur</label>
+            <div class="col-lg-6 mb-3">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <label class="form-label fw-bold mb-0 section-label">Role utilisateur</label>
+                @if (!isUserRoleEnabled()) {
+                  <span class="badge bg-secondary-light text-secondary status-badge">Desactive</span>
+                } @else {
+                  <span class="badge bg-success-light text-success status-badge">Actif</span>
+                }
+              </div>
+              <select formControlName="userRole"
+                      class="form-select"
+                      [class.disabled-state]="!isUserRoleEnabled()"
+                      [disabled]="!isUserRoleEnabled()">
+                <option [ngValue]="null">-- Selectionner un role --</option>
+                @for (role of roles(); track role.id || role) {
+                  <option [ngValue]="role.id || role">{{ role.name || role }}</option>
+                }
+              </select>
               @if (!isUserRoleEnabled()) {
-                <span class="badge bg-secondary-light text-secondary status-badge">Désactivé</span>
-              } @else {
-                <span class="badge bg-success-light text-success status-badge">Actif</span>
+                <small class="text-muted d-block mt-2 help-text">
+                  <i class="fas fa-info-circle me-1"></i>
+                  Cochez "Creer un utilisateur" pour activer
+                </small>
               }
             </div>
-            <select formControlName="userRole"
-                    class="form-select"
-                    [class.disabled-state]="!isUserRoleEnabled()"
-                    [disabled]="!isUserRoleEnabled()">
-              <option [ngValue]="null">-- Sélectionner un rôle --</option>
-              @for (role of roles(); track role.id || role) {
-                <option [ngValue]="role.id || role">{{ role.name || role }}</option>
-              }
-            </select>
-            @if (!isUserRoleEnabled()) {
-              <small class="text-muted d-block mt-2 help-text">
-                <i class="fas fa-info-circle me-1"></i>
-                Cochez "Créer un utilisateur" pour activer
-              </small>
-            }
           </div>
-        </div>
+        }
       </div>
-    }
+    </ng-template>
 
-    <!-- STEP 2: AFFECTATIONS -->
-    @if (currentStep() === 2) {
+    <ng-template #affectationsFields>
       <div class="step-content">
-        <h5 class="border-bottom pb-2 mb-3 text-primary">
-          <i class="fas fa-sitemap me-2"></i>
-          Affectations
-        </h5>
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 border-bottom pb-2 mb-3">
+          <h5 class="mb-0" [class]="isEditMode() ? 'text-warning' : 'text-primary'">
+            <i class="fas fa-sitemap me-2"></i>
+            Affectations
+          </h5>
+
+          <button type="button" class="btn btn-sm btn-success"
+                  (click)="addAffectation()">
+            <i class="fas fa-plus me-2"></i>
+            Ajouter une affectation
+          </button>
+        </div>
 
         <div class="table-responsive">
           <table class="table table-sm table-bordered">
             <thead class="table-light">
               <tr>
-                <th class="affectation-col-wide">Entité</th>
+                <th class="affectation-col-wide">Entite</th>
                 <th class="affectation-col-wide">Fonction</th>
                 <th class="text-center affectation-col-actions">Actions</th>
               </tr>
@@ -188,7 +180,7 @@
                     <p-treeSelect
                       [options]="organizationTree()"
                       formControlName="entiteId"
-                      placeholder="Sélectionner une entité..."
+                      placeholder="Selectionner une entite..."
                       styleClass="w-100"
                       containerStyleClass="w-100"
                       appendTo="body"
@@ -197,7 +189,7 @@
                     </p-treeSelect>
                     @if (getAffectationControl(i, 'entiteId')?.invalid && getAffectationControl(i, 'entiteId')?.touched) {
                       <div class="invalid-feedback d-block">
-                        Entité requise
+                        Entite requise
                       </div>
                     }
                   </td>
@@ -205,7 +197,7 @@
                     <p-treeSelect
                       [options]="fonctionsTree()"
                       formControlName="fonctionId"
-                      placeholder="Sélectionner une fonction..."
+                      placeholder="Selectionner une fonction..."
                       styleClass="w-100"
                       containerStyleClass="w-100"
                       appendTo="body"
@@ -231,92 +223,125 @@
             </tbody>
           </table>
         </div>
+      </div>
+    </ng-template>
 
-        <div class="mb-3">
-          <button type="button" class="btn btn-sm btn-success"
-                  (click)="addAffectation()">
-            <i class="fas fa-plus me-2"></i>
-            Ajouter une affectation
-          </button>
+    @if (isEditMode()) {
+      <p-tabs [value]="0" styleClass="personnel-edit-tabs">
+        <p-tablist>
+          <p-tab [value]="0">Informations administratives</p-tab>
+          <p-tab [value]="1">Affectations</p-tab>
+        </p-tablist>
+        <p-tabpanels>
+          <p-tabpanel [value]="0">
+            <ng-container [ngTemplateOutlet]="administrativeFields"></ng-container>
+          </p-tabpanel>
+          <p-tabpanel [value]="1">
+            <ng-container [ngTemplateOutlet]="affectationsFields"></ng-container>
+          </p-tabpanel>
+        </p-tabpanels>
+      </p-tabs>
+    } @else {
+      <div class="stepper-header mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="stepper-step" [class.active]="currentStep() === 1">
+            <div class="step-number">1</div>
+            <div class="step-label">Personnel</div>
+          </div>
+          <div class="stepper-line"></div>
+          <div class="stepper-step" [class.active]="currentStep() === 2">
+            <div class="step-number">2</div>
+            <div class="step-label">Affectations</div>
+          </div>
+          <div class="stepper-line"></div>
+          <div class="stepper-step" [class.active]="currentStep() === 3">
+            <div class="step-number">3</div>
+            <div class="step-label">Confirmation</div>
+          </div>
         </div>
       </div>
-    }
 
-    <!-- STEP 3: CONFIRMATION & SUBMISSION -->
-    @if (currentStep() === 3) {
-      <div class="step-content">
-        <h5 class="border-bottom pb-2 mb-3 text-primary">
-          <i class="fas fa-check-circle me-2"></i>
-          Confirmation
-        </h5>
+      @if (currentStep() === 1) {
+        <ng-container [ngTemplateOutlet]="administrativeFields"></ng-container>
+      }
 
-        <div class="alert alert-info" role="alert">
-          <i class="fas fa-info-circle me-2"></i>
-          Veuillez vérifier les informations ci-dessous avant de confirmer la création du personnel.
-        </div>
+      @if (currentStep() === 2) {
+        <ng-container [ngTemplateOutlet]="affectationsFields"></ng-container>
+      }
 
-        <!-- SUMMARY SECTION -->
-        <div class="row mb-4">
-          <div class="col-md-6">
-            <div class="card bg-light">
-              <div class="card-header bg-primary text-white">
-                <h6 class="mb-0">Informations Personnel</h6>
-              </div>
-              <div class="card-body">
-                <div class="mb-2">
-                  <strong>Matricule:</strong> {{ form.get('matricule')?.value || '-' }}
+      @if (currentStep() === 3) {
+        <div class="step-content">
+          <h5 class="border-bottom pb-2 mb-3 text-primary">
+            <i class="fas fa-check-circle me-2"></i>
+            Confirmation
+          </h5>
+
+          <div class="alert alert-info" role="alert">
+            <i class="fas fa-info-circle me-2"></i>
+            Veuillez verifier les informations ci-dessous avant de confirmer la creation du personnel.
+          </div>
+
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <div class="card bg-light">
+                <div class="card-header bg-primary text-white">
+                  <h6 class="mb-0">Informations Personnel</h6>
                 </div>
-                <div class="mb-2">
-                  <strong>Nom:</strong> {{ form.get('nom')?.value || '-' }}
-                </div>
-                <div class="mb-2">
-                  <strong>Prénom:</strong> {{ form.get('prenom')?.value || '-' }}
-                </div>
-                <div class="mb-2">
-                  <strong>Email:</strong> {{ form.get('email')?.value || '-' }}
-                </div>
-                <div class="mb-2">
-                  <strong>Statut:</strong> {{ form.get('statut')?.value || '-' }}
-                </div>
-                <div class="mb-2">
-                  <strong>Grade:</strong> {{ form.get('grade')?.value || '-' }}
-                </div>
-                @if (form.get('createUser')?.value) {
+                <div class="card-body">
                   <div class="mb-2">
-                    <strong>Rôle Utilisateur:</strong> {{ getSelectedRoleLabel() }}
+                    <strong>Matricule:</strong> {{ form.get('matricule')?.value || '-' }}
                   </div>
-                }
+                  <div class="mb-2">
+                    <strong>Nom:</strong> {{ form.get('nom')?.value || '-' }}
+                  </div>
+                  <div class="mb-2">
+                    <strong>Prenom:</strong> {{ form.get('prenom')?.value || '-' }}
+                  </div>
+                  <div class="mb-2">
+                    <strong>Email:</strong> {{ form.get('email')?.value || '-' }}
+                  </div>
+                  <div class="mb-2">
+                    <strong>Statut:</strong> {{ form.get('statut')?.value || '-' }}
+                  </div>
+                  <div class="mb-2">
+                    <strong>Grade:</strong> {{ form.get('grade')?.value || '-' }}
+                  </div>
+                  @if (form.get('createUser')?.value) {
+                    <div class="mb-2">
+                      <strong>Role Utilisateur:</strong> {{ getSelectedRoleLabel() }}
+                    </div>
+                  }
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="col-md-6">
-            <div class="card bg-light">
-              <div class="card-header bg-primary text-white">
-                <h6 class="mb-0">Affectations ({{ affectationsFormArray.length }})</h6>
-              </div>
-              <div class="card-body summary-scroll">
-                @if (affectationsFormArray.length > 0) {
-                  <ul class="list-unstyled">
-                    @for (affectation of affectationsFormArray.controls; let i = $index; track i) {
-                      <li class="mb-2 pb-2 border-bottom">
-                        <small>
-                          <strong>#{{ i + 1 }}:</strong>
-                          Entité: {{ getSelectedNodeLabel(affectation.get('entiteId')) }},
-                          Fonction: {{ getSelectedNodeLabel(affectation.get('fonctionId')) }}
-                        </small>
-                      </li>
-                    }
-                  </ul>
-                } @else {
-                  <p class="text-muted">Aucune affectation</p>
-                }
+            <div class="col-md-6">
+              <div class="card bg-light">
+                <div class="card-header bg-primary text-white">
+                  <h6 class="mb-0">Affectations ({{ affectationsFormArray.length }})</h6>
+                </div>
+                <div class="card-body summary-scroll">
+                  @if (affectationsFormArray.length > 0) {
+                    <ul class="list-unstyled">
+                      @for (affectation of affectationsFormArray.controls; let i = $index; track i) {
+                        <li class="mb-2 pb-2 border-bottom">
+                          <small>
+                            <strong>#{{ i + 1 }}:</strong>
+                            Entite: {{ getSelectedNodeLabel(affectation.get('entiteId')) }},
+                            Fonction: {{ getSelectedNodeLabel(affectation.get('fonctionId')) }}
+                          </small>
+                        </li>
+                      }
+                    </ul>
+                  } @else {
+                    <p class="text-muted">Aucune affectation</p>
+                  }
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      }
     }
-
   </form>
 </div>
