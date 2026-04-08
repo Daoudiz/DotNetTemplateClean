@@ -168,9 +168,10 @@
           <table class="table table-sm table-bordered">
             <thead class="table-light">
               <tr>
-                <th class="affectation-col-wide">Entite</th>
-                <th class="affectation-col-wide">Fonction</th>
-                <th class="text-center affectation-col-actions">Actions</th>
+                <th style="width: 35%;">Entite</th>
+                <th style="width: 35%;">Fonction</th>
+                <th style="width: 20%;">Date debut affectation</th>
+                <th style="width: 10%;">Actions</th>
               </tr>
             </thead>
             <tbody formArrayName="affectations">
@@ -181,8 +182,8 @@
                       [options]="organizationTree()"
                       formControlName="entiteId"
                       placeholder="Selectionner une entite..."
-                      styleClass="w-100"
-                      containerStyleClass="w-100"
+                      styleClass="w-40"
+                      containerStyleClass="w-40"
                       appendTo="body"
                       dataKey="key"
                       [filter]="true">
@@ -198,7 +199,7 @@
                       [options]="fonctionsTree()"
                       formControlName="fonctionId"
                       placeholder="Selectionner une fonction..."
-                      styleClass="w-100"
+                      styleClass="w-100 "
                       containerStyleClass="w-100"
                       appendTo="body"
                       dataKey="key"
@@ -207,6 +208,18 @@
                     @if (getAffectationControl(i, 'fonctionId')?.invalid && getAffectationControl(i, 'fonctionId')?.touched) {
                       <div class="invalid-feedback d-block">
                         Fonction requise
+                      </div>
+                    }
+                  </td>
+                  <td>
+                    <input
+                      type="date"
+                      formControlName="dateDebutAffectation"
+                      class="form-control"
+                      [class.is-invalid]="getAffectationControl(i, 'dateDebutAffectation')?.invalid && getAffectationControl(i, 'dateDebutAffectation')?.touched">
+                    @if (getAffectationControl(i, 'dateDebutAffectation')?.invalid && getAffectationControl(i, 'dateDebutAffectation')?.touched) {
+                      <div class="invalid-feedback d-block">
+                        Date de debut requise
                       </div>
                     }
                   </td>
@@ -328,7 +341,8 @@
                           <small>
                             <strong>#{{ i + 1 }}:</strong>
                             Entite: {{ getSelectedNodeLabel(affectation.get('entiteId')) }},
-                            Fonction: {{ getSelectedNodeLabel(affectation.get('fonctionId')) }}
+                            Fonction: {{ getSelectedNodeLabel(affectation.get('fonctionId')) }},
+                            Date debut: {{ affectation.get('dateDebutAffectation')?.value || '-' }}
                           </small>
                         </li>
                       }

@@ -32,6 +32,7 @@ import { ValidationService } from '../../../services/user/validation.service';
 import {
     CreateAffectationRequest,
     CreatePersonnelRequest,
+    PersonnelEditAffectationDto,
     PersonnelDetailsDto,
     PersonnelListDto,
     PrimeNgTreeNode,
@@ -198,12 +199,10 @@ export class PersonnelCreateComponent {
                 this.roles.set(roles || []);
 
                 queueMicrotask(() => {
-                    if (personnel) {
-console.log('Personnel data loaded:', personnel);
-
-                        this.patchEditForm(personnel);
-                    } else {
-                        this.resetCreateForm();
+                        if (personnel) {
+                            this.patchEditForm(personnel);
+                        } else {
+                            this.resetCreateForm();
                     }
                 });
             });
@@ -406,7 +405,8 @@ console.log('Personnel data loaded:', personnel);
                 return {
                     entiteId,
                     fonctionId,
-                    dateDebut: control.get('dateDebut')?.value || this.getTodayDate(),
+                    dateDebutAffectation: control.get('dateDebutAffectation')?.value || this.getTodayDate(),
+                    dateDebut: control.get('dateDebutAffectation')?.value || this.getTodayDate(),
                     nature: control.get('nature')?.value || 'PERMANENTE'
                 };
             })
@@ -427,7 +427,8 @@ console.log('Personnel data loaded:', personnel);
                     id: Number(control.get('id')?.value || 0),
                     entiteId,
                     fonctionId,
-                    dateDebut: control.get('dateDebut')?.value || this.getTodayDate(),
+                    dateDebutAffectation: control.get('dateDebutAffectation')?.value || this.getTodayDate(),
+                    dateDebut: control.get('dateDebutAffectation')?.value || this.getTodayDate(),
                     nature: control.get('nature')?.value || 'PERMANENTE'
                 };
             })
@@ -510,7 +511,7 @@ console.log('Personnel data loaded:', personnel);
                 id: affectation.id,
                 entiteId: entiteNode,
                 fonctionId: fonctionNode,
-                dateDebut: this.toDateInputValue(affectation.dateDebut),
+                dateDebutAffectation: this.toDateInputValue(this.getAffectationStartDate(affectation)),
                 nature: affectation.nature
             });
         });
@@ -537,16 +538,20 @@ console.log('Personnel data loaded:', personnel);
         id?: number;
         entiteId?: OrganizationTreeNode | null;
         fonctionId?: PrimeNgTreeNode | null;
-        dateDebut?: string;
+        dateDebutAffectation?: string;
         nature?: string;
     }) {
         return this.fb.group({
             id: [value?.id ?? 0],
             entiteId: [value?.entiteId ?? null as OrganizationTreeNode | null, Validators.required],
             fonctionId: [value?.fonctionId ?? null as PrimeNgTreeNode | null, Validators.required],
-            dateDebut: [value?.dateDebut ?? this.getTodayDate()],
+            dateDebutAffectation: [value?.dateDebutAffectation ?? this.getTodayDate(), Validators.required],
             nature: [value?.nature ?? 'PERMANENTE']
         });
+    }
+
+    private getAffectationStartDate(affectation: PersonnelEditAffectationDto): string | null | undefined {
+        return affectation.dateDebutAffectation ?? affectation.dateDebut;
     }
 
     private toggleUserRoleControl(isEnabled: boolean, emitEvent = true): void {

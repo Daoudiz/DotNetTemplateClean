@@ -28,6 +28,7 @@ export interface GetPersonnelsWithFiltersQuery {
 export interface CreateAffectationRequest {
     entiteId: number;
     fonctionId: number;
+    dateDebutAffectation: string;
     dateDebut: string;
     nature: string;
 }
@@ -36,6 +37,7 @@ export interface UpdateAffectationRequest {
     id: number;
     entiteId: number;
     fonctionId: number;
+    dateDebutAffectation: string;
     dateDebut: string;
     nature: string;
 }
@@ -70,7 +72,8 @@ export interface PersonnelEditAffectationDto {
     id: number;
     entiteId: number;
     fonctionId: number;
-    dateDebut: string;
+    dateDebutAffectation?: string;
+    dateDebut?: string;
     nature: string;
 }
 
