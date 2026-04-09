@@ -59,7 +59,8 @@ public class CreatePersonnelCommandHandler(IApplicationDbContext context, IUserS
                     EntiteId = aff.EntiteId,
                     FonctionId = aff.FonctionId,
                     DateDebutAffectation = aff.DateDebut,
-                    Nature = aff.Nature
+                    Nature = aff.Nature,
+                    IsActive = true
                     // Le PersonnelId sera injecté automatiquement par EF Core lors du Save
                 });
             }

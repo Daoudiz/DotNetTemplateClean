@@ -26,6 +26,11 @@ public enum TypeFonction
     Technique,
 }
 
+public enum NatureFonction
+{
+    Suppleant,
+    Titulaire,
+}
 public enum  StatutPersonnel
 {
     Stagiaire,
