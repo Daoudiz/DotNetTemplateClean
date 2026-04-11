@@ -1,11 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, catchError, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { WebUtilsService } from '../helpers/web-utils.service';
 import {
     CreatePersonnelRequest,
     GetPersonnelsWithFiltersQuery,
+    NatureFonction,
     PersonnelDetailsDto,
     PersonnelListDto,
     UpdatePersonnelRequest,
@@ -55,5 +56,11 @@ export class PersonnelService {
      */
     getFonctionsTree(): Observable<PrimeNgTreeNode[]> {
         return this.http.get<PrimeNgTreeNode[]>(`${environment.apiUrl}/fonctions/tree`);
+    }
+
+    getNatureFonctions(): Observable<NatureFonction[]> {
+        return this.http
+            .get<NatureFonction[]>(`${environment.apiUrl}/fonctions/naturefonction`)
+            .pipe(catchError((error) => throwError(() => error)));
     }
 }

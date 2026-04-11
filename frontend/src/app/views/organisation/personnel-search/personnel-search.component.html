@@ -198,7 +198,8 @@
 <c-modal id="createPersonnelModal"
          [visible]="isPersonnelModalOpen()"
          (visibleChange)="onPersonnelModalVisibilityChange($event)"
-         size="lg"
+         [size]="isEditMode() ? 'xl' : 'lg'"
+         [class.personnel-modal-edit]="isEditMode()"
          alignment="center"
          [scrollable]="false">
   <c-modal-header [class]="isEditMode() ? 'bg-warning text-dark' : 'bg-success text-white'">

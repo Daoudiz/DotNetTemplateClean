@@ -19,6 +19,7 @@ import {
 } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, finalize, forkJoin, of } from 'rxjs';
+import { ButtonModule, ModalModule } from '@coreui/angular';
 
 import { TabsModule } from 'primeng/tabs';
 import { TreeSelectModule } from 'primeng/treeselect';
@@ -32,6 +33,7 @@ import { ValidationService } from '../../../services/user/validation.service';
 import {
     CreateAffectationRequest,
     CreatePersonnelRequest,
+    NatureFonction,
     PersonnelEditAffectationDto,
     PersonnelDetailsDto,
     PersonnelListDto,
@@ -45,9 +47,9 @@ import { OrganizationTreeNode } from '../../../models/organisation/organisation-
 @Component({
     selector: 'app-personnel-create',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, TreeSelectModule, TabsModule],
+    imports: [CommonModule, ReactiveFormsModule, TreeSelectModule, TabsModule, ModalModule, ButtonModule],
     templateUrl: './personnel-create.component.html',
-    styleUrl: './personnel-create.component.scss'
+    styleUrls: ['./personnel-create.component.scss']
 })
 export class PersonnelCreateComponent {
 
@@ -67,8 +69,13 @@ export class PersonnelCreateComponent {
     readonly currentStep = signal(1);
     readonly organizationTree = signal<OrganizationTreeNode[]>([]);
     readonly fonctionsTree = signal<PrimeNgTreeNode[]>([]);
+    readonly natureFonctions = signal<NatureFonction[]>([]);
     readonly statuts = signal<StatutPersonnel[]>([]);
     readonly roles = signal<any[]>([]);
+    private readonly defaultNature = 'Titulaire';
+    readonly isEndAffectationDialogOpen = signal(false);
+    readonly selectedAffectationIndex = signal<number | null>(null);
+    readonly endAffectationDate = signal('');
 
     @Output() cancel = new EventEmitter<void>();
     @Output() personnelSaved = new EventEmitter<void>();
@@ -184,6 +191,7 @@ export class PersonnelCreateComponent {
         forkJoin({
             organizationTree: this.organisationService.getOrganizationTree(),
             fonctionsTree: this.personnelService.getFonctionsTree(),
+            natureFonctions: this.personnelService.getNatureFonctions(),
             statuts: this.personnelService.getStatutPersonnel(),
             roles: this.userService.getRoles(),
             personnel: id ? this.personnelService.getPersonnelById(id) : of(null)
@@ -192,9 +200,10 @@ export class PersonnelCreateComponent {
                 takeUntilDestroyed(this.destroyRef),
                 finalize(() => this.loading.set(false))
             )
-            .subscribe(({ organizationTree, fonctionsTree, statuts, roles, personnel }) => {
+            .subscribe(({ organizationTree, fonctionsTree, natureFonctions, statuts, roles, personnel }) => {
                 this.organizationTree.set(this.organisationService.addKeysToTree(organizationTree));
                 this.fonctionsTree.set(fonctionsTree);
+                this.natureFonctions.set(natureFonctions);
                 this.statuts.set(statuts);
                 this.roles.set(roles || []);
 
@@ -247,6 +256,68 @@ export class PersonnelCreateComponent {
         }
     }
 
+    onAffectationAction(index: number): void {
+        if (this.isExistingAffectation(index)) {
+            this.openEndAffectationDialog(index);
+            return;
+        }
+
+        this.removeAffectation(index);
+    }
+
+    isExistingAffectation(index: number): boolean {
+        if (!this.isEditMode()) {
+            return false;
+        }
+
+        const idValue = Number(this.affectationsFormArray.at(index).get('id')?.value || 0);
+        return idValue > 0;
+    }
+
+    isAffectationReadOnly(index: number): boolean {
+        return this.isEditMode() && this.isExistingAffectation(index);
+    }
+
+    getAffectationActionTitle(index: number): string {
+        if (this.isExistingAffectation(index)) {
+            return 'Cloturer cette affectation';
+        }
+
+        if (this.affectationsFormArray.length === 1) {
+            return 'Au moins une affectation est requise';
+        }
+
+        return 'Supprimer cette affectation';
+    }
+
+    closeEndAffectationDialog(): void {
+        this.isEndAffectationDialogOpen.set(false);
+        this.selectedAffectationIndex.set(null);
+        this.endAffectationDate.set('');
+    }
+
+    confirmEndAffectation(): void {
+        const index = this.selectedAffectationIndex();
+        const endDate = this.endAffectationDate();
+
+        if (index == null || !endDate) {
+            this.notification.warn('Date de fin affectation requise');
+            return;
+        }
+
+        const affectation = this.affectationsFormArray.at(index);
+        const startDate = affectation.get('dateDebutAffectation')?.value as string | null;
+
+        if (startDate && endDate < startDate) {
+            this.notification.warn('La date de fin doit etre superieure ou egale a la date de debut');
+            return;
+        }
+
+        affectation.patchValue({ dateFinAffectation: endDate });
+        this.formStatusChanged.update((value) => value + 1);
+        this.closeEndAffectationDialog();
+    }
+
     getAffectationControl(index: number, controlName: string): AbstractControl | null {
         return this.affectationsFormArray.at(index).get(controlName);
     }
@@ -296,6 +367,14 @@ export class PersonnelCreateComponent {
         }
 
         return matchingRole.name || matchingRole.displayName || String(matchingRole.id || matchingRole);
+    }
+
+    getNatureLabel(value: string | null | undefined): string {
+        if (!value) {
+            return '-';
+        }
+
+        return this.natureFonctions().find((nature) => nature.value === value)?.displayName ?? value;
     }
 
     onSubmit(): void {
@@ -407,7 +486,7 @@ export class PersonnelCreateComponent {
                     fonctionId,
                     dateDebutAffectation: control.get('dateDebutAffectation')?.value || this.getTodayDate(),
                     dateDebut: control.get('dateDebutAffectation')?.value || this.getTodayDate(),
-                    nature: control.get('nature')?.value || 'PERMANENTE'
+                    nature: control.get('nature')?.value || this.defaultNature
                 };
             })
             .filter((affectation): affectation is CreateAffectationRequest => affectation !== null);
@@ -415,7 +494,7 @@ export class PersonnelCreateComponent {
 
     private buildUpdateAffectationsPayload(): UpdateAffectationRequest[] {
         return this.affectationsFormArray.controls
-            .map((control) => {
+            .map((control): UpdateAffectationRequest | null => {
                 const entiteId = this.extractNodeId(control.get('entiteId')?.value);
                 const fonctionId = this.extractNodeId(control.get('fonctionId')?.value);
 
@@ -429,10 +508,11 @@ export class PersonnelCreateComponent {
                     fonctionId,
                     dateDebutAffectation: control.get('dateDebutAffectation')?.value || this.getTodayDate(),
                     dateDebut: control.get('dateDebutAffectation')?.value || this.getTodayDate(),
-                    nature: control.get('nature')?.value || 'PERMANENTE'
+                    nature: control.get('nature')?.value || this.defaultNature,
+                    dateFinAffectation: control.get('dateFinAffectation')?.value || null
                 };
             })
-            .filter((affectation): affectation is UpdateAffectationRequest => affectation !== null);
+            .filter((affectation): affectation is NonNullable<typeof affectation> => affectation !== null);
     }
 
     private patchEditForm(personnel: PersonnelDetailsDto): void {
@@ -497,6 +577,9 @@ export class PersonnelCreateComponent {
     }
 
     private initializeEditAffectations(personnel: PersonnelDetailsDto): void {
+        const affectationsArray = this.fb.array([]);
+        this.form.setControl('affectations', affectationsArray as unknown as FormArray);
+
         const affectationGroups = personnel.affectations.map((affectation) => {
             const entiteNode = this.organisationService.findNodeById(
                 this.organizationTree(),
@@ -512,20 +595,20 @@ export class PersonnelCreateComponent {
                 entiteId: entiteNode,
                 fonctionId: fonctionNode,
                 dateDebutAffectation: this.toDateInputValue(this.getAffectationStartDate(affectation)),
-                nature: affectation.nature
+                nature: affectation.nature || this.defaultNature,
+                dateFinAffectation: this.toDateInputValue(affectation.dateFinAffectation)
             });
         });
 
-        const affectationsArray = this.fb.array(
-            affectationGroups.length > 0
-                ? affectationGroups
-                : [this.createAffectationGroup()]
-        );
+        if (affectationGroups.length === 0) {
+            this.affectationsFormArray.push(this.createAffectationGroup());
+        } else {
+            affectationGroups.forEach((group) => {
+                this.affectationsFormArray.push(group);
+            });
+        }
 
-        this.form.setControl(
-            'affectations',
-            affectationsArray as unknown as FormArray
-        );
+        this.applyEditModeReadOnlyState();
     }
 
     private clearAffectations(): void {
@@ -540,13 +623,33 @@ export class PersonnelCreateComponent {
         fonctionId?: PrimeNgTreeNode | null;
         dateDebutAffectation?: string;
         nature?: string;
+        dateFinAffectation?: string;
     }) {
         return this.fb.group({
             id: [value?.id ?? 0],
             entiteId: [value?.entiteId ?? null as OrganizationTreeNode | null, Validators.required],
             fonctionId: [value?.fonctionId ?? null as PrimeNgTreeNode | null, Validators.required],
             dateDebutAffectation: [value?.dateDebutAffectation ?? this.getTodayDate(), Validators.required],
-            nature: [value?.nature ?? 'PERMANENTE']
+            nature: [value?.nature ?? this.defaultNature, Validators.required],
+            dateFinAffectation: [value?.dateFinAffectation ?? '']
+        });
+    }
+
+    private applyEditModeReadOnlyState(): void {
+        if (!this.isEditMode()) {
+            return;
+        }
+
+        this.affectationsFormArray.controls.forEach((group) => {
+            const idValue = Number(group.get('id')?.value || 0);
+            if (idValue <= 0) {
+                return;
+            }
+
+            group.get('entiteId')?.disable({ emitEvent: false });
+            group.get('fonctionId')?.disable({ emitEvent: false });
+            group.get('dateDebutAffectation')?.disable({ emitEvent: false });
+            group.get('nature')?.disable({ emitEvent: false });
         });
     }
 
@@ -658,6 +761,15 @@ export class PersonnelCreateComponent {
 
     private getTodayDate(): string {
         return new Date().toISOString().split('T')[0];
+    }
+
+    private openEndAffectationDialog(index: number): void {
+        const affectation = this.affectationsFormArray.at(index);
+        const currentEndDate = affectation.get('dateFinAffectation')?.value as string | null;
+
+        this.selectedAffectationIndex.set(index);
+        this.endAffectationDate.set(currentEndDate || this.getTodayDate());
+        this.isEndAffectationDialogOpen.set(true);
     }
 
     private toDateInputValue(value: string | null | undefined): string {

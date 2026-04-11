@@ -17,7 +17,7 @@ public record UpdatePersonnelCommand : IRequest
     public IList<UpdateAffectationDto> Affectations { get; init; } = [];
 }
 
-public record UpdateAffectationDto(int Id, int EntiteId, int FonctionId, DateTime DateDebut, string Nature);
+public record UpdateAffectationDto(int Id, int EntiteId, int FonctionId, DateTime DateDebut, string Nature, DateTime? DateFinAffectation);
 
 public class UpdatePersonnelCommandHandler(IApplicationDbContext context)
     : IRequestHandler<UpdatePersonnelCommand>
@@ -28,10 +28,10 @@ public class UpdatePersonnelCommandHandler(IApplicationDbContext context)
         var updatedPersonnel = await context.Personnels
             .Include(x => x.Affectations)
             .SingleOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
-        
-        Guard.Against.NotFound ( request.Id, updatedPersonnel);
 
-        // Mise à jour des propriétés
+        Guard.Against.NotFound(request.Id, updatedPersonnel);
+
+        // Mise a jour des proprietes
         updatedPersonnel.Matricule = request.Matricule;
         updatedPersonnel.Nom = request.Nom;
         updatedPersonnel.Prenom = request.Prenom;
@@ -42,16 +42,7 @@ public class UpdatePersonnelCommandHandler(IApplicationDbContext context)
 
         var existing = updatedPersonnel.Affectations.ToList();
 
-        // DELETE des affectations qui ne sont plus présentes dans la requête
-        foreach (var aff in existing)
-        {
-            if (!request.Affectations.Any(a => a.Id == aff.Id))
-            {
-                context.AffectationsPersonnel.Remove(aff);
-            }
-        }
-
-        // UPDATE + ADD des affectations fournies dans la requête
+        // UPDATE + ADD des affectations fournies dans la requete
         foreach (var aff in request.Affectations)
         {
             var existingAff = existing.FirstOrDefault(a => a.Id == aff.Id);
@@ -63,6 +54,7 @@ public class UpdatePersonnelCommandHandler(IApplicationDbContext context)
                 existingAff.FonctionId = aff.FonctionId;
                 existingAff.DateDebutAffectation = aff.DateDebut;
                 existingAff.Nature = aff.Nature;
+                existingAff.DateFinAffectation = aff.DateFinAffectation;
             }
             else
             {
@@ -72,7 +64,8 @@ public class UpdatePersonnelCommandHandler(IApplicationDbContext context)
                     EntiteId = aff.EntiteId,
                     FonctionId = aff.FonctionId,
                     DateDebutAffectation = aff.DateDebut,
-                    Nature = aff.Nature
+                    Nature = aff.Nature,
+                    DateFinAffectation = aff.DateFinAffectation
                 });
             }
         }
@@ -80,4 +73,3 @@ public class UpdatePersonnelCommandHandler(IApplicationDbContext context)
         await context.SaveChangesAsync(cancellationToken);
     }
 }
-

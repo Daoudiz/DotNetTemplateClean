@@ -40,6 +40,7 @@ export interface UpdateAffectationRequest {
     dateDebutAffectation: string;
     dateDebut: string;
     nature: string;
+    dateFinAffectation?: string | null;
 }
 
 export interface CreatePersonnelRequest {
@@ -75,6 +76,7 @@ export interface PersonnelEditAffectationDto {
     dateDebutAffectation?: string;
     dateDebut?: string;
     nature: string;
+    dateFinAffectation?: string | null;
 }
 
 export interface PersonnelDetailsDto {
@@ -92,6 +94,11 @@ export interface PersonnelDetailsDto {
 }
 
 export interface StatutPersonnel {
+    value: string;
+    displayName: string;
+}
+
+export interface NatureFonction {
     value: string;
     displayName: string;
 }

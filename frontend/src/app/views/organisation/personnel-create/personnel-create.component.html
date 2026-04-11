@@ -168,10 +168,12 @@
           <table class="table table-sm table-bordered">
             <thead class="table-light">
               <tr>
-                <th style="width: 35%;">Entite</th>
-                <th style="width: 35%;">Fonction</th>
-                <th style="width: 20%;">Date debut affectation</th>
-                <th style="width: 10%;">Actions</th>
+                <th class="affectation-col-wide">Entite</th>
+                <th class="affectation-col-wide">Fonction</th>
+                <th class="affectation-col-nature">Nature</th>
+                <th class="affectation-col-date">Date debut affectation</th>
+                <th class="affectation-col-date">Date fin affectation</th>
+                <th class="affectation-col-actions">Actions</th>
               </tr>
             </thead>
             <tbody formArrayName="affectations">
@@ -182,11 +184,12 @@
                       [options]="organizationTree()"
                       formControlName="entiteId"
                       placeholder="Selectionner une entite..."
-                      styleClass="w-40"
-                      containerStyleClass="w-40"
+                      styleClass="w-100"
+                      containerStyleClass="w-100"
                       appendTo="body"
                       dataKey="key"
-                      [filter]="true">
+                      [filter]="true"
+                      [disabled]="isAffectationReadOnly(i)">
                     </p-treeSelect>
                     @if (getAffectationControl(i, 'entiteId')?.invalid && getAffectationControl(i, 'entiteId')?.touched) {
                       <div class="invalid-feedback d-block">
@@ -199,11 +202,12 @@
                       [options]="fonctionsTree()"
                       formControlName="fonctionId"
                       placeholder="Selectionner une fonction..."
-                      styleClass="w-100 "
+                      styleClass="w-100"
                       containerStyleClass="w-100"
                       appendTo="body"
                       dataKey="key"
-                      [filter]="true">
+                      [filter]="true"
+                      [disabled]="isAffectationReadOnly(i)">
                     </p-treeSelect>
                     @if (getAffectationControl(i, 'fonctionId')?.invalid && getAffectationControl(i, 'fonctionId')?.touched) {
                       <div class="invalid-feedback d-block">
@@ -212,10 +216,28 @@
                     }
                   </td>
                   <td>
+                    <select
+                      formControlName="nature"
+                      class="form-select affectation-nature-select"
+                      [disabled]="isAffectationReadOnly(i)"
+                      [class.is-invalid]="getAffectationControl(i, 'nature')?.invalid && getAffectationControl(i, 'nature')?.touched">
+                      <option [ngValue]="null">-- Selectionner une nature --</option>
+                      @for (nature of natureFonctions(); track nature.value) {
+                        <option [ngValue]="nature.value">{{ nature.displayName }}</option>
+                      }
+                    </select>
+                    @if (getAffectationControl(i, 'nature')?.invalid && getAffectationControl(i, 'nature')?.touched) {
+                      <div class="invalid-feedback d-block">
+                        Nature requise
+                      </div>
+                    }
+                  </td>
+                  <td>
                     <input
                       type="date"
                       formControlName="dateDebutAffectation"
                       class="form-control"
+                      [readonly]="isAffectationReadOnly(i)"
                       [class.is-invalid]="getAffectationControl(i, 'dateDebutAffectation')?.invalid && getAffectationControl(i, 'dateDebutAffectation')?.touched">
                     @if (getAffectationControl(i, 'dateDebutAffectation')?.invalid && getAffectationControl(i, 'dateDebutAffectation')?.touched) {
                       <div class="invalid-feedback d-block">
@@ -223,12 +245,26 @@
                       </div>
                     }
                   </td>
+                  <td>
+                    <input
+                      type="date"
+                      formControlName="dateFinAffectation"
+                      class="form-control"
+                      readonly>
+                  </td>
                   <td class="text-center">
-                    <button type="button" class="btn-close remove-affectation-btn"
-                            aria-label="Supprimer cette affectation"
-                            [disabled]="affectationsFormArray.length === 1"
-                            [title]="affectationsFormArray.length === 1 ? 'Au moins une affectation est requise' : 'Supprimer cette affectation'"
-                            (click)="removeAffectation(i)">
+                    <button
+                      type="button"
+                      class="remove-affectation-btn"
+                      [class.end-affectation-btn]="isExistingAffectation(i)"
+                      [attr.aria-label]="getAffectationActionTitle(i)"
+                      [disabled]="!isExistingAffectation(i) && affectationsFormArray.length === 1"
+                      [title]="getAffectationActionTitle(i)"
+                      (click)="onAffectationAction(i)">
+                      <i [class]="isExistingAffectation(i)
+                       ? 'fas fa-flag-checkered' 
+                       : 'fas fa-trash-alt'">
+                       </i>
                     </button>
                   </td>
                 </tr>
@@ -342,7 +378,9 @@
                             <strong>#{{ i + 1 }}:</strong>
                             Entite: {{ getSelectedNodeLabel(affectation.get('entiteId')) }},
                             Fonction: {{ getSelectedNodeLabel(affectation.get('fonctionId')) }},
-                            Date debut: {{ affectation.get('dateDebutAffectation')?.value || '-' }}
+                            Nature: {{ getNatureLabel(affectation.get('nature')?.value) }},
+                            Date debut: {{ affectation.get('dateDebutAffectation')?.value || '-' }},
+                            Date fin: {{ affectation.get('dateFinAffectation')?.value || '-' }}
                           </small>
                         </li>
                       }
@@ -359,3 +397,35 @@
     }
   </form>
 </div>
+
+<c-modal
+  id="endAffectationModal"
+  class="end-affectation-modal"
+  [visible]="isEndAffectationDialogOpen()"
+  alignment="center"
+  [backdrop]="true"
+  (visibleChange)="!$event && closeEndAffectationDialog()">
+  <c-modal-header class="bg-warning text-dark">
+    <h5 cModalTitle>
+      <i class="fas fa-flag-checkered me-2"></i>
+      Cloturer l'affectation
+    </h5>
+    <button cButtonClose (click)="closeEndAffectationDialog()"></button>
+  </c-modal-header>
+  <c-modal-body>
+    <label class="form-label fw-bold">Date fin affectation <span class="text-danger">*</span></label>
+    <input
+      type="date"
+      class="form-control"
+      [value]="endAffectationDate()"
+      (input)="endAffectationDate.set($any($event.target).value)">
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closeEndAffectationDialog()">
+      Annuler
+    </button>
+    <button cButton color="warning" (click)="confirmEndAffectation()">
+      Valider
+    </button>
+  </c-modal-footer>
+</c-modal>

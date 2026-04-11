@@ -53,6 +53,7 @@ public class PersonnelAffectationDetailsDto
     public int EntiteId { get; init; }
     public int FonctionId { get; init; }
     public DateTime DateDebut { get; init; }
+    public DateTime? DateFinAffectation { get; init; }
     public required string Nature { get; init; }
 
     private class Mapping : Profile
