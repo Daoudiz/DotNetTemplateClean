@@ -126,7 +126,7 @@ internal class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextIniti
                 NormalizedEmail = "ZAKARIA.DAOUDI@GMAIL.COM",
                 EmailConfirmed = true,
                 EntiteId = 5,
-                DateRecrutement  = DateTime.UtcNow                
+                DateRecrutement  = DateOnly.FromDateTime(DateTime.UtcNow)                
             };
 
             if (userManager.Users.All(u => u.UserName != admin.UserName))

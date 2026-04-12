@@ -8,7 +8,7 @@ public record UpdatePersonnelCommand : IRequest
     public required string Matricule { get; init; }
     public required string Nom { get; init; }
     public required string Prenom { get; init; }
-    public DateTime? DateRecrutement { get; init; }
+    public DateOnly DateRecrutement { get; init; }
     public DateTime? DateNaissance { get; init; }
     public string? Statut { get; init; }
     public string? Grade { get; init; }
@@ -36,7 +36,9 @@ public class UpdatePersonnelCommandHandler(IApplicationDbContext context)
         updatedPersonnel.Nom = request.Nom;
         updatedPersonnel.Prenom = request.Prenom;
         updatedPersonnel.DateRecrutement = request.DateRecrutement;
-        updatedPersonnel.DateNaissance = DateNaissance.FromDateTime(request.DateNaissance);
+        updatedPersonnel.DateNaissance = request.DateNaissance.HasValue
+            ? DateNaissance.Create(DateOnly.FromDateTime(request.DateNaissance.Value))
+            : null;
         updatedPersonnel.Statut = request.Statut;
         updatedPersonnel.Grade = request.Grade;
 

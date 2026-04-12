@@ -30,7 +30,7 @@ public class PersonnelDetailsDto
     public required string Matricule { get; init; }
     public required string Nom { get; init; }
     public required string Prenom { get; init; }
-    public DateTime? DateRecrutement { get; init; }
+    public DateOnly? DateRecrutement { get; init; }
     public DateTime? DateNaissance { get; init; }
     public required string Email { get; init; }
     public int EntiteId { get; init; }
@@ -45,7 +45,9 @@ public class PersonnelDetailsDto
             CreateMap<Personnel, PersonnelDetailsDto>()
                  .ForMember(
                 dest => dest.DateNaissance,
-                opt => opt.MapFrom(src => src.DateNaissance.Value.ToDateTime(TimeOnly.MinValue))
+                opt => opt.MapFrom(src => src.DateNaissance == null
+                    ? (DateTime?)null
+                    : src.DateNaissance.Value.ToDateTime(TimeOnly.MinValue))
             ); 
         }
     }

@@ -8,7 +8,7 @@ public class PersonnelListDto
     public required string Matricule { get; init; }
     public  required string Nom { get; init; }
     public  required string Prenom { get; init; }
-    public DateTime? DateRecrutement { get; init; }
+    public DateOnly? DateRecrutement { get; init; }
     public DateOnly? DateNaissance { get; init; }
     public string? Statut { get; init; }
     public string? Grade { get; init; }

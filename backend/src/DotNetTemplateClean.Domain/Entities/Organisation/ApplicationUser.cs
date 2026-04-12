@@ -9,7 +9,7 @@ public class ApplicationUser : IdentityUser, IAuditableEntity
     public  string LastName { get; set; }   = string.Empty;        
     public int Matricule { get; set; }
    
-    public DateTime? DateRecrutement { get; set; }
+    public DateOnly? DateRecrutement { get; set; }
    
     public virtual int EntiteId { get; set; }
                     

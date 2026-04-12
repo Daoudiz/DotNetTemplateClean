@@ -25,7 +25,10 @@ public class CreatePersonnelCommandValidator : AbstractValidator<CreatePersonnel
             {
                 try
                 {
-                    DateNaissance.FromDateTime(dateNaissance);
+                    DateNaissance.Create(
+                        dateNaissance.HasValue
+                            ? DateOnly.FromDateTime(dateNaissance.Value.Date)
+                            : null);
                 }
                 catch (DomainException ex)
                 {
@@ -43,9 +46,9 @@ public class CreatePersonnelCommandValidator : AbstractValidator<CreatePersonnel
                 }
 
                 var birthDate = DateOnly.FromDateTime(command.DateNaissance.Value.Date);
-                var recrutementDate = DateOnly.FromDateTime(dateRecrutement.Value.Date);
+                var recrutementDate = dateRecrutement.Value;
 
-                return recrutementDate >= birthDate.AddYears(DateNaissance.MinimumAge);
+                return recrutementDate >= birthDate.AddYears(18);
             })
             .WithMessage("Le personnel doit avoir au moins 18 ans au moment du recrutement.");
 

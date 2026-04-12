@@ -9,7 +9,7 @@ public record UserCreationDto
     public int Matricule { get; init; }
     public string FirstName { get; init; } = string.Empty;
     public string LastName { get; init; } = string.Empty;
-    public DateTime DateRecrutement { get; init; }
+    public DateOnly DateRecrutement { get; init; }
     public string Email { get; init; } = string.Empty;
     public string UserName { get; init; } = string.Empty;
     public string Password { get; init; } = string.Empty;
@@ -28,7 +28,7 @@ public record UserUpdateDto
     public string LastName { get; set; } = string.Empty;
     public string UserName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
-    public DateTime? DateRecrutement { get; set; }
+    public DateOnly? DateRecrutement { get; set; }
     public int Direction { get; set; }
     public int? Division { get; set; }
     public int? Service { get; set; }
@@ -41,7 +41,7 @@ public class UserSearchResultDto
     public int Matricule { get; set; }
     public required string Nom { get; set; }
     public required string Prenom { get; set; }
-    public DateTime? DateRecrutement { get; set; }
+    public DateOnly? DateRecrutement { get; set; }
     public int DirectionId { get; set; }
     public int? DivisionId { get; set; }
     public int? ServiceId { get; set; }
@@ -57,8 +57,8 @@ public class SearchViewModel
     public int? Matricule { get; set; }
     public string? Nom { get; set; }
     public string? Prenom { get; set; }        
-    public DateTime? DateRecrutementDebut { get; set; }
-    public DateTime? DateRecrutementFin { get; set; }
+    public DateOnly? DateRecrutementDebut { get; set; }
+    public DateOnly? DateRecrutementFin { get; set; }
     public int? DirectionId { get; set; }
     public int? DivisionId { get; set; }
     public int? ServiceId { get; set; }
@@ -82,7 +82,7 @@ public class ProfilViewModel
     public int Matricule { get; set; }        
     public required string FirstName { get; set; }       
     public required string LastName { get; set; }       
-    public DateTime? DateRecrutement { get; set; }        
+    public DateOnly? DateRecrutement { get; set; }        
     public string Email { get; set; } = string.Empty;       
     public required string Entite { get; set; }        
     public required string UserRole { get; set; }
@@ -101,7 +101,7 @@ public class CreateViewModel
     public int Matricule { get; set; }  
     public required string FirstName { get; set; }      
     public required string LastName { get; set; }    
-    public DateTime DateRecrutement { get; set; }    
+    public DateOnly DateRecrutement { get; set; }    
     public int Direction { get; set; }
     public int? Division { get; set; }
     public int? Service { get; set; }   
@@ -121,7 +121,7 @@ public class UpdateUserViewModel
     public string FirstName { get; set; } = string.Empty;  
     public string LastName { get; set; } = string.Empty;   
     public string Email { get; set; } = string.Empty;
-    public DateTime? DateRecrutement { get; set; }  
+    public DateOnly? DateRecrutement { get; set; }  
     public int Direction { get; set; }
     public int? Division { get; set; }
     public int? Service { get; set; }  

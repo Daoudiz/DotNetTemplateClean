@@ -5,7 +5,7 @@ public record CreatePersonnelCommand : IRequest<int>
     public required string Matricule { get; init; }
     public required string Nom { get; init; }
     public required string Prenom { get; init; }
-    public DateTime? DateRecrutement { get; init; }
+    public DateOnly? DateRecrutement { get; init; }
     public DateTime? DateNaissance { get; init; }
     public string Email { get; init; } = string.Empty;
     public int EntiteId { get; init; }
@@ -31,13 +31,20 @@ public class CreatePersonnelCommandHandler(IApplicationDbContext context, IUserS
 
         await context.ExecuteInTransactionAsync(async () =>
         {
-            var dateNaissance = DateNaissance.FromDateTime(request.DateNaissance);
+            var dateNaissance = DateNaissance.Create(
+                request.DateNaissance.HasValue
+                    ? DateOnly.FromDateTime(request.DateNaissance.Value)
+                    : null);
+
+            var dateRecrutement = request.DateRecrutement.HasValue
+                ? request.DateRecrutement.Value
+                : throw new DomainException("La date de recrutement est obligatoire.");
 
             var entity = Personnel.Create(
                 request.Matricule,
                 request.Nom,
                 request.Prenom,
-                request.DateRecrutement,
+                dateRecrutement,
                 dateNaissance,
                 request.Email,
                 request.EntiteId,
@@ -63,7 +70,7 @@ public class CreatePersonnelCommandHandler(IApplicationDbContext context, IUserS
                     Matricule = int.Parse(request.Matricule, CultureInfo.InvariantCulture),
                     FirstName = request.Prenom,
                     LastName = request.Nom,
-                    DateRecrutement = request.DateRecrutement ?? DateTime.Now,
+                    DateRecrutement = request.DateRecrutement ?? DateOnly.FromDateTime(DateTime.Now),
                     Email = request.Email,
                     UserName = request.Email,
                     Password = request.Prenom + "@2026",

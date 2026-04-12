@@ -9,7 +9,8 @@ public class OrganisationRelationsConfiguration :
     IEntityTypeConfiguration<AffectationPersonnel>,
     IEntityTypeConfiguration<Entite>,
     IEntityTypeConfiguration<Personnel>,
-    IEntityTypeConfiguration<Fonction>
+    IEntityTypeConfiguration<Fonction>,
+    IEntityTypeConfiguration<ApplicationUser>
 
     /*IEntityTypeConfiguration<TypeEntite>,
     IEntityTypeConfiguration<Fonction>*/
@@ -88,16 +89,41 @@ public class OrganisationRelationsConfiguration :
         builder.Property(p => p.Statut)
              .HasConversion<string>();
 
+        builder.Property(p => p.DateRecrutement)
+            .HasConversion(
+                date => date.HasValue
+                    ? date.Value.ToDateTime(TimeOnly.MinValue)
+                    : (DateTime?)null,
+                value => value.HasValue
+                    ? DateOnly.FromDateTime(value.Value)
+                    : null)
+            .HasColumnName(nameof(Personnel.DateRecrutement));
+
         builder.Property(p => p.DateNaissance)
             .HasConversion(
                 dateNaissance => dateNaissance == null
                     ? (DateTime?)null
-                    : dateNaissance.ToDateTime(),
+                    : dateNaissance.Value.ToDateTime(TimeOnly.MinValue),
                 value => value.HasValue
-                    ? DateNaissance.FromDateTime(value.Value)
+                    ? DateNaissance.Create(DateOnly.FromDateTime(value.Value))
                     : null)
             .HasColumnName(nameof(Personnel.DateNaissance));
 
+    }
+
+    public void Configure(EntityTypeBuilder<ApplicationUser> builder)
+    {
+        ArgumentNullException.ThrowIfNull(builder, nameof(builder));
+
+        builder.Property(p => p.DateRecrutement)
+            .HasConversion(
+                date => date.HasValue
+                    ? date.Value.ToDateTime(TimeOnly.MinValue)
+                    : (DateTime?)null,
+                value => value.HasValue
+                    ? DateOnly.FromDateTime(value.Value)
+                    : null)
+            .HasColumnName(nameof(ApplicationUser.DateRecrutement));
     }
 #pragma warning restore CA1822  
 }

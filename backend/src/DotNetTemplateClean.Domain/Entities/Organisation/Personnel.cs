@@ -7,7 +7,7 @@ public class Personnel : AuditableEntity<int>
     public required string Matricule { get; set; }
     public required string Nom { get; set; }
     public required string Prenom { get; set; }
-    public DateTime? DateRecrutement { get; set; }
+    public DateOnly? DateRecrutement { get; set; }
     public DateNaissance? DateNaissance { get; set; }
 
     public string Email { get; init; } = string.Empty;
@@ -35,7 +35,7 @@ public class Personnel : AuditableEntity<int>
         string matricule,
         string nom,
         string prenom,
-        DateTime? dateRecrutement,
+        DateOnly dateRecrutement,
         DateNaissance dateNaissance,
         string email,
         int entiteId,
@@ -59,6 +59,8 @@ public class Personnel : AuditableEntity<int>
 
         ArgumentNullException.ThrowIfNull(dateNaissance);
 
+        ValidateAgeAtRecruitment(dateNaissance, dateRecrutement );
+
         return new Personnel
         {
             Matricule = matricule,
@@ -71,5 +73,17 @@ public class Personnel : AuditableEntity<int>
             Grade = grade,
             EntiteId = entiteId
         };
+    }
+
+    private static void ValidateAgeAtRecruitment(DateNaissance dateNaissance, DateOnly dateRecrutement)
+    {
+        var age = dateRecrutement.Year - dateNaissance.Value.Year;
+
+        if (dateNaissance.Value > dateRecrutement.AddYears(-age))
+            age--;
+
+        if (age < 18 || age > 45)
+            throw new DomainException(
+                "L'âge du personnel à la date de recrutement doit être compris entre 18 et 45 ans.");
     }
 }
