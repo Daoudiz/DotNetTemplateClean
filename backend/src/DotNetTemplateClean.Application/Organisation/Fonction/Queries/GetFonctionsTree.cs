@@ -21,13 +21,13 @@ public class GetFonctionsTreeQueryHandler(IApplicationDbContext context) : IRequ
                 Key: g.Key.HasValue ? $"domaine-{g.Key.Value}" : "domaine-unspecified",
                 Label: g.Key.HasValue ? g.Key.Value.GetDisplayName() : "Unspecified",
                 Data: null,
-                Children: g.Select(f => new PrimeNgTreeNodeDto(
+                Children: [.. g.Select(f => new PrimeNgTreeNodeDto(
                     Key: $"fonction-{f.Id}",
                     Label: $"{f.Designation} ({f.Code})",
                     Data: new FonctionNodeData(f.Id, f.Code, f.Designation, f.Type.HasValue ? f.Type.Value.ToString() : null),
-                    Children: new List<PrimeNgTreeNodeDto>(),
+                    Children: [],
                     Selectable: true
-                )).OrderBy(f => f.Label).ToList(),
+                )).OrderBy(f => f.Label)],
                     ExpandedIcon: "pi pi-folder-open",
                     CollapsedIcon: "pi pi-folder",
                     Selectable: false

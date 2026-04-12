@@ -16,7 +16,6 @@ public class ProblemDetailsExceptionHandler : IExceptionHandler
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(httpContext);
-
         var (statusCode, problemDetails) = exception switch
         {
             ValidationException ve => (StatusCodes.Status400BadRequest, (ProblemDetails)new ValidationProblemDetails(ve.Errors)
@@ -43,7 +42,7 @@ public class ProblemDetailsExceptionHandler : IExceptionHandler
                 Title = "Forbidden",
                 Type = "https://tools.ietf.org/html/rfc9110#section-15.5.4"
             }),
-            InvalidOperationException ioe => (StatusCodes.Status409Conflict, new ProblemDetails
+            InvalidOperationException => (StatusCodes.Status409Conflict, new ProblemDetails
             {
                 Status = StatusCodes.Status409Conflict,
                 Title = "Conflit d'intégrité",

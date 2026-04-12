@@ -1,8 +1,5 @@
 
 using Ardalis.GuardClauses;
-using Microsoft.EntityFrameworkCore;
-using System.Threading;
-using System.Threading.Tasks;
 
 
 namespace DotNetTemplateClean.Application;

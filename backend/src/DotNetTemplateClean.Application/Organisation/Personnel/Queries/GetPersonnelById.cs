@@ -42,7 +42,11 @@ public class PersonnelDetailsDto
     {
         public Mapping()
         {
-            CreateMap<Personnel, PersonnelDetailsDto>();
+            CreateMap<Personnel, PersonnelDetailsDto>()
+                 .ForMember(
+                dest => dest.DateNaissance,
+                opt => opt.MapFrom(src => src.DateNaissance.Value.ToDateTime(TimeOnly.MinValue))
+            ); 
         }
     }
 }

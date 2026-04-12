@@ -9,7 +9,7 @@ public class PersonnelListDto
     public  required string Nom { get; init; }
     public  required string Prenom { get; init; }
     public DateTime? DateRecrutement { get; init; }
-    public DateTime? DateNaissance { get; init; }
+    public DateOnly? DateNaissance { get; init; }
     public string? Statut { get; init; }
     public string? Grade { get; init; }
 
@@ -20,7 +20,11 @@ public class PersonnelListDto
     {
         public Mapping()
         {
-            CreateMap<Personnel, PersonnelListDto>();
+            CreateMap<Personnel, PersonnelListDto>()
+                .ForMember(
+                    dest => dest.DateNaissance,
+                    opt => opt.MapFrom(src => src.DateNaissance == null ? (DateOnly?)null : src.DateNaissance.Value)
+                );
         }
     }
 }

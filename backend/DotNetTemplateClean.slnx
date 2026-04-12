@@ -11,6 +11,8 @@
     <Project Path="src/DotNetTemplateClean.WebAPI/DotNetTemplateClean.WebAPI.csproj" Id="4cd7473f-b8c6-43f7-949a-37bbd317ea7c" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Application.FunctionalTests/Application.FunctionalTests.csproj" Id="a96a8713-3077-45fc-9c37-a201d8a8c1cc" />
     <Project Path="tests/Application.UnitTests/Application.UnitTests.csproj" />
+    <Project Path="tests/Domain.UnitTests/Domain.UnitTests.csproj" Id="5638c8f0-e39d-4758-8311-1b1bb60d1704" />
   </Folder>
 </Solution>
