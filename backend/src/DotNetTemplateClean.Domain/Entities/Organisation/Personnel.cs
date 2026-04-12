@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 
 namespace DotNetTemplateClean.Domain;
 
@@ -7,18 +8,68 @@ public class Personnel : AuditableEntity<int>
     public required string Nom { get; set; }
     public required string Prenom { get; set; }
     public DateTime? DateRecrutement { get; set; }
-    public DateTime? DateNaissance { get; set; }
+    public DateNaissance? DateNaissance { get; set; }
 
     public string Email { get; init; } = string.Empty;
     public string? Statut { get; set; }
     public string? Grade { get; set; }
     // optional link to ApplicationUser
-    public string? IdentityId { get; set; }   
+    public string? IdentityId { get; set; }
 
     // N-ary association: Affectation between Personnel, Entite and Fonction
-    public ICollection<AffectationPersonnel> Affectations { get;  } = [];
+    public ICollection<AffectationPersonnel> Affectations { get; } = [];
 
     public virtual int EntiteId { get; set; }
 
     public virtual Entite Entite { get; set; } = null!;
+
+    [SetsRequiredMembers]
+    private Personnel()
+    {
+        Matricule = string.Empty;
+        Nom = string.Empty;
+        Prenom = string.Empty;
+    }
+
+    public static Personnel Create(
+        string matricule,
+        string nom,
+        string prenom,
+        DateTime? dateRecrutement,
+        DateNaissance dateNaissance,
+        string email,
+        int entiteId,
+        string? statut,
+        string? grade)
+    {
+        if (string.IsNullOrWhiteSpace(matricule))
+        {
+            throw new DomainException("Le matricule est obligatoire.");
+        }
+
+        if (string.IsNullOrWhiteSpace(nom))
+        {
+            throw new DomainException("Le nom est obligatoire.");
+        }
+
+        if (string.IsNullOrWhiteSpace(prenom))
+        {
+            throw new DomainException("Le prenom est obligatoire.");
+        }
+
+        ArgumentNullException.ThrowIfNull(dateNaissance);
+
+        return new Personnel
+        {
+            Matricule = matricule,
+            Nom = nom,
+            Prenom = prenom,
+            DateRecrutement = dateRecrutement,
+            DateNaissance = dateNaissance,
+            Email = email,
+            Statut = statut,
+            Grade = grade,
+            EntiteId = entiteId
+        };
+    }
 }

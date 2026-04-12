@@ -1,4 +1,3 @@
-
 namespace DotNetTemplateClean.Application;
 
 public record CreatePersonnelCommand : IRequest<int>
@@ -9,16 +8,13 @@ public record CreatePersonnelCommand : IRequest<int>
     public DateTime? DateRecrutement { get; init; }
     public DateTime? DateNaissance { get; init; }
     public string Email { get; init; } = string.Empty;
-    public int EntiteId { get; init; } // ID de l'entité d'affectation principale
+    public int EntiteId { get; init; }
     public string? Statut { get; init; }
     public string? Grade { get; init; }
 
-    public bool CreateUser { get; init; }  // Option pour créer un compte utilisateur lié
-
-    // ID role pour l'attribution d'un rôle lors de la création du compte utilisateur
+    public bool CreateUser { get; init; }
     public string? UserRole { get; init; }
 
-    // Liste des affectations initiales
     public IList<CreateAffectationDto> Affectations { get; init; } = [];
 }
 
@@ -29,29 +25,25 @@ public class CreatePersonnelCommandHandler(IApplicationDbContext context, IUserS
 {
     public async Task<int> Handle(CreatePersonnelCommand request, CancellationToken cancellationToken)
     {
-        
         ArgumentNullException.ThrowIfNull(request, nameof(request));
 
         int personnelId = 0;
 
         await context.ExecuteInTransactionAsync(async () =>
         {
-            
-            //Instanciation de l'entité Personnel
-            var entity = new Personnel
-            {
-                Matricule = request.Matricule,
-                Nom = request.Nom,
-                Prenom = request.Prenom,
-                Email = request.Email,
-                DateRecrutement = request.DateRecrutement,
-                DateNaissance = request.DateNaissance,
-                Statut = request.Statut,
-                Grade = request.Grade,
-                EntiteId = request.EntiteId
-            };
+            var dateNaissance = DateNaissance.FromDateTime(request.DateNaissance);
 
-            // Création des affectations liées
+            var entity = Personnel.Create(
+                request.Matricule,
+                request.Nom,
+                request.Prenom,
+                request.DateRecrutement,
+                dateNaissance,
+                request.Email,
+                request.EntiteId,
+                request.Statut,
+                request.Grade);
+
             foreach (var aff in request.Affectations)
             {
                 entity.Affectations.Add(new AffectationPersonnel
@@ -61,11 +53,8 @@ public class CreatePersonnelCommandHandler(IApplicationDbContext context, IUserS
                     DateDebutAffectation = aff.DateDebut,
                     Nature = aff.Nature,
                     IsActive = true
-                    // Le PersonnelId sera injecté automatiquement par EF Core lors du Save
                 });
             }
-
-            
 
             if (request.CreateUser)
             {
@@ -76,10 +65,10 @@ public class CreatePersonnelCommandHandler(IApplicationDbContext context, IUserS
                     LastName = request.Nom,
                     DateRecrutement = request.DateRecrutement ?? DateTime.Now,
                     Email = request.Email,
-                    UserName = request.Email, // Utiliser l'email comme nom d'utilisateur
-                    Password = request.Prenom + "@2026", // Mot de passe par défaut (à changer à la première connexion)
+                    UserName = request.Email,
+                    Password = request.Prenom + "@2026",
                     UserRole = request.UserRole!,
-                    Service = request.EntiteId, // Associer l'utilisateur à l'entité d'affectation principale
+                    Service = request.EntiteId,
                     TwoFactorEnabled = false
                 };
 
@@ -87,20 +76,14 @@ public class CreatePersonnelCommandHandler(IApplicationDbContext context, IUserS
 
                 if (result.IsSuccess)
                 {
-                   
-                    // Associer le Personnel à l'utilisateur créé
                     entity.IdentityId = result.Value;
                     context.Personnels.Add(entity);
                     await context.SaveChangesAsync(cancellationToken);
-
-
                 }
                 else
                 {
-
-                    throw new InvalidOperationException($"Impossible de créer l'utilisateur: {result.ErrorMessage}");
+                    throw new InvalidOperationException($"Impossible de creer l'utilisateur: {result.ErrorMessage}");
                 }
-
             }
 
             personnelId = entity.Id;
@@ -108,6 +91,5 @@ public class CreatePersonnelCommandHandler(IApplicationDbContext context, IUserS
         }, cancellationToken);
 
         return personnelId;
-
     }
 }

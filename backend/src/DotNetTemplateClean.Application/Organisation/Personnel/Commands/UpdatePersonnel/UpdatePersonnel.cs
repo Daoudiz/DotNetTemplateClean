@@ -36,7 +36,7 @@ public class UpdatePersonnelCommandHandler(IApplicationDbContext context)
         updatedPersonnel.Nom = request.Nom;
         updatedPersonnel.Prenom = request.Prenom;
         updatedPersonnel.DateRecrutement = request.DateRecrutement;
-        updatedPersonnel.DateNaissance = request.DateNaissance;
+        updatedPersonnel.DateNaissance = DateNaissance.FromDateTime(request.DateNaissance);
         updatedPersonnel.Statut = request.Statut;
         updatedPersonnel.Grade = request.Grade;
 

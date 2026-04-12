@@ -87,7 +87,17 @@ public class OrganisationRelationsConfiguration :
         ArgumentNullException.ThrowIfNull(builder, nameof(builder));
         builder.Property(p => p.Statut)
              .HasConversion<string>();
-        
+
+        builder.Property(p => p.DateNaissance)
+            .HasConversion(
+                dateNaissance => dateNaissance == null
+                    ? (DateTime?)null
+                    : dateNaissance.ToDateTime(),
+                value => value.HasValue
+                    ? DateNaissance.FromDateTime(value.Value)
+                    : null)
+            .HasColumnName(nameof(Personnel.DateNaissance));
+
     }
 #pragma warning restore CA1822  
 }
