@@ -55,6 +55,15 @@ public class UpdatePersonnelCommandHandler(IApplicationDbContext context)
                 existingAff.DateDebutAffectation = aff.DateDebut;
                 existingAff.Nature = aff.Nature;
                 existingAff.DateFinAffectation = aff.DateFinAffectation;
+
+                if (aff.DateFinAffectation.HasValue)
+                {
+                    existingAff.IsActive = false;
+                }
+                else
+                {
+                    existingAff.IsActive = true;
+                }
             }
             else
             {
@@ -65,7 +74,8 @@ public class UpdatePersonnelCommandHandler(IApplicationDbContext context)
                     FonctionId = aff.FonctionId,
                     DateDebutAffectation = aff.DateDebut,
                     Nature = aff.Nature,
-                    DateFinAffectation = aff.DateFinAffectation
+                    DateFinAffectation = aff.DateFinAffectation,
+                    IsActive = !aff.DateFinAffectation.HasValue
                 });
             }
         }

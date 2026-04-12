@@ -20,6 +20,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, finalize, forkJoin, of } from 'rxjs';
 import { ButtonModule, ModalModule } from '@coreui/angular';
+import { IconModule } from '@coreui/icons-angular'; 
 
 import { TabsModule } from 'primeng/tabs';
 import { TreeSelectModule } from 'primeng/treeselect';
@@ -47,7 +48,9 @@ import { OrganizationTreeNode } from '../../../models/organisation/organisation-
 @Component({
     selector: 'app-personnel-create',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, TreeSelectModule, TabsModule, ModalModule, ButtonModule],
+    imports: [
+        CommonModule, ReactiveFormsModule, TreeSelectModule, 
+        TabsModule, ModalModule, ButtonModule, IconModule],
     templateUrl: './personnel-create.component.html',
     styleUrls: ['./personnel-create.component.scss']
 })
