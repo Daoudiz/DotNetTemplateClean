@@ -3,8 +3,18 @@
   max-width: min(1400px, 96vw);
 }
 
+:host ::ng-deep c-modal.personnel-modal-create .modal-dialog {
+  width: 94vw;
+  max-width: min(1280px, 94vw);
+}
+
 @media (max-width: 1199.98px) {
   :host ::ng-deep c-modal.personnel-modal-edit .modal-dialog {
+    width: auto;
+    max-width: 95vw;
+  }
+
+  :host ::ng-deep c-modal.personnel-modal-create .modal-dialog {
     width: auto;
     max-width: 95vw;
   }
