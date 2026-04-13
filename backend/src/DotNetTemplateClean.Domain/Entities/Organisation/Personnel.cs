@@ -75,6 +75,43 @@ public class Personnel : AuditableEntity<int>
         };
     }
 
+    public void UpdateAdministrativeData(
+        string matricule,
+        string nom,
+        string prenom,
+        DateOnly dateRecrutement,
+        DateNaissance dateNaissance,
+        string? statut,
+        string? grade)
+    {
+        if (string.IsNullOrWhiteSpace(matricule))
+        {
+            throw new DomainException("Le matricule est obligatoire.");
+        }
+
+        if (string.IsNullOrWhiteSpace(nom))
+        {
+            throw new DomainException("Le nom est obligatoire.");
+        }
+
+        if (string.IsNullOrWhiteSpace(prenom))
+        {
+            throw new DomainException("Le prenom est obligatoire.");
+        }
+
+        ArgumentNullException.ThrowIfNull(dateNaissance);
+
+        ValidateAgeAtRecruitment(dateNaissance, dateRecrutement);
+
+        Matricule = matricule;
+        Nom = nom;
+        Prenom = prenom;
+        DateRecrutement = dateRecrutement;
+        DateNaissance = dateNaissance;
+        Statut = statut;
+        Grade = grade;
+    }
+
     private static void ValidateAgeAtRecruitment(DateNaissance dateNaissance, DateOnly dateRecrutement)
     {
         var age = dateRecrutement.Year - dateNaissance.Value.Year;

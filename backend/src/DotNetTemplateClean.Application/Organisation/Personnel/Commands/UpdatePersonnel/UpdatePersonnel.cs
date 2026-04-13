@@ -31,16 +31,19 @@ public class UpdatePersonnelCommandHandler(IApplicationDbContext context)
 
         Guard.Against.NotFound(request.Id, updatedPersonnel);
 
-        // Mise a jour des proprietes
-        updatedPersonnel.Matricule = request.Matricule;
-        updatedPersonnel.Nom = request.Nom;
-        updatedPersonnel.Prenom = request.Prenom;
-        updatedPersonnel.DateRecrutement = request.DateRecrutement;
-        updatedPersonnel.DateNaissance = request.DateNaissance.HasValue
-            ? DateNaissance.Create(DateOnly.FromDateTime(request.DateNaissance.Value))
-            : null;
-        updatedPersonnel.Statut = request.Statut;
-        updatedPersonnel.Grade = request.Grade;
+        var dateNaissance = DateNaissance.Create(
+            request.DateNaissance.HasValue
+                ? DateOnly.FromDateTime(request.DateNaissance.Value)
+                : null);
+
+        updatedPersonnel.UpdateAdministrativeData(
+            request.Matricule,
+            request.Nom,
+            request.Prenom,
+            request.DateRecrutement,
+            dateNaissance,
+            request.Statut,
+            request.Grade);
 
         var existing = updatedPersonnel.Affectations.ToList();
 
