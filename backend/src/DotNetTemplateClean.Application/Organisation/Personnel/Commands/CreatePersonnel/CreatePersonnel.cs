@@ -84,15 +84,11 @@ public class CreatePersonnelCommandHandler(IApplicationDbContext context, IUserS
                 if (result.IsSuccess)
                 {
                     entity.IdentityId = result.Value;
-                    context.Personnels.Add(entity);
-                    await context.SaveChangesAsync(cancellationToken);
-                }
-                else
-                {
-                    throw new InvalidOperationException($"Impossible de creer l'utilisateur: {result.ErrorMessage}");
                 }
             }
 
+            context.Personnels.Add(entity);
+            await context.SaveChangesAsync(cancellationToken);
             personnelId = entity.Id;
 
         }, cancellationToken);
