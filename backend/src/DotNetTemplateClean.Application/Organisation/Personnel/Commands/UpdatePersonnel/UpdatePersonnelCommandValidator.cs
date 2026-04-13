@@ -5,8 +5,10 @@ public class UpdatePersonnelCommandValidator : AbstractValidator<UpdatePersonnel
     public UpdatePersonnelCommandValidator()
     {
         RuleFor(v => v.Affectations)
-            .MustHaveUniqueEntiteFonctionPairs<UpdatePersonnelCommand, IList<UpdateAffectationDto>, UpdateAffectationDto>(
+            .MustNotHaveOverlappingEntiteFonctionRanges<UpdatePersonnelCommand, IList<UpdateAffectationDto>, UpdateAffectationDto>(
                 affectation => affectation.EntiteId,
-                affectation => affectation.FonctionId);
+                affectation => affectation.FonctionId,
+                affectation => affectation.DateDebut,
+                affectation => affectation.DateFinAffectation);
     }
 }

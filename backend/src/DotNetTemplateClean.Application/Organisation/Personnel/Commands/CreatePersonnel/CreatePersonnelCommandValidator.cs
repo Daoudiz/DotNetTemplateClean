@@ -60,9 +60,11 @@ public class CreatePersonnelCommandValidator : AbstractValidator<CreatePersonnel
         });
 
         RuleFor(v => v.Affectations)
-            .MustHaveUniqueEntiteFonctionPairs<CreatePersonnelCommand, IList<CreateAffectationDto>, CreateAffectationDto>(
+            .MustNotHaveOverlappingEntiteFonctionRanges<CreatePersonnelCommand, IList<CreateAffectationDto>, CreateAffectationDto>(
                 affectation => affectation.EntiteId,
-                affectation => affectation.FonctionId);
+                affectation => affectation.FonctionId,
+                affectation => affectation.DateDebut,
+                _ => null);
     }
 
     public async Task<bool> BeUniqueMatricule(string matricule, CancellationToken cancellationToken)
