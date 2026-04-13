@@ -58,6 +58,11 @@ public class CreatePersonnelCommandValidator : AbstractValidator<CreatePersonnel
             aff.RuleFor(x => x.FonctionId).GreaterThan(0);
             aff.RuleFor(x => x.DateDebut).NotEmpty();
         });
+
+        RuleFor(v => v.Affectations)
+            .MustHaveUniqueEntiteFonctionPairs<CreatePersonnelCommand, IList<CreateAffectationDto>, CreateAffectationDto>(
+                affectation => affectation.EntiteId,
+                affectation => affectation.FonctionId);
     }
 
     public async Task<bool> BeUniqueMatricule(string matricule, CancellationToken cancellationToken)

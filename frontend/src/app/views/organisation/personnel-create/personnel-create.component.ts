@@ -15,6 +15,7 @@ import {
     FormArray,
     FormBuilder,
     ReactiveFormsModule,
+    ValidationErrors,
     Validators
 } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -55,6 +56,7 @@ import { OrganizationTreeNode } from '../../../models/organisation/organisation-
     styleUrls: ['./personnel-create.component.scss']
 })
 export class PersonnelCreateComponent {
+    private static readonly overlappingAffectationsErrorKey = 'overlappingAffectations';
 
     private readonly fb = inject(FormBuilder);
     private readonly personnelService = inject(PersonnelService);
@@ -76,6 +78,8 @@ export class PersonnelCreateComponent {
     readonly statuts = signal<StatutPersonnel[]>([]);
     readonly roles = signal<any[]>([]);
     private readonly defaultNature = 'Titulaire';
+    private readonly overlappingAffectationsMessage =
+        'Un personnel ne peut pas avoir deux affectations avec la meme entite et la meme fonction sur des periodes qui se chevauchent.';
     readonly isEndAffectationDialogOpen = signal(false);
     readonly selectedAffectationIndex = signal<number | null>(null);
     readonly endAffectationDate = signal('');
@@ -104,7 +108,7 @@ export class PersonnelCreateComponent {
         entiteId: [null as OrganizationTreeNode | null, Validators.required],
         createUser: [false],
         userRole: [{ value: '', disabled: true }],
-        affectations: this.fb.array([])
+        affectations: this.createAffectationsFormArray()
     });
 
     get affectationsFormArray(): FormArray {
@@ -246,13 +250,13 @@ export class PersonnelCreateComponent {
 
     addAffectation(): void {
         this.affectationsFormArray.push(this.createAffectationGroup());
-        this.formStatusChanged.update((value) => value + 1);
+        this.refreshAffectationsValidation();
     }
 
     removeAffectation(index: number): void {
         if (this.affectationsFormArray.length > 1) {
             this.affectationsFormArray.removeAt(index);
-            this.formStatusChanged.update((value) => value + 1);
+            this.refreshAffectationsValidation();
             this.notification.info('Affectation supprimee');
         } else {
             this.notification.warn('Au moins une affectation est requise');
@@ -317,12 +321,32 @@ export class PersonnelCreateComponent {
         }
 
         affectation.patchValue({ dateFinAffectation: endDate });
-        this.formStatusChanged.update((value) => value + 1);
+        this.refreshAffectationsValidation();
         this.closeEndAffectationDialog();
     }
 
     getAffectationControl(index: number, controlName: string): AbstractControl | null {
         return this.affectationsFormArray.at(index).get(controlName);
+    }
+
+    hasOverlappingAffectationsError(): boolean {
+        return this.affectationsFormArray.hasError(PersonnelCreateComponent.overlappingAffectationsErrorKey);
+    }
+
+    getOverlappingAffectationsErrorMessage(): string {
+        const error = this.affectationsFormArray.getError(PersonnelCreateComponent.overlappingAffectationsErrorKey) as
+            | { message?: string }
+            | undefined;
+
+        return error?.message ?? this.overlappingAffectationsMessage;
+    }
+
+    isOverlappingAffectation(index: number): boolean {
+        const error = this.affectationsFormArray.getError(PersonnelCreateComponent.overlappingAffectationsErrorKey) as
+            | { overlappingIndices?: number[] }
+            | undefined;
+
+        return error?.overlappingIndices?.includes(index) ?? false;
     }
 
     getSelectedNodeLabel(control: AbstractControl | null): string {
@@ -388,7 +412,11 @@ export class PersonnelCreateComponent {
         if (this.form.invalid || this.affectationsFormArray.length === 0) {
             this.form.markAllAsTouched();
             this.affectationsFormArray.markAllAsTouched();
-            this.notification.error('Veuillez remplir tous les champs requis');
+            this.notification.error(
+                this.hasOverlappingAffectationsError()
+                    ? this.getOverlappingAffectationsErrorMessage()
+                    : 'Veuillez remplir tous les champs requis'
+            );
             return;
         }
 
@@ -580,7 +608,7 @@ export class PersonnelCreateComponent {
     }
 
     private initializeEditAffectations(personnel: PersonnelDetailsDto): void {
-        const affectationsArray = this.fb.array([]);
+        const affectationsArray = this.createAffectationsFormArray();
         this.form.setControl('affectations', affectationsArray as unknown as FormArray);
 
         const affectationGroups = personnel.affectations.map((affectation) => {
@@ -612,12 +640,19 @@ export class PersonnelCreateComponent {
         }
 
         this.applyEditModeReadOnlyState();
+        this.refreshAffectationsValidation(false);
     }
 
     private clearAffectations(): void {
         while (this.affectationsFormArray.length > 0) {
             this.affectationsFormArray.removeAt(0);
         }
+    }
+
+    private createAffectationsFormArray(): FormArray {
+        return this.fb.array([], {
+            validators: [(control: AbstractControl) => this.validateOverlappingAffectations(control)]
+        });
     }
 
     private createAffectationGroup(value?: {
@@ -636,6 +671,77 @@ export class PersonnelCreateComponent {
             nature: [value?.nature ?? this.defaultNature, Validators.required],
             dateFinAffectation: [value?.dateFinAffectation ?? '']
         });
+    }
+
+    private validateOverlappingAffectations(control: AbstractControl): ValidationErrors | null {
+        if (!(control instanceof FormArray)) {
+            return null;
+        }
+
+        const overlapIndices = new Set<number>();
+        const groupedAffectations = new Map<
+            string,
+            Array<{ index: number; startDate: number; endDate: number }>
+        >();
+
+        control.controls.forEach((group, rowIndex) => {
+            const entiteId = this.extractNodeId(group.get('entiteId')?.value);
+            const fonctionId = this.extractNodeId(group.get('fonctionId')?.value);
+            const startDateValue = group.get('dateDebutAffectation')?.value as string | null | undefined;
+            const endDateValue = group.get('dateFinAffectation')?.value as string | null | undefined;
+            const startDate = this.parseDateInput(startDateValue);
+            const endDate = this.parseDateInput(endDateValue) ?? Number.POSITIVE_INFINITY;
+
+            if (!entiteId || !fonctionId || startDate === null) {
+                return;
+            }
+
+            const pairKey = `${entiteId}:${fonctionId}`;
+            const rowsForPair = groupedAffectations.get(pairKey) ?? [];
+
+            for (const existingRow of rowsForPair) {
+                if (this.areRangesOverlapping(startDate, endDate, existingRow.startDate, existingRow.endDate)) {
+                    overlapIndices.add(existingRow.index);
+                    overlapIndices.add(rowIndex);
+                }
+            }
+
+            rowsForPair.push({
+                index: rowIndex,
+                startDate,
+                endDate
+            });
+            groupedAffectations.set(pairKey, rowsForPair);
+        });
+
+        if (overlapIndices.size === 0) {
+            return null;
+        }
+
+        return {
+            [PersonnelCreateComponent.overlappingAffectationsErrorKey]: {
+                overlappingIndices: Array.from(overlapIndices).sort((left, right) => left - right),
+                message: this.overlappingAffectationsMessage
+            }
+        };
+    }
+
+    private areRangesOverlapping(
+        firstStart: number,
+        firstEnd: number,
+        secondStart: number,
+        secondEnd: number
+    ): boolean {
+        return firstStart <= secondEnd && secondStart <= firstEnd;
+    }
+
+    private parseDateInput(value: string | null | undefined): number | null {
+        if (!value) {
+            return null;
+        }
+
+        const parsedValue = Date.parse(`${value}T00:00:00Z`);
+        return Number.isNaN(parsedValue) ? null : parsedValue;
     }
 
     private applyEditModeReadOnlyState(): void {
@@ -760,6 +866,11 @@ export class PersonnelCreateComponent {
 
         const extractedValue = Number(trailingDigitsMatch[1]);
         return Number.isNaN(extractedValue) ? null : extractedValue;
+    }
+
+    private refreshAffectationsValidation(emitEvent = true): void {
+        this.affectationsFormArray.updateValueAndValidity({ emitEvent });
+        this.formStatusChanged.update((value) => value + 1);
     }
 
     private getTodayDate(): string {

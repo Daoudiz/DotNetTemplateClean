@@ -164,6 +164,13 @@
           </button>
         </div>
 
+        @if (hasOverlappingAffectationsError()) {
+          <div class="alert alert-danger mb-3" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            {{ getOverlappingAffectationsErrorMessage() }}
+          </div>
+        }
+
         <div class="table-responsive">
           <table class="table table-sm table-bordered">
             <thead class="table-light">
@@ -189,6 +196,8 @@
                       appendTo="body"
                       dataKey="key"
                       [filter]="true"
+                      [class.ng-invalid]="(getAffectationControl(i, 'entiteId')?.invalid && getAffectationControl(i, 'entiteId')?.touched) || isOverlappingAffectation(i)"
+                      [class.ng-touched]="(getAffectationControl(i, 'entiteId')?.touched ?? false) || isOverlappingAffectation(i)"
                       [disabled]="isAffectationReadOnly(i)">
                     </p-treeSelect>
                     @if (getAffectationControl(i, 'entiteId')?.invalid && getAffectationControl(i, 'entiteId')?.touched) {
@@ -207,11 +216,18 @@
                       appendTo="body"
                       dataKey="key"
                       [filter]="true"
+                      [class.ng-invalid]="(getAffectationControl(i, 'fonctionId')?.invalid && getAffectationControl(i, 'fonctionId')?.touched) || isOverlappingAffectation(i)"
+                      [class.ng-touched]="(getAffectationControl(i, 'fonctionId')?.touched ?? false) || isOverlappingAffectation(i)"
                       [disabled]="isAffectationReadOnly(i)">
                     </p-treeSelect>
                     @if (getAffectationControl(i, 'fonctionId')?.invalid && getAffectationControl(i, 'fonctionId')?.touched) {
                       <div class="invalid-feedback d-block">
                         Fonction requise
+                      </div>
+                    }
+                    @if (isOverlappingAffectation(i)) {
+                      <div class="invalid-feedback d-block">
+                        Cette affectation chevauche une autre periode pour la meme entite/fonction.
                       </div>
                     }
                   </td>
