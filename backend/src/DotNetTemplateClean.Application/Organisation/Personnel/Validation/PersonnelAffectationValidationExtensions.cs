@@ -4,6 +4,24 @@ public static class PersonnelAffectationValidationExtensions
 {
     private const string OverlappingAffectationsMessage =
         "Un personnel ne peut pas avoir deux affectations avec le meme couple entiteId/fonctionId sur des periodes qui se chevauchent.";
+    public const string MissingActiveInitialEntiteAffectationMessage =
+        "Le personnel doit avoir au moins une affectation active dans son entite initiale.";
+
+    public static bool HasActiveAffectationForEntite<TAffectation>(
+        IEnumerable<TAffectation>? affectations,
+        int entiteId,
+        Func<TAffectation, int> entiteIdSelector,
+        Func<TAffectation, DateTime?> dateFinSelector)
+    {
+        if (entiteId <= 0 || affectations is null)
+        {
+            return false;
+        }
+
+        return affectations.Any(affectation =>
+            entiteIdSelector(affectation) == entiteId
+            && dateFinSelector(affectation) is null);
+    }
 
     public static IRuleBuilderOptions<TCommand, TCollection> MustNotHaveOverlappingEntiteFonctionRanges<TCommand, TCollection, TAffectation>(
         this IRuleBuilder<TCommand, TCollection> ruleBuilder,

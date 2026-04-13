@@ -57,6 +57,7 @@ import { OrganizationTreeNode } from '../../../models/organisation/organisation-
 })
 export class PersonnelCreateComponent {
     private static readonly overlappingAffectationsErrorKey = 'overlappingAffectations';
+    private static readonly missingInitialEntiteAffectationErrorKey = 'missingInitialEntiteAffectation';
 
     private readonly fb = inject(FormBuilder);
     private readonly personnelService = inject(PersonnelService);
@@ -80,6 +81,8 @@ export class PersonnelCreateComponent {
     private readonly defaultNature = 'Titulaire';
     private readonly overlappingAffectationsMessage =
         'Un personnel ne peut pas avoir deux affectations avec la meme entite et la meme fonction sur des periodes qui se chevauchent.';
+    private readonly missingInitialEntiteAffectationMessage =
+        "Au moins une affectation doit correspondre a l'entite initiale du personnel.";
     readonly isEndAffectationDialogOpen = signal(false);
     readonly selectedAffectationIndex = signal<number | null>(null);
     readonly endAffectationDate = signal('');
@@ -109,6 +112,8 @@ export class PersonnelCreateComponent {
         createUser: [false],
         userRole: [{ value: '', disabled: true }],
         affectations: this.createAffectationsFormArray()
+    }, {
+        validators: [(control: AbstractControl) => this.validateInitialEntiteAffectation(control)]
     });
 
     get affectationsFormArray(): FormArray {
@@ -127,7 +132,9 @@ export class PersonnelCreateComponent {
 
     readonly isStep2Valid = computed(() => {
         this.formStatusChanged();
-        return this.affectationsFormArray.length > 0 && this.affectationsFormArray.valid;
+        return this.affectationsFormArray.length > 0
+            && this.affectationsFormArray.valid
+            && !this.hasMissingInitialEntiteAffectationError();
     });
 
     readonly canGoNext = computed(() => {
@@ -333,12 +340,24 @@ export class PersonnelCreateComponent {
         return this.affectationsFormArray.hasError(PersonnelCreateComponent.overlappingAffectationsErrorKey);
     }
 
+    hasMissingInitialEntiteAffectationError(): boolean {
+        return this.form.hasError(PersonnelCreateComponent.missingInitialEntiteAffectationErrorKey);
+    }
+
     getOverlappingAffectationsErrorMessage(): string {
         const error = this.affectationsFormArray.getError(PersonnelCreateComponent.overlappingAffectationsErrorKey) as
             | { message?: string }
             | undefined;
 
         return error?.message ?? this.overlappingAffectationsMessage;
+    }
+
+    getMissingInitialEntiteAffectationErrorMessage(): string {
+        const error = this.form.getError(PersonnelCreateComponent.missingInitialEntiteAffectationErrorKey) as
+            | { message?: string }
+            | undefined;
+
+        return error?.message ?? this.missingInitialEntiteAffectationMessage;
     }
 
     isOverlappingAffectation(index: number): boolean {
@@ -415,6 +434,8 @@ export class PersonnelCreateComponent {
             this.notification.error(
                 this.hasOverlappingAffectationsError()
                     ? this.getOverlappingAffectationsErrorMessage()
+                    : this.hasMissingInitialEntiteAffectationError()
+                        ? this.getMissingInitialEntiteAffectationErrorMessage()
                     : 'Veuillez remplir tous les champs requis'
             );
             return;
@@ -722,6 +743,30 @@ export class PersonnelCreateComponent {
             [PersonnelCreateComponent.overlappingAffectationsErrorKey]: {
                 overlappingIndices: Array.from(overlapIndices).sort((left, right) => left - right),
                 message: this.overlappingAffectationsMessage
+            }
+        };
+    }
+
+    private validateInitialEntiteAffectation(control: AbstractControl): ValidationErrors | null {
+        const initialEntiteId = this.extractNodeId(control.get('entiteId')?.value);
+        const affectationsControl = control.get('affectations');
+
+        if (initialEntiteId == null || !(affectationsControl instanceof FormArray)) {
+            return null;
+        }
+
+        const hasAffectationInInitialEntite = affectationsControl.controls.some((group) => {
+            const affectationEntiteId = this.extractNodeId(group.get('entiteId')?.value);
+            return affectationEntiteId === initialEntiteId;
+        });
+
+        if (hasAffectationInInitialEntite) {
+            return null;
+        }
+
+        return {
+            [PersonnelCreateComponent.missingInitialEntiteAffectationErrorKey]: {
+                message: this.missingInitialEntiteAffectationMessage
             }
         };
     }

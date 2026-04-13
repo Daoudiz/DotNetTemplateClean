@@ -65,6 +65,14 @@ public class CreatePersonnelCommandValidator : AbstractValidator<CreatePersonnel
                 affectation => affectation.FonctionId,
                 affectation => affectation.DateDebut,
                 _ => null);
+
+        RuleFor(v => v)
+            .Must(command => PersonnelAffectationValidationExtensions.HasActiveAffectationForEntite(
+                command.Affectations,
+                command.EntiteId,
+                affectation => affectation.EntiteId,
+                _ => null))
+            .WithMessage(PersonnelAffectationValidationExtensions.MissingActiveInitialEntiteAffectationMessage);
     }
 
     public async Task<bool> BeUniqueMatricule(string matricule, CancellationToken cancellationToken)

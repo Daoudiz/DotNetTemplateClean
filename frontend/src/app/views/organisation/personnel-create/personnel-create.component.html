@@ -170,6 +170,12 @@
             {{ getOverlappingAffectationsErrorMessage() }}
           </div>
         }
+        @if (hasMissingInitialEntiteAffectationError()) {
+          <div class="alert alert-danger mb-3" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            {{ getMissingInitialEntiteAffectationErrorMessage() }}
+          </div>
+        }
 
         <div class="table-responsive">
           <table class="table table-sm table-bordered">
