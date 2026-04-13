@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using DotNetTemplateClean.Application;
+using DotNetTemplateClean.Domain;
 using Ardalis.GuardClauses;
 
 namespace DotNetTemplateClean.WebAPI;
@@ -22,6 +23,13 @@ public class ProblemDetailsExceptionHandler : IExceptionHandler
             {
                 Status = StatusCodes.Status400BadRequest,
                 Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1"
+            }),
+            DomainException de => (StatusCodes.Status400BadRequest, new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+                Title = "Regle metier invalide",
+                Detail = de.Message
             }),
             NotFoundException ne => (StatusCodes.Status404NotFound, new ProblemDetails
             {
