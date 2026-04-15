@@ -17,9 +17,14 @@ Codex should know:
 - Naming conventions:
   - DTOs use PascalCase.
   - Angular models should use camelCase.
+- Testing guidelines:
+	- All unit and integration tests must use NUnit
+	- Domain layer tests (business rules, value objects, entities) must be located in:src/Domain.UnitTests
+	- Application layer tests (handlers, validators, services) must be located in: src/Application.UnitTests
+	- Tests must always be created in the correct layer-specific test project
+	- Do not place tests in incorrect folders or mix domain and application tests
 
 ## Angular Styling Rules (Strict)
-
 - Inline styles in HTML templates are strictly forbidden.
 - All styles must be moved to the component SCSS file.
 - Always use `styleUrls` in Angular components.
