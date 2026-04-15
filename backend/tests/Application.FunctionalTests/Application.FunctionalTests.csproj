@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -9,19 +9,23 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Infrastructure\**" />
-    <EmbeddedResource Remove="Infrastructure\**" />
-    <None Remove="Infrastructure\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="coverlet.collector">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="Moq" />
     <PackageReference Include="NUnit" />
     <PackageReference Include="NUnit3TestAdapter" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\DotNetTemplateClean.Application\DotNetTemplateClean.Application.csproj" />
+    <ProjectReference Include="..\..\src\DotNetTemplateClean.Domain\DotNetTemplateClean.Domain.csproj" />
+    <ProjectReference Include="..\..\src\DotNetTemplateClean.Infrastructure\DotNetTemplateClean.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\DotNetTemplateClean.WebAPI\DotNetTemplateClean.WebAPI.csproj" />
   </ItemGroup>
 
   <ItemGroup>

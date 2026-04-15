@@ -1,12 +1,13 @@
-using CleanArchWebApi.Domain.Constants;
-using CleanArchWebApi.Infrastructure.Data;
-using CleanArchWebApi.Infrastructure.Identity;
+using DotNetTemplateClean.Domain;
+using DotNetTemplateClean.Infrastructure;
+
 using MediatR;
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CleanArchWebApi.Application.FunctionalTests.Infrastructure;
+namespace DotNetTemplateClean.Application.FunctionalTests.Infrastructure;
 
 public static class TestApp
 {
@@ -16,18 +17,14 @@ public static class TestApp
     public static async Task<TResponse> SendAsync<TResponse>(IRequest<TResponse> request)
     {
         using var scope = FunctionalTestSetup.ScopeFactory.CreateScope();
-
         var mediator = scope.ServiceProvider.GetRequiredService<ISender>();
-
         return await mediator.Send(request);
     }
 
     public static async Task SendAsync(IBaseRequest request)
     {
         using var scope = FunctionalTestSetup.ScopeFactory.CreateScope();
-
         var mediator = scope.ServiceProvider.GetRequiredService<ISender>();
-
         await mediator.Send(request);
     }
 
@@ -42,16 +39,26 @@ public static class TestApp
 
     public static async Task<string> RunAsAdministratorAsync()
     {
-        return await RunAsUserAsync("administrator@local", "Administrator1234!", [Roles.Administrator]);
+        return await RunAsUserAsync("administrator@local", "Administrator1234!", ["Admin"]);
     }
 
     public static async Task<string> RunAsUserAsync(string userName, string password, string[] roles)
     {
+        ArgumentNullException.ThrowIfNull(roles);
+
         using var scope = FunctionalTestSetup.ScopeFactory.CreateScope();
 
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-
-        var user = new ApplicationUser { UserName = userName, Email = userName };
+        var user = new ApplicationUser
+        {
+            UserName = userName,
+            Email = userName,
+            FirstName = "Test",
+            LastName = "User",
+            Matricule = 999999,
+            EntiteId = 1,
+            DateRecrutement = DateOnly.FromDateTime(DateTime.UtcNow)
+        };
 
         var result = await userManager.CreateAsync(user, password);
 
@@ -67,16 +74,15 @@ public static class TestApp
             await userManager.AddToRolesAsync(user, roles);
         }
 
-        if (result.Succeeded)
+        if (!result.Succeeded)
         {
-            _userId = user.Id;
-            _roles = [..roles];
-            return _userId;
+            var errors = string.Join(Environment.NewLine, result.Errors.Select(e => e.Description));
+            throw new InvalidOperationException($"Unable to create {userName}.{Environment.NewLine}{errors}");
         }
 
-        var errors = string.Join(Environment.NewLine, result.ToApplicationResult().Errors);
-
-        throw new Exception($"Unable to create {userName}.{Environment.NewLine}{errors}");
+        _userId = user.Id;
+        _roles = new List<string>(roles);
+        return _userId;
     }
 
     public static async Task ResetState()
@@ -94,9 +100,7 @@ public static class TestApp
         where TEntity : class
     {
         using var scope = FunctionalTestSetup.ScopeFactory.CreateScope();
-
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
         return await context.FindAsync<TEntity>(keyValues);
     }
 
@@ -104,18 +108,16 @@ public static class TestApp
         where TEntity : class
     {
         using var scope = FunctionalTestSetup.ScopeFactory.CreateScope();
-
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         context.Add(entity);
-
         await context.SaveChangesAsync();
     }
 
-    public static async Task<int> CountAsync<TEntity>() where TEntity : class
+    public static async Task<int> CountAsync<TEntity>()
+        where TEntity : class
     {
         using var scope = FunctionalTestSetup.ScopeFactory.CreateScope();
-
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         return await context.Set<TEntity>().CountAsync();

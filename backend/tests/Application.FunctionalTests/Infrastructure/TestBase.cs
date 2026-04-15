@@ -1,4 +1,4 @@
-namespace CleanArchWebApi.Application.FunctionalTests.Infrastructure;
+namespace DotNetTemplateClean.Application.FunctionalTests.Infrastructure;
 
 public abstract class TestBase
 {

@@ -1,36 +1,30 @@
-using Microsoft.Data.Sqlite;
-using Respawn;
-using System.Data.Common;
+using DotNetTemplateClean.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace CleanArchWebApi.Application.FunctionalTests.Infrastructure;
+namespace DotNetTemplateClean.Application.FunctionalTests.Infrastructure;
 
 internal sealed class DatabaseResetter : IAsyncDisposable
 {
-    private readonly DbConnection _connection;
-    private readonly Respawner _respawner;
+    private readonly IServiceScopeFactory _scopeFactory;
 
-    private DatabaseResetter(DbConnection connection, Respawner respawner)
+    private DatabaseResetter(IServiceScopeFactory scopeFactory)
     {
-        _connection = connection;
-        _respawner = respawner;
+        _scopeFactory = scopeFactory;
     }
 
-    public static async Task<DatabaseResetter> CreateAsync(string connectionString)
+    public static Task<DatabaseResetter> CreateAsync(IServiceScopeFactory scopeFactory)
     {
-        var connection = new SqliteConnection(connectionString);
-
-        await connection.OpenAsync();
-        var respawner = await Respawner.CreateAsync(connection);
-        await connection.CloseAsync();
-        return new DatabaseResetter(connection, respawner);
+        return Task.FromResult(new DatabaseResetter(scopeFactory));
     }
 
     public async Task ResetAsync()
     {
-        await _connection.OpenAsync();
-        await _respawner.ResetAsync(_connection);
-        await _connection.CloseAsync();
+        using var scope = _scopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        await context.Database.EnsureDeletedAsync();
+        await context.Database.EnsureCreatedAsync();
     }
 
-    public async ValueTask DisposeAsync() => await _connection.DisposeAsync();
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }
