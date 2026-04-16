@@ -18,7 +18,6 @@ import { AsyncPipe } from '@angular/common';
   standalone: true,
   imports: [
     FormsModule,
-    RouterLink,
     ContainerComponent,
     RowComponent,
     ColComponent, 
