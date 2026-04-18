@@ -44,11 +44,8 @@ internal class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextIniti
         {
             try
             {
-                // Vérifie s'il y a des migrations en attente et les applique
-                if (context.Database.IsSqlServer()) // Optionnel : vérifie le provider
-                {
                     await context.Database.MigrateAsync();
-                }
+               
             }
             catch (Exception ex)
             {

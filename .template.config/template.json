@@ -16,17 +16,46 @@
     "language": "C#",
     "type": "project"
   },
+  "symbols": {
+    "Database": {
+      "type": "parameter",
+      "datatype": "choice",
+      "defaultValue": "sqlserver",
+      "choices": [
+        {
+          "choice": "sqlserver",
+          "description": "Use SQL Server provider"
+        },
+        {
+          "choice": "postgresql",
+          "description": "Use PostgreSQL provider"
+        }
+      ]
+    },
+    "UseSqlServer": {
+      "type": "computed",
+      "value": "(Database == \"sqlserver\")"
+    },
+    "UsePostgreSQL": {
+      "type": "computed",
+      "value": "(Database == \"postgresql\")"
+    }
+  },
   "sources": [
     {
       "source": "./",
       "target": "./",
       "exclude": [
-        ".git/**",
+		".git/**",
         ".github/**",
-        ".vs/**",
+        "**/.git/**",
+        "**/.github/**",
+        "**/.vs/**",
         ".template.config/**",
         "**/[Bb]in/**",
         "**/[Oo]bj/**",
+		"**/Migrations",
+		"**/Migrations/**",
         "**/node_modules/**",
         "**/dist/**"
       ],

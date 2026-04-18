@@ -3,16 +3,15 @@ using DotNetTemplateClean.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Hosting;
 
+
 namespace Microsoft.Extensions.DependencyInjection;
 
 public static class DependencyInjection
 {
-
     public static void AddInfrastructureServices(this IHostApplicationBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder, nameof(builder));
 
-       
         // =========================================================================
         //                              JWT Authentication
         // =========================================================================
@@ -22,8 +21,6 @@ public static class DependencyInjection
         var jwtKey = builder.Configuration["Jwt:Key"];
         var jwtIssuer = builder.Configuration["Jwt:Issuer"];
         var jwtAudience = builder.Configuration["Jwt:Audience"]; // Récupère la nouvelle ligne
-
-
 
         builder.Services
             .AddAuthentication(options =>
@@ -38,7 +35,6 @@ public static class DependencyInjection
                 // Il sera 'false' en local (Dev) et 'true' sur le serveur (Prod)
                 options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
 
-
                 options.SaveToken = true;
 
                 options.TokenValidationParameters = new TokenValidationParameters
@@ -49,9 +45,7 @@ public static class DependencyInjection
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = jwtIssuer,
                     ValidAudience = jwtAudience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!)
-                    ),
-
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!)),
                     ClockSkew = TimeSpan.Zero // pas de tolérance sur l'expiration
                 };
 
@@ -65,11 +59,11 @@ public static class DependencyInjection
                 };
             });
 
-       
         //Configure the ConnectionString and DbContext class
         var connectionString = builder.Configuration.GetConnectionString("DBConnection");
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
         {
+#if UseSqlServer
             options.UseSqlServer(connectionString, sqlOptions =>
             {
                 sqlOptions.EnableRetryOnFailure(
@@ -78,12 +72,24 @@ public static class DependencyInjection
                     errorNumbersToAdd: null          // codes SQL spécifiques à ajouter
                 );
             });
+#elif UsePostgreSQL
+            options.UseNpgsql(connectionString, npgsqlOptions =>
+            {
+                npgsqlOptions.EnableRetryOnFailure(
+                    maxRetryCount: 5,
+                    maxRetryDelay: TimeSpan.FromSeconds(10),
+                    errorCodesToAdd: null
+                );
+            });
+#else
+            // Default to SQL Server if no symbol provided
+            options.UseSqlServer(connectionString);
+#endif
         });
 
         builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
         builder.Services.AddScoped<ApplicationDbContextInitialiser>();
-
 
         //Configure Identity
         builder.Services.AddIdentityCore<ApplicationUser>()
@@ -104,3 +110,4 @@ public static class DependencyInjection
         builder.Services.AddScoped<IRoleService, RoleService>();
     }
 }
+

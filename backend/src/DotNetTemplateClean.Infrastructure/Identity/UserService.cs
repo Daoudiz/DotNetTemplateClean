@@ -1,8 +1,8 @@
 
+using System.Data.Common;
 using System.Globalization;
 
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Options;
 
 namespace DotNetTemplateClean.Infrastructure;
@@ -286,7 +286,7 @@ public class UserService(ApplicationDbContext  context,
 
             return ServiceResult.Success<string>("Utilisateur mis à jour avec succès.");
         }
-        catch (Exception ex) when (ex is DbUpdateException or SqlException)
+        catch (Exception ex) when (ex is DbUpdateException or DbException)
         {
             // En cas d'erreur technique imprévue (ex: perte SQL), on annule tout
             await transaction.RollbackAsync(ct);
