@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "DotNetTemplateClean",
+  "classifications": [
+    "Web",
+    "API",
+    "Angular"
+  ],
+  "name": "DotNet + Angular Full Stack Template",
+  "description": "Reusable full stack template with a .NET backend and an Angular frontend. Backend is renamed from template name; frontend is copied unchanged.",
+  "identity": "DotNetTemplateClean.FullStack",
+  "shortName": "ca-angular",
+  "sourceName": "DotNetTemplateClean",
+  "preferNameDirectory": true,
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sources": [
+    {
+      "source": "./",
+      "target": "./",
+      "exclude": [
+        ".git/**",
+        ".github/**",
+        ".vs/**",
+        ".template.config/**",
+        "**/[Bb]in/**",
+        "**/[Oo]bj/**",
+        "**/node_modules/**",
+        "**/dist/**"
+      ],
+      "copyOnly": [
+        "frontend/**"
+      ]
+    }
+  ]
+}
