@@ -51,6 +51,7 @@
         "**/.git/**",
         "**/.github/**",
         "**/.vs/**",
+		"**/.angular/**",
         ".template.config/**",
         "**/[Bb]in/**",
         "**/[Oo]bj/**",
