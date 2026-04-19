@@ -29,13 +29,13 @@ dotnet new install .
 ### 🌐 2) Install from GitHub (specific tag/version)
 
 ```bash
-dotnet new install https://github.com/Daoudiz/DotNetTemplateClean::<tag>
+dotnet new install https://github.com/Daoudiz/DotNetTemplateClean
 ```
 
 Example:
 
 ```bash
-dotnet new install https://github.com/Daoudiz/DotNetTemplateClean::v1.0.0
+dotnet new install https://github.com/Daoudiz/DotNetTemplateClean
 ```
 
 ## ▶️ Usage
