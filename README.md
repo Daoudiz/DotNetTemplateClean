@@ -23,19 +23,9 @@ It is designed to accelerate new project setup while keeping backend and fronten
 ### 🧩 1) Install template locally (from this repository)
 
 ```bash
+git clone https://github.com/Daoudiz/DotNetTemplateClean
+cd DotNetTemplateClean
 dotnet new install .
-```
-
-### 🌐 2) Install from GitHub (specific tag/version)
-
-```bash
-dotnet new install https://github.com/Daoudiz/DotNetTemplateClean
-```
-
-Example:
-
-```bash
-dotnet new install https://github.com/Daoudiz/DotNetTemplateClean
 ```
 
 ## ▶️ Usage
