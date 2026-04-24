@@ -20,8 +20,13 @@ public class LoggingBehaviour<TRequest>(ILogger<TRequest> logger, IUser user, IU
         }
 #pragma warning disable CA1848 // Template should be a static expression
 #pragma warning disable CA1873 // Template should be a static expression
-        logger.LogInformation("CleanArchitecture Request: {Name} {@UserId} {@UserName} {@Request}",
-            requestName, userId, userName, request);
+        logger.LogInformation(
+            "CleanArchitecture Request: {RequestName} {RequestType} {UserId} {UserName} {UtcTimestamp}",
+            requestName,
+            typeof(TRequest).FullName,
+            userId,
+            userName,
+            DateTime.UtcNow);
     }
 #pragma warning restore CA1873 // Template should be a static expression
 #pragma warning restore CA1848 // Template should be a static expression

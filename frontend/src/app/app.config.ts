@@ -31,7 +31,7 @@ export const appConfig: ApplicationConfig = {
     }),
 
     provideHttpClient(
-      withInterceptors([httpErrorInterceptor]) // On l'ajoute ici
+      withInterceptors([jwtInterceptor, httpErrorInterceptor])
     ),
 
     provideRouter(routes,
@@ -46,9 +46,6 @@ export const appConfig: ApplicationConfig = {
       withEnabledBlockingInitialNavigation(),
       withViewTransitions(),
       withHashLocation()
-    ),
-    provideHttpClient(
-      withInterceptors([jwtInterceptor]) // <--- On active l'intercepteur ici
     ),
     providePrimeNG({
       theme: {
