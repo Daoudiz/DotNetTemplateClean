@@ -81,10 +81,12 @@ public class CreatePersonnelCommandHandler(IApplicationDbContext context, IUserS
 
                 var result = await userService.CreateUserWithRoleAsync(user);
 
-                if (result.IsSuccess)
+                if (!result.IsSuccess || string.IsNullOrWhiteSpace(result.Value))
                 {
-                    entity.IdentityId = result.Value;
+                    throw new DomainException(result.ErrorMessage ?? "Impossible de creer l'utilisateur associe au personnel.");
                 }
+
+                entity.IdentityId = result.Value;
             }
 
             context.Personnels.Add(entity);

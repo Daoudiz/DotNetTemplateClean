@@ -19,11 +19,14 @@ public sealed class JwtTokenService(
         var issuer = jwtSection["Issuer"]
             ?? throw new InvalidOperationException("Jwt:Issuer not configured");
 
+        var audience = jwtSection["Audience"]
+            ?? throw new InvalidOperationException("Jwt:Audience not configured");
+
         var expiryMinutes = int.TryParse(jwtSection["ExpiryMinutes"], out var m)
             ? m
             : 120;
 
-        var roles = ( await UserManager.GetRolesAsync(user)).ToArray();
+        var roles = (await UserManager.GetRolesAsync(user)).ToArray();
 
         var claims = BuildClaims(user, roles);
 
@@ -33,7 +36,7 @@ public sealed class JwtTokenService(
 
         var token = new JwtSecurityToken(
             issuer: issuer,
-            audience: issuer,
+            audience: audience,
             claims: claims,
             expires: expires,
             signingCredentials: signingCredentials
