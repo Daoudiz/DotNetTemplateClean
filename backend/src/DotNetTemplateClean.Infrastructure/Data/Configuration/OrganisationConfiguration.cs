@@ -40,6 +40,18 @@ public class OrganisationRelationsConfiguration :
     {
         ArgumentNullException.ThrowIfNull(builder, nameof(builder));
 
+        builder.Property(e => e.Code)
+               .HasMaxLength(250);
+
+        builder.Property(e => e.Libelle)
+               .HasMaxLength(250);
+
+        builder.HasIndex(e => e.Code)
+               .IsUnique();
+
+        builder.HasIndex(e => e.Libelle)
+               .IsUnique();
+
         // Configuration de la Hiérarchie (Auto-rattachement)
         // Les annotations ont du mal avec la navigation inverse des enfants
         builder.HasOne(e => e.Rattachement)
@@ -86,6 +98,12 @@ public class OrganisationRelationsConfiguration :
     public void Configure(EntityTypeBuilder<Personnel> builder)
     {
         ArgumentNullException.ThrowIfNull(builder, nameof(builder));
+        builder.Property(p => p.Matricule)
+               .HasMaxLength(100);
+
+        builder.HasIndex(p => p.Matricule)
+               .IsUnique();
+
         builder.Property(p => p.Statut)
              .HasConversion<string>();
 

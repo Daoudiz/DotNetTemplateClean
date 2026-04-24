@@ -2,12 +2,19 @@
 using DotNetTemplateClean.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 
 namespace Microsoft.Extensions.DependencyInjection;
 
 public static class DependencyInjection
 {
+    private static readonly Action<ILogger, string, string, string?, string, Exception?> JwtAuthenticationFailed =
+        LoggerMessage.Define<string, string, string?, string>(
+            LogLevel.Warning,
+            new EventId(1001, nameof(JwtAuthenticationFailed)),
+            "JWT authentication failed. {AuthenticationScheme} {ExceptionType} {RequestPath} {TraceId}");
+
     public static void AddInfrastructureServices(this IHostApplicationBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder, nameof(builder));
@@ -53,7 +60,18 @@ public static class DependencyInjection
                 {
                     OnAuthenticationFailed = context =>
                     {
-                        Console.WriteLine("Échec authentification : " + context.Exception.Message);
+                        var logger = context.HttpContext.RequestServices
+                            .GetRequiredService<ILoggerFactory>()
+                            .CreateLogger("JwtAuthentication");
+
+                        JwtAuthenticationFailed(
+                            logger,
+                            JwtBearerDefaults.AuthenticationScheme,
+                            context.Exception.GetType().Name,
+                            context.HttpContext.Request.Path.Value,
+                            context.HttpContext.TraceIdentifier,
+                            null);
+
                         return Task.CompletedTask;
                     }
                 };

@@ -6,7 +6,7 @@ namespace DotNetTemplateClean.Application;
 
 public record DeletePersonnelCommand(int Id) : IRequest;
 
-public class DeletePersonnelCommandHandler(IApplicationDbContext context, IUserService userService)
+public class DeletePersonnelCommandHandler(IApplicationDbContext context, IUserService userService, IUser currentUser)
     : IRequestHandler<DeletePersonnelCommand>
 {
     //public async Task Handle(DeletePersonnelCommand request, CancellationToken cancellationToken)
@@ -53,7 +53,10 @@ public class DeletePersonnelCommandHandler(IApplicationDbContext context, IUserS
             // Deactivate associated Identity user if present
             if (!string.IsNullOrWhiteSpace(entity.IdentityId))
             {
-                var userResult = await userService.DeleteUserAsync(entity.IdentityId, string.Empty);
+                var currentUserId = currentUser.Id
+                    ?? throw new UnauthorizedAccessException("Utilisateur courant non identifie.");
+
+                var userResult = await userService.DeleteUserAsync(entity.IdentityId, currentUserId);
                 if (!userResult.IsSuccess)
                 {
                     // Any failure must abort the whole transaction
