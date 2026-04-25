@@ -42,7 +42,7 @@ public static class DependencyInjection
                 // Il sera 'false' en local (Dev) et 'true' sur le serveur (Prod)
                 options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
 
-                options.SaveToken = true;
+                options.SaveToken = false;
 
                 options.TokenValidationParameters = new TokenValidationParameters
                 {

@@ -34,6 +34,10 @@ public class OrganisationRelationsConfiguration :
                .WithMany(f => f.Affectations)
                .HasForeignKey(ap => ap.FonctionId)
                .OnDelete(DeleteBehavior.Restrict);
+
+        // Query-oriented indexes for frequent filters on FK + active/soft-delete flags.
+        builder.HasIndex(ap => new { ap.PersonnelId, ap.IsDeleted, ap.IsActive });
+        builder.HasIndex(ap => new { ap.EntiteId, ap.IsDeleted, ap.IsActive });
     }
 
     public void Configure(EntityTypeBuilder<Entite> builder)
@@ -64,6 +68,10 @@ public class OrganisationRelationsConfiguration :
                .WithMany(t => t.Entites)
                .HasForeignKey(e => e.TypeEntiteId)
                .OnDelete(DeleteBehavior.Restrict);
+
+        // Query-oriented indexes for hierarchy/type filters with soft-delete.
+        builder.HasIndex(e => new { e.RattachementEntiteId, e.IsDeleted });
+        builder.HasIndex(e => new { e.TypeEntiteId, e.IsDeleted });
 
         // Relation avec les Utilisateurs (Sécurité)
         // On la configure ici car c'est l'Entite qui "possède" les users
@@ -103,6 +111,9 @@ public class OrganisationRelationsConfiguration :
 
         builder.HasIndex(p => p.Matricule)
                .IsUnique();
+
+        // Query-oriented index for branch/personnel filtering with soft-delete.
+        builder.HasIndex(p => new { p.EntiteId, p.IsDeleted });
 
         builder.Property(p => p.Statut)
              .HasConversion<string>();

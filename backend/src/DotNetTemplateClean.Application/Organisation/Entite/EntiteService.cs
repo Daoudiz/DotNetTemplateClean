@@ -160,7 +160,12 @@ public class EntiteService(
                 400);
         }
        
-        if (!await IsParentRangGreaterAsync(dto.TypeEntiteId, dto.RattachementEntiteId!.Value).ConfigureAwait(false))
+        if (!dto.RattachementEntiteId.HasValue)
+        {
+            return ServiceResult.Failure<string>(AppErrorMessages.Entite.ParentRangInvalid, 400);
+        }
+
+        if (!await IsParentRangGreaterAsync(dto.TypeEntiteId, dto.RattachementEntiteId.Value).ConfigureAwait(false))
         {
             return ServiceResult.Failure<string>(AppErrorMessages.Entite.ParentRangInvalid, 400);
         }
@@ -212,7 +217,12 @@ public class EntiteService(
         }
 
         //Vérifier que la parent possède un rang hiearachiquement strictement supérieur au rang de l'entité à créer
-        if (!await IsParentRangGreaterAsync(dto.TypeEntiteId, dto.RattachementEntiteId!.Value))
+        if (!dto.RattachementEntiteId.HasValue)
+        {
+            return ServiceResult.Failure<string>(AppErrorMessages.Entite.ParentRangInvalid, 400);
+        }
+
+        if (!await IsParentRangGreaterAsync(dto.TypeEntiteId, dto.RattachementEntiteId.Value))
         {
             return ServiceResult.Failure<string>(AppErrorMessages.Entite.ParentRangInvalid, 400);
         }
@@ -246,8 +256,8 @@ public class EntiteService(
             return ServiceResult.Failure<string>(AppErrorMessages.Entite.EntiteHasChildren, 409);
         }        
 
-        // Perform delete (soft or hard depending on repository implementation)
-        context.Entites.Remove(existing);
+        // Soft delete for consistency with other aggregate delete flows.
+        existing.IsDeleted = true;
 
         await context.SaveChangesAsync(cancellationToken);
 
