@@ -2,7 +2,7 @@ using Ardalis.GuardClauses;
 
 namespace DotNetTemplateClean.Application;
 
-public record UpdatePersonnelCommand : IRequest
+public record UpdatePersonnelCommand : IRequest, IAuthorizeRequest
 {
     public required int Id { get; init; }
     public required string Matricule { get; init; }
@@ -15,6 +15,8 @@ public record UpdatePersonnelCommand : IRequest
 
     // Liste des affectations initiales
     public IList<UpdateAffectationDto> Affectations { get; init; } = [];
+
+    public IReadOnlyCollection<string> Roles => ["Admin"];
 }
 
 public record UpdateAffectationDto(int Id, int EntiteId, int FonctionId, DateTime DateDebut, string Nature, DateTime? DateFinAffectation);

@@ -1,6 +1,6 @@
 namespace DotNetTemplateClean.Application;
 
-public record CreatePersonnelCommand : IRequest<int>
+public record CreatePersonnelCommand : IRequest<int>, IAuthorizeRequest
 {
     public required string Matricule { get; init; }
     public required string Nom { get; init; }
@@ -16,6 +16,8 @@ public record CreatePersonnelCommand : IRequest<int>
     public string? UserRole { get; init; }
 
     public IList<CreateAffectationDto> Affectations { get; init; } = [];
+
+    public IReadOnlyCollection<string> Roles => ["Admin"];
 }
 
 public record CreateAffectationDto(int EntiteId, int FonctionId, DateTime DateDebut, string Nature);
@@ -36,9 +38,8 @@ public class CreatePersonnelCommandHandler(IApplicationDbContext context, IUserS
                     ? DateOnly.FromDateTime(request.DateNaissance.Value)
                     : null);
 
-            var dateRecrutement = request.DateRecrutement.HasValue
-                ? request.DateRecrutement.Value
-                : throw new DomainException("La date de recrutement est obligatoire.");
+            // Validated in FluentValidation pipeline (CreatePersonnelCommandValidator).
+            var dateRecrutement = request.DateRecrutement!.Value;
 
             var entity = Personnel.Create(
                 request.Matricule,

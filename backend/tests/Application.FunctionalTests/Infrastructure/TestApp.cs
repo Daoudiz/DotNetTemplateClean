@@ -48,7 +48,18 @@ public static class TestApp
 
         using var scope = FunctionalTestSetup.ScopeFactory.CreateScope();
 
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var entiteId = await EnsureEntiteIdAsync(context);
+
+        var existingUser = await userManager.FindByNameAsync(userName);
+        if (existingUser is not null)
+        {
+            _userId = existingUser.Id;
+            _roles = [.. roles];
+            return _userId;
+        }
+
         var user = new ApplicationUser
         {
             UserName = userName,
@@ -56,7 +67,7 @@ public static class TestApp
             FirstName = "Test",
             LastName = "User",
             Matricule = 999999,
-            EntiteId = 1,
+            EntiteId = entiteId,
             DateRecrutement = DateOnly.FromDateTime(DateTime.UtcNow)
         };
 
@@ -83,6 +94,47 @@ public static class TestApp
         _userId = user.Id;
         _roles = new List<string>(roles);
         return _userId;
+    }
+
+    private static async Task<int> EnsureEntiteIdAsync(ApplicationDbContext context)
+    {
+        var existingEntiteId = await context.Entites
+            .Select(e => (int?)e.Id)
+            .FirstOrDefaultAsync();
+
+        if (existingEntiteId.HasValue)
+        {
+            return existingEntiteId.Value;
+        }
+
+        var typeEntiteId = await context.TypeEntites
+            .Select(t => (int?)t.Id)
+            .FirstOrDefaultAsync();
+
+        if (!typeEntiteId.HasValue)
+        {
+            var typeEntite = new TypeEntite
+            {
+                Code = "TST-TYPE",
+                Libelle = "Type test setup"
+            };
+
+            context.TypeEntites.Add(typeEntite);
+            await context.SaveChangesAsync();
+            typeEntiteId = typeEntite.Id;
+        }
+
+        var entite = new Entite
+        {
+            Code = "TST-ENTITE",
+            Libelle = "Entite test setup",
+            TypeEntiteId = typeEntiteId.Value
+        };
+
+        context.Entites.Add(entite);
+        await context.SaveChangesAsync();
+
+        return entite.Id;
     }
 
     public static async Task ResetState()

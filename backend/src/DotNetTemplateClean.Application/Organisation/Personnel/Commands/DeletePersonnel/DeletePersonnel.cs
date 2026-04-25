@@ -4,7 +4,10 @@ using Ardalis.GuardClauses;
 
 namespace DotNetTemplateClean.Application;
 
-public record DeletePersonnelCommand(int Id) : IRequest;
+public record DeletePersonnelCommand(int Id) : IRequest, IAuthorizeRequest
+{
+    public IReadOnlyCollection<string> Roles => ["Admin"];
+}
 
 public class DeletePersonnelCommandHandler(IApplicationDbContext context, IUserService userService, IUser currentUser)
     : IRequestHandler<DeletePersonnelCommand>
