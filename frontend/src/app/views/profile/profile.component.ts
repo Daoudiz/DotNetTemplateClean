@@ -12,7 +12,8 @@ import { NotificationService } from '../../services/notification.service';
   selector: 'app-profile',
   standalone: true,
   imports: [CommonModule, CardModule, GridModule, SpinnerModule, AlertModule, ReactiveFormsModule],
-  templateUrl: './profile.component.html'
+  templateUrl: './profile.component.html',
+  styleUrls: ['./profile.component.scss']
 })
 export class ProfileComponent implements OnInit {
   private profileService = inject(ProfileService);

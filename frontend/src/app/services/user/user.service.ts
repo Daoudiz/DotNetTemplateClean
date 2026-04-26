@@ -1,48 +1,57 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ApplicationUser, SearchViewModel, CreateUserViewModel, PagedResult } from '../../models/user/user-models';
+import { map } from 'rxjs/operators';
+import {
+  ApplicationUser,
+  CreateUserViewModel,
+  PagedResult,
+  RoleOption,
+  UpdateUserViewModel,
+  UserSearchCriteria,
+  UserSearchResultDto
+} from '../../models/user/user-models';
 import { environment } from '../../../environments/environment';
 
-@Injectable({ providedIn: 'root' }) 
-export class UserService {   
-   
-    private readonly apiUrl = `${environment.apiUrl}`;
+@Injectable({ providedIn: 'root' })
+export class UserService {
+  private readonly apiUrl = `${environment.apiUrl}`;
 
-    constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
-   
-    searchUsers(criteria: any): Observable<PagedResult<ApplicationUser>> {
-        return this.http.post<PagedResult<ApplicationUser>>(`${this.apiUrl}/user/UserSearch`, criteria);
-    }
+  searchUsers(criteria: UserSearchCriteria): Observable<PagedResult<ApplicationUser>> {
+    return this.http
+      .post<PagedResult<UserSearchResultDto>>(`${this.apiUrl}/user/UserSearch`, criteria)
+      .pipe(
+        map((response) => ({
+          ...response,
+          items: response.items.map((item) => ({
+            id: item.id,
+            userName: item.userName,
+            email: item.email,
+            firstName: item.prenom,
+            lastName: item.nom,
+            roles: item.roles,
+            roleId: item.roleId,
+            isLocked: item.isLocked
+          }))
+        }))
+      );
+  }
 
-    getDirections(): Observable<any[]> {
-        return this.http.get<any[]>(`${this.apiUrl}/entite/directions`);
-    }
+  createUser(userData: CreateUserViewModel): Observable<unknown> {
+    return this.http.post(`${this.apiUrl}/user/CreateUser`, userData);
+  }
 
-    getDivisions(directionId: number): Observable<any[]> {
-        return this.http.get<any[]>(`${this.apiUrl}/entite/divisions/${directionId}`);
-    }
+  getRoles(): Observable<RoleOption[]> {
+    return this.http.get<RoleOption[]>(`${this.apiUrl}/roles`);
+  }
 
-    getServices(divisionId: number): Observable<any[]> {
-        return this.http.get<any[]>(`${this.apiUrl}/entite/services/${divisionId}`);
-    }
+  deleteUser(id: string): Observable<unknown> {
+    return this.http.delete(`${this.apiUrl}/user/${id}`);
+  }
 
-    // Méthode pour créer un nouvel utilisateur    
-    createUser(userData: CreateUserViewModel): Observable<any> {
-        return this.http.post(`${this.apiUrl}/user/CreateUser`, userData);
-    }
-
-    getRoles(): Observable<any[]> {
-        return this.http.get<any[]>(`${this.apiUrl}/roles`);
-    }
-
-    deleteUser(id: string): Observable<any> {
-        return this.http.delete(`${this.apiUrl}/user/${id}`);
-    }
-
-    updateUser(id: string, userData: any): Observable<any> {
-        return this.http.put(`${this.apiUrl}/user/${id}`, userData);
-    }
+  updateUser(id: string, userData: UpdateUserViewModel): Observable<unknown> {
+    return this.http.put(`${this.apiUrl}/user/${id}`, userData);
+  }
 }
-

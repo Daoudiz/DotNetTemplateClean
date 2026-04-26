@@ -68,15 +68,12 @@ public class CreatePersonnelCommandHandler(IApplicationDbContext context, IUserS
             {
                 var user = new UserCreationDto
                 {
-                    Matricule = int.Parse(request.Matricule, CultureInfo.InvariantCulture),
                     FirstName = request.Prenom,
                     LastName = request.Nom,
-                    DateRecrutement = request.DateRecrutement ?? DateOnly.FromDateTime(DateTime.Now),
                     Email = request.Email,
                     UserName = request.Email,
                     Password = request.Prenom + "@2026",
                     UserRole = request.UserRole!,
-                    Service = request.EntiteId,
                     TwoFactorEnabled = false
                 };
 

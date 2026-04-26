@@ -114,16 +114,13 @@ internal class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextIniti
 
             var admin = new ApplicationUser
             {           
-                Matricule = 201210,
                 FirstName = "Zakaria",
                 LastName = "DAOUDI",
                 UserName = "Zakaria",
                 NormalizedUserName = "ZAKARIA",
                 Email = "zakaria.daoudi@gmail.com",
                 NormalizedEmail = "ZAKARIA.DAOUDI@GMAIL.COM",
-                EmailConfirmed = true,
-                EntiteId = 5,
-                DateRecrutement  = DateOnly.FromDateTime(DateTime.UtcNow)                
+                EmailConfirmed = true               
             };
 
             if (userManager.Users.All(u => u.UserName != admin.UserName))

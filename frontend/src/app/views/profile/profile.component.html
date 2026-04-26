@@ -1,102 +1,85 @@
 <c-container breakpoint="lg">
-    <c-row>
-        <c-col xs="12">
-            <c-card class="mb-4">
-                <c-card-header>
-                    <strong>Mon Profil Utilisateur</strong>
-                </c-card-header>
-                <c-card-body>
+  <c-row>
+    <c-col xs="12">
+      <c-card class="mb-4">
+        <c-card-header>
+          <strong>Mon Profil Utilisateur</strong>
+        </c-card-header>
+        <c-card-body>
+          @if (isLoading()) {
+          <div class="text-center">
+            <c-spinner color="primary"></c-spinner>
+          </div>
+          }
 
-                    @if (isLoading()) {
-                    <div class="text-center">
-                        <c-spinner color="primary"></c-spinner>
-                    </div>
-                    }
+          @if (profile(); as user) {
+          <div class="row mb-3">
+            <div class="col-sm-4 font-weight-bold">Nom complet :</div>
+            <div class="col-sm-8 text-secondary">{{ user.firstName }} {{ user.lastName }}</div>
+          </div>
+          <hr />
+          <div class="row mb-3">
+            <div class="col-sm-4 font-weight-bold">Nom d'utilisateur :</div>
+            <div class="col-sm-8 text-secondary">{{ user.userName }}</div>
+          </div>
+          <hr />
+          <div class="row mb-3">
+            <div class="col-sm-4 font-weight-bold">Email :</div>
+            <div class="col-sm-8 text-secondary">{{ user.email }}</div>
+          </div>
+          <hr />
+          <div class="row mb-3">
+            <div class="col-sm-4 font-weight-bold">Role :</div>
+            <div class="col-sm-8"><span class="badge bg-primary">{{ user.userRole }}</span></div>
+          </div>
 
-                    <!--
-                    <c-alert color="danger" *ngIf="errorMsg()">
-                      {{ errorMsg() }}
-                    </c-alert>
-                    -->
-                    @if (profile(); as user) {
-                    <div class="row mb-3">
-                        <div class="col-sm-4 font-weight-bold">Matricule :</div>
-                        <div class="col-sm-8 text-secondary">{{ user.matricule }}</div>
-                    </div>
-                    <hr>
-                    <div class="row mb-3">
-                        <div class="col-sm-4 font-weight-bold">Nom complet :</div>
-                        <div class="col-sm-8 text-secondary">{{ user.firstName }} {{ user.lastName }}</div>
-                    </div>
-                    <hr>
-                    <div class="row mb-3">
-                        <div class="col-sm-4 font-weight-bold">Email :</div>
-                        <div class="col-sm-8 text-secondary">{{ user.email }}</div>
-                    </div>
-                    <hr>
-                    <div class="row mb-3">
-                        <div class="col-sm-4 font-weight-bold">EntitÃ© :</div>
-                        <div class="col-sm-8"><span class="badge bg-info">{{ user.entite }}</span></div>
-                    </div>
-                    <hr>
-                    <div class="row mb-3">
-                        <div class="col-sm-4 font-weight-bold">RÃ´le :</div>
-                        <div class="col-sm-8"><span class="badge bg-primary">{{ user.userRole }}</span></div>
-                    </div>
+          <div class="card p-3 shadow-sm">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="mb-0">Securite</h5>
+                <p class="text-muted mb-0">Mot de passe : ••••••••••••</p>
+              </div>
+              <button class="btn btn-outline-primary" (click)="showModal = true">Changer le mot de passe</button>
+            </div>
+          </div>
 
-                    <div class="card p-3 shadow-sm">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h5 class="mb-0">SÃ©curitÃ©</h5>
-                                <p class="text-muted mb-0">Mot de passe : â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢</p>
-                            </div>
-                            <button class="btn btn-outline-primary" (click)="showModal = true">
-                                Changer le mot de passe
-                            </button>
-                        </div>
+          <div class="modal-backdrop-local modal d-block" *ngIf="showModal">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Nouveau mot de passe</h5>
+                  <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <form [formGroup]="passwordForm" (ngSubmit)="onSubmit()">
+                  <div class="modal-body">
+                    <div class="mb-3">
+                      <label>Mot de passe actuel</label>
+                      <input type="password" class="form-control" formControlName="currentPassword" />
                     </div>
-                    
-                    <div class="modal d-block" *ngIf="showModal" style="background: rgba(0,0,0,0.5)">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title">Nouveau mot de passe</h5>
-                                    <button type="button" class="btn-close" (click)="closeModal()"></button>
-                                </div>
-                                <form [formGroup]="passwordForm" (ngSubmit)="onSubmit()">
-                                    <div class="modal-body">
-                                        <div class="mb-3">
-                                            <label>Mot de passe actuel</label>
-                                            <input type="password" class="form-control" formControlName="currentPassword">
-                                        </div>
-                                        <hr>
-                                        <div class="mb-3">
-                                            <label>Nouveau mot de passe</label>
-                                            <input type="password" class="form-control" formControlName="newPassword">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label>Confirmer le nouveau mot de passe</label>
-                                            <input type="password" class="form-control" formControlName="confirmPassword">
-                                            <div class="text-danger small" *ngIf="passwordForm.hasError('passwordMismatch')">
-                                                Les mots de passe ne correspondent pas.
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
-                                        <button type="submit" class="btn btn-primary" [disabled]="passwordForm.invalid">
-                                            Enregistrer
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
+                    <hr />
+                    <div class="mb-3">
+                      <label>Nouveau mot de passe</label>
+                      <input type="password" class="form-control" formControlName="newPassword" />
                     </div>
-
-                    }
-
-                </c-card-body>
-            </c-card>
-        </c-col>
-    </c-row>
+                    <div class="mb-3">
+                      <label>Confirmer le nouveau mot de passe</label>
+                      <input type="password" class="form-control" formControlName="confirmPassword" />
+                      <div class="text-danger small" *ngIf="passwordForm.hasError('passwordMismatch')">
+                        Les mots de passe ne correspondent pas.
+                      </div>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+                    <button type="submit" class="btn btn-primary" [disabled]="passwordForm.invalid">Enregistrer</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+          }
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>
 </c-container>

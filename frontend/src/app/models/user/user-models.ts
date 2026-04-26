@@ -1,63 +1,64 @@
-export interface Entite {
-    id: number;
-    code: string;
-}
-export interface ApplicationUser {
-    id: string;
-    firstName: string;
-    lastName: string;
-    matricule: number;
-    dateRecrutement?: string;
-    entiteId: number;
-    entite?: any; // Optionnel avec '?'
-    lockoutEnabled: boolean;
-    lockoutEnd?: string; // Optionnel avec '?'
+export interface RoleOption {
+  id: string;
+  name: string;
 }
 
-export interface SearchViewModel {
-    matricule?: number;
-    nom?: string;
-    prenom?: string;
-    dateRecrutementDebut?: string;
-    dateRecrutementFin?: string;
-    direction?: number;
-    division?: number;
-    service?: number;
+export interface ApplicationUser {
+  id: string;
+  userName: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber?: string | null;
+  roles?: string;
+  roleId?: string;
+  isLocked: boolean;
+  createdBy?: string | null;
+  createdDate?: string;
+  updatedBy?: string | null;
+  updatedDate?: string | null;
 }
 
 export interface CreateUserViewModel {
-    matricule: number;
-    firstName: string;
-    lastName: string;
-    dateRecrutement: string; // ISO string pour les dates
-    direction: number;
-    division: number;
-    service: number;
-    userRole: string;
-    roleId : string;
-    email: string;
-    userName: string;
-    password: string;
-    confirmPassword: string;
-    twoFactorEnabled: boolean;
+  firstName: string;
+  lastName: string;
+  userRole: string;
+  email: string;
+  userName: string;
+  password: string;
+  confirmPassword: string;
+  twoFactorEnabled: boolean;
+}
+
+export interface UpdateUserViewModel {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  userRole: string;
+  email: string;
+  userName: string;
 }
 
 export interface PagedResult<T> {
-    items: T[];
-    totalCount: number;
-    isFullResult: boolean;
+  items: T[];
+  totalCount: number;
+  isFullResult: boolean;
 }
 
 export interface UserSearchCriteria {
-    matricule?: number | null;
-    nom?: string | null;
-    prenom?: string | null;
-    dateRecrutementDebut?: string | null;
-    dateRecrutementFin?: string | null;
-    directionId?: number | null;
-    divisionId?: number | null;
-    serviceId?: number | null;
-    pageNumber: number;
-    pageSize: number;
+  nom?: string | null;
+  prenom?: string | null;
+  pageNumber: number;
+  pageSize: number;
 }
 
+export interface UserSearchResultDto {
+  id: string;
+  nom: string;
+  prenom: string;
+  email: string;
+  userName: string;
+  isLocked: boolean;
+  roles: string;
+  roleId: string;
+}

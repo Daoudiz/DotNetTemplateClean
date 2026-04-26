@@ -1,7 +1,4 @@
-
-
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
 
 namespace DotNetTemplateClean.Infrastructure;
 
@@ -9,17 +6,13 @@ public class OrganisationRelationsConfiguration :
     IEntityTypeConfiguration<AffectationPersonnel>,
     IEntityTypeConfiguration<Entite>,
     IEntityTypeConfiguration<Personnel>,
-    IEntityTypeConfiguration<Fonction>,
-    IEntityTypeConfiguration<ApplicationUser>
-
-    /*IEntityTypeConfiguration<TypeEntite>,
-    IEntityTypeConfiguration<Fonction>*/
+    IEntityTypeConfiguration<Fonction>
 {
     public void Configure(EntityTypeBuilder<AffectationPersonnel> builder)
     {
         ArgumentNullException.ThrowIfNull(builder, nameof(builder));
 
-        // Configuration de l'association Ternaire (Priorité 1)
+        // Configuration de l'association Ternaire (Priorite 1)
         builder.HasOne(ap => ap.Personnel)
                .WithMany(p => p.Affectations)
                .HasForeignKey(ap => ap.PersonnelId)
@@ -56,8 +49,7 @@ public class OrganisationRelationsConfiguration :
         builder.HasIndex(e => e.Libelle)
                .IsUnique();
 
-        // Configuration de la Hiérarchie (Auto-rattachement)
-        // Les annotations ont du mal avec la navigation inverse des enfants
+        // Configuration de la Hierarchie (Auto-rattachement)
         builder.HasOne(e => e.Rattachement)
                .WithMany(e => e.Children)
                .HasForeignKey(e => e.RattachementEntiteId)
@@ -73,28 +65,20 @@ public class OrganisationRelationsConfiguration :
         builder.HasIndex(e => new { e.RattachementEntiteId, e.IsDeleted });
         builder.HasIndex(e => new { e.TypeEntiteId, e.IsDeleted });
 
-        // Relation avec les Utilisateurs (Sécurité)
-        // On la configure ici car c'est l'Entite qui "possède" les users
-        builder.HasMany(e => e.Users)
-               .WithOne(u => u.Entite)
-               .HasForeignKey(u => u.EntiteId)
-               .OnDelete(DeleteBehavior.Restrict)
-               .IsRequired(); // Un utilisateur doit forcément appartenir à une entité
-
-        //Relation avec le Personnel (Affectations)
+        // Relation avec le Personnel (Affectations)
         builder.HasMany(e => e.Personnel)
                .WithOne(p => p.Entite)
                .HasForeignKey(p => p.EntiteId)
                .OnDelete(DeleteBehavior.Restrict)
-               .IsRequired(); // Un personnel doit forcément appartenir à une entité
-
+               .IsRequired();
     }
-#pragma warning disable CA1822 
-    public void Configure (EntityTypeBuilder<Fonction> builder)
+
+#pragma warning disable CA1822
+    public void Configure(EntityTypeBuilder<Fonction> builder)
     {
         ArgumentNullException.ThrowIfNull(builder, nameof(builder));
 
-        //Config enums as strings for better readability in the database
+        // Config enums as strings for better readability in the database
         builder.Property(f => f.Domaine)
              .HasConversion<string>();
 
@@ -102,10 +86,11 @@ public class OrganisationRelationsConfiguration :
              .HasConversion<string>();
     }
 
-    //Configure enums for Personnel as strings for better readability in the database
+    // Configure enums for Personnel as strings for better readability in the database
     public void Configure(EntityTypeBuilder<Personnel> builder)
     {
         ArgumentNullException.ThrowIfNull(builder, nameof(builder));
+
         builder.Property(p => p.Matricule)
                .HasMaxLength(100);
 
@@ -137,22 +122,6 @@ public class OrganisationRelationsConfiguration :
                     ? DateNaissance.Create(DateOnly.FromDateTime(value.Value))
                     : null)
             .HasColumnName(nameof(Personnel.DateNaissance));
-
     }
-
-    public void Configure(EntityTypeBuilder<ApplicationUser> builder)
-    {
-        ArgumentNullException.ThrowIfNull(builder, nameof(builder));
-
-        builder.Property(p => p.DateRecrutement)
-            .HasConversion(
-                date => date.HasValue
-                    ? date.Value.ToDateTime(TimeOnly.MinValue)
-                    : (DateTime?)null,
-                value => value.HasValue
-                    ? DateOnly.FromDateTime(value.Value)
-                    : null)
-            .HasColumnName(nameof(ApplicationUser.DateRecrutement));
-    }
-#pragma warning restore CA1822  
+#pragma warning restore CA1822
 }
