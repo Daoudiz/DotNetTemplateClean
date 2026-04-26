@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Identity;
-
 namespace DotNetTemplateClean.Domain;
 
 public class ApplicationUser : IdentityUser, IAuditableEntity
