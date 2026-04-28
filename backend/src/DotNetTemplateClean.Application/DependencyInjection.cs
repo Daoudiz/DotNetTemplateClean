@@ -14,7 +14,7 @@ public static class DependencyInjection
         ArgumentNullException.ThrowIfNull(builder, nameof(builder));
 
         //register services Default: Scoped lifetime
-        var serviceAssembly = typeof(IEntiteService).Assembly;
+        var serviceAssembly = Assembly.GetExecutingAssembly();
         builder.Services.AddServices(serviceAssembly);
 
         builder.Services.AddAutoMapper(cfg =>

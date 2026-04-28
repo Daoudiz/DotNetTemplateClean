@@ -4,9 +4,17 @@ public class UpdatePersonnelCommandValidator : AbstractValidator<UpdatePersonnel
 {
     private readonly IApplicationDbContext _context;
 
-    public UpdatePersonnelCommandValidator(IApplicationDbContext context)
+    public UpdatePersonnelCommandValidator(
+        IApplicationDbContext context,
+        IPersonnelMatriculeUniquenessService matriculeUniquenessService)
     {
         _context = context;
+
+        RuleFor(v => v.Matricule)
+            .NotEmpty().WithMessage("Le matricule est obligatoire.")
+            .MustAsync((command, matricule, cancellationToken) =>
+                matriculeUniquenessService.IsMatriculeUniqueAsync(matricule, command.Id, cancellationToken))
+            .WithMessage("Ce matricule est deja utilise par un autre personnel.");
 
         RuleFor(v => v.Affectations)
             .MustNotHaveOverlappingEntiteFonctionRanges<UpdatePersonnelCommand, IList<UpdateAffectationDto>, UpdateAffectationDto>(

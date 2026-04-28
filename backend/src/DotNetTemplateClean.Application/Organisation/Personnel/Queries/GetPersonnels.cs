@@ -14,7 +14,7 @@ public record GetPersonnelsWithFiltersQuery : IRequest<PaginatedList<PersonnelLi
 
 public class GetPersonnelsWithFiltersQueryHandler(IApplicationDbContext context,
                                                                 IMapper mapper,
-                                                                IEntiteService entiteService ) : IRequestHandler<GetPersonnelsWithFiltersQuery, PaginatedList<PersonnelListDto>>
+                                                                IEntiteHierarchyService entiteHierarchyService ) : IRequestHandler<GetPersonnelsWithFiltersQuery, PaginatedList<PersonnelListDto>>
 {
     public async Task<PaginatedList<PersonnelListDto>> Handle(GetPersonnelsWithFiltersQuery request, CancellationToken cancellationToken)
     {
@@ -38,7 +38,7 @@ public class GetPersonnelsWithFiltersQueryHandler(IApplicationDbContext context,
         //Filtre par Entité (Tree List) et tous ses enfants       
         if (request.EntiteId.HasValue)
         {   
-            var allChildEntiteIds = await entiteService.GetFlattenedChildEntityIds(request.EntiteId.Value);
+            var allChildEntiteIds = await entiteHierarchyService.GetFlattenedChildEntityIds(request.EntiteId.Value);
             query = query.Where(x=>allChildEntiteIds.Contains(x.EntiteId));
 
             //query = query.Where(p => p.Affectations.Any(a =>

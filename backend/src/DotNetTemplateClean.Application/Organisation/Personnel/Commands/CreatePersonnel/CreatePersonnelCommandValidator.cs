@@ -2,12 +2,8 @@ namespace DotNetTemplateClean.Application;
 
 public class CreatePersonnelCommandValidator : AbstractValidator<CreatePersonnelCommand>
 {
-    private readonly IApplicationDbContext _context;
-
-    public CreatePersonnelCommandValidator(IApplicationDbContext context)
+    public CreatePersonnelCommandValidator(IPersonnelMatriculeUniquenessService matriculeUniquenessService)
     {
-        _context = context;
-
         RuleFor(v => v.Nom)
             .MaximumLength(100).WithMessage("Le nom ne doit pas depasser 100 caracteres.")
             .NotEmpty().WithMessage("Le nom est obligatoire.");
@@ -18,7 +14,9 @@ public class CreatePersonnelCommandValidator : AbstractValidator<CreatePersonnel
 
         RuleFor(v => v.Matricule)
             .NotEmpty().WithMessage("Le matricule est obligatoire.")
-            .MustAsync(BeUniqueMatricule).WithMessage("Ce matricule est deja utilise par un autre personnel.");
+            .MustAsync((_, matricule, cancellationToken) =>
+                matriculeUniquenessService.IsMatriculeUniqueAsync(matricule, null, cancellationToken))
+            .WithMessage("Ce matricule est deja utilise par un autre personnel.");
 
         RuleFor(v => v.DateNaissance)
             .Custom((dateNaissance, contextValidation) =>
@@ -73,11 +71,5 @@ public class CreatePersonnelCommandValidator : AbstractValidator<CreatePersonnel
                 affectation => affectation.EntiteId,
                 _ => null))
             .WithMessage(PersonnelAffectationValidationExtensions.MissingActiveInitialEntiteAffectationMessage);
-    }
-
-    public async Task<bool> BeUniqueMatricule(string matricule, CancellationToken cancellationToken)
-    {
-        return await _context.Personnels
-            .AllAsync(l => l.Matricule != matricule, cancellationToken);
     }
 }
