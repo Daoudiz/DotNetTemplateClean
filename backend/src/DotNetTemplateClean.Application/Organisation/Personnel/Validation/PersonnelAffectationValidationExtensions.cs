@@ -6,6 +6,10 @@ public static class PersonnelAffectationValidationExtensions
         "Un personnel ne peut pas avoir deux affectations avec le meme couple entiteId/fonctionId sur des periodes qui se chevauchent.";
     public const string MissingActiveInitialEntiteAffectationMessage =
         "Le personnel doit avoir au moins une affectation active dans son entite initiale.";
+    public const string AffectationStartBeforeRecruitmentDateMessage =
+        "La date de debut d'affectation doit etre superieure ou egale a la date de recrutement.";
+    public const string AffectationEndBeforeRecruitmentDateMessage =
+        "La date de fin d'affectation doit etre superieure ou egale a la date de recrutement.";
 
     public static bool HasActiveAffectationForEntite<TAffectation>(
         IEnumerable<TAffectation>? affectations,
@@ -39,6 +43,41 @@ public static class PersonnelAffectationValidationExtensions
                 dateDebutSelector,
                 dateFinSelector))
             .WithMessage(OverlappingAffectationsMessage);
+    }
+
+    public static bool HasAffectationStartDatesOnOrAfterRecruitmentDate<TAffectation>(
+        IEnumerable<TAffectation>? affectations,
+        DateOnly? dateRecrutement,
+        Func<TAffectation, DateTime> dateDebutSelector)
+    {
+        if (!dateRecrutement.HasValue || affectations is null)
+        {
+            return true;
+        }
+
+        var recruitmentDate = dateRecrutement.Value;
+
+        return affectations.All(affectation =>
+            DateOnly.FromDateTime(dateDebutSelector(affectation).Date) >= recruitmentDate);
+    }
+
+    public static bool HasAffectationEndDatesOnOrAfterRecruitmentDate<TAffectation>(
+        IEnumerable<TAffectation>? affectations,
+        DateOnly? dateRecrutement,
+        Func<TAffectation, DateTime?> dateFinSelector)
+    {
+        if (!dateRecrutement.HasValue || affectations is null)
+        {
+            return true;
+        }
+
+        var recruitmentDate = dateRecrutement.Value;
+
+        return affectations.All(affectation =>
+        {
+            var dateFin = dateFinSelector(affectation);
+            return !dateFin.HasValue || DateOnly.FromDateTime(dateFin.Value.Date) >= recruitmentDate;
+        });
     }
 
     private static bool HaveNoOverlappingRanges<TAffectation>(

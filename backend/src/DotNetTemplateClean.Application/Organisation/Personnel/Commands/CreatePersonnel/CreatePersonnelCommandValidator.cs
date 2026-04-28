@@ -65,6 +65,13 @@ public class CreatePersonnelCommandValidator : AbstractValidator<CreatePersonnel
                 _ => null);
 
         RuleFor(v => v)
+            .Must(command => PersonnelAffectationValidationExtensions.HasAffectationStartDatesOnOrAfterRecruitmentDate(
+                    command.Affectations,
+                    command.DateRecrutement,
+                    affectation => affectation.DateDebut))
+            .WithMessage(PersonnelAffectationValidationExtensions.AffectationStartBeforeRecruitmentDateMessage);
+
+        RuleFor(v => v)
             .Must(command => PersonnelAffectationValidationExtensions.HasActiveAffectationForEntite(
                 command.Affectations,
                 command.EntiteId,

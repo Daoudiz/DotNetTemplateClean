@@ -24,6 +24,20 @@ public class UpdatePersonnelCommandValidator : AbstractValidator<UpdatePersonnel
                 affectation => affectation.DateFinAffectation);
 
         RuleFor(v => v)
+            .Must(command => PersonnelAffectationValidationExtensions.HasAffectationStartDatesOnOrAfterRecruitmentDate(
+                    command.Affectations,
+                    command.DateRecrutement,
+                    affectation => affectation.DateDebut))
+            .WithMessage(PersonnelAffectationValidationExtensions.AffectationStartBeforeRecruitmentDateMessage);
+
+        RuleFor(v => v)
+            .Must(command => PersonnelAffectationValidationExtensions.HasAffectationEndDatesOnOrAfterRecruitmentDate(
+                command.Affectations,
+                command.DateRecrutement,
+                affectation => affectation.DateFinAffectation))
+            .WithMessage(PersonnelAffectationValidationExtensions.AffectationEndBeforeRecruitmentDateMessage);
+
+        RuleFor(v => v)
             .MustAsync(HaveAffectationForInitialEntite)
             .WithMessage(PersonnelAffectationValidationExtensions.MissingActiveInitialEntiteAffectationMessage);
     }
