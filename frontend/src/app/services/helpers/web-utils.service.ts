@@ -1,22 +1,40 @@
 import { Injectable } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 
+type QueryParamPrimitive = string | number | boolean | Date;
+type QueryParamValue = QueryParamPrimitive | null | undefined;
+type QueryParamCollection = QueryParamValue | ReadonlyArray<QueryParamValue>;
+
 @Injectable({ providedIn: 'root' })
 export class WebUtilsService {
     /**
-     * Prépare les paramètres pour un GET simple
+     * Builds HTTP query params from a typed filter object.
      */
-    toHttpParams(filters: any): HttpParams {
-        const cleanFilters: any = {};
+    toHttpParams<T extends object>(filters: T): HttpParams {
+        const cleanFilters: Record<string, string | ReadonlyArray<string>> = {};
 
-        Object.keys(filters).forEach(key => {
-            const value = filters[key];
-            // On ne garde que ce qui a une valeur réelle (évite ?parentId=null)
+        Object.entries(filters as Record<string, unknown>).forEach(([key, rawValue]) => {
+            if (Array.isArray(rawValue)) {
+                const formattedValues = rawValue
+                    .filter((item): item is QueryParamPrimitive => item !== null && item !== undefined && item !== '')
+                    .map((item) => this.toQueryParamString(item));
+
+                if (formattedValues.length > 0) {
+                    cleanFilters[key] = formattedValues;
+                }
+                return;
+            }
+
+            const value = rawValue as QueryParamValue;
             if (value !== null && value !== undefined && value !== '') {
-                cleanFilters[key] = value.toString();
+                cleanFilters[key] = this.toQueryParamString(value);
             }
         });
 
         return new HttpParams({ fromObject: cleanFilters });
+    }
+
+    private toQueryParamString(value: QueryParamPrimitive): string {
+        return value instanceof Date ? value.toISOString() : String(value);
     }
 }

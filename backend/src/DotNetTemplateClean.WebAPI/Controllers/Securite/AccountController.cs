@@ -40,7 +40,6 @@ public class AccountController(IUserService UserService) : ApiBaseController
         return HandleResult(result);
     }
     // GET: api/acount/profile
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Authorize]
     [HttpGet("profile")]
     public async Task<ActionResult<ProfilViewModel?>> GetProfile()

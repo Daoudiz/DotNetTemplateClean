@@ -1,4 +1,6 @@
-namespace DotNetTemplateClean.Domain;
+using DotNetTemplateClean.Domain;
+
+namespace DotNetTemplateClean.Infrastructure;
 
 public class ApplicationUser : IdentityUser, IAuditableEntity
 {

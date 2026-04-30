@@ -8,21 +8,12 @@ public record UpdateEntiteCommand(OrganizationUnitSaveDto Dto) : IRequest<Servic
 public class UpdateEntiteCommandHandler(
     IApplicationDbContext context,
     IMapper mapper,
-    IValidator<UpdateEntiteCommand> validator,
     IEntiteRulesService entiteRulesService)
     : IRequestHandler<UpdateEntiteCommand, ServiceResult<string>>
 {
     public async Task<ServiceResult<string>> Handle(UpdateEntiteCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request, nameof(request));
-        var validationResult = await validator.ValidateAsync(request, cancellationToken);
-
-        if (!validationResult.IsValid)
-        {
-            return ServiceResult.Failure<string>(
-                string.Join(" | ", validationResult.Errors.Select(e => e.ErrorMessage)),
-                400);
-        }
 
         var dto = request.Dto;
         var existing = await context.Entites.FirstOrDefaultAsync(e => e.Id == dto.Id!.Value, cancellationToken);

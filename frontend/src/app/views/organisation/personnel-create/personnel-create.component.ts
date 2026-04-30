@@ -536,7 +536,6 @@ export class PersonnelCreateComponent {
                 return {
                     entiteId,
                     fonctionId,
-                    dateDebutAffectation: control.get('dateDebutAffectation')?.value || this.getTodayDate(),
                     dateDebut: control.get('dateDebutAffectation')?.value || this.getTodayDate(),
                     nature: control.get('nature')?.value || this.defaultNature
                 };
@@ -558,7 +557,6 @@ export class PersonnelCreateComponent {
                     id: Number(control.get('id')?.value || 0),
                     entiteId,
                     fonctionId,
-                    dateDebutAffectation: control.get('dateDebutAffectation')?.value || this.getTodayDate(),
                     dateDebut: control.get('dateDebutAffectation')?.value || this.getTodayDate(),
                     nature: control.get('nature')?.value || this.defaultNature,
                     dateFinAffectation: control.get('dateFinAffectation')?.value || null
@@ -808,7 +806,7 @@ export class PersonnelCreateComponent {
     }
 
     private getAffectationStartDate(affectation: PersonnelEditAffectationDto): string | null | undefined {
-        return affectation.dateDebutAffectation ?? affectation.dateDebut;
+        return affectation.dateDebutAffectation;
     }
 
     private toggleUserRoleControl(isEnabled: boolean, emitEvent = true): void {

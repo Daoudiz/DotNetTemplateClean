@@ -7,21 +7,12 @@ public record DeleteEntiteCommand(int Id) : IRequest<ServiceResult<string>>, IAu
 
 public class DeleteEntiteCommandHandler(
     IApplicationDbContext context,
-    IValidator<DeleteEntiteCommand> validator,
     IEntiteHierarchyService entiteHierarchyService)
     : IRequestHandler<DeleteEntiteCommand, ServiceResult<string>>
 {
     public async Task<ServiceResult<string>> Handle(DeleteEntiteCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request, nameof(request));
-        var validationResult = await validator.ValidateAsync(request, cancellationToken);
-
-        if (!validationResult.IsValid)
-        {
-            return ServiceResult.Failure<string>(
-                string.Join(" | ", validationResult.Errors.Select(e => e.ErrorMessage)),
-                400);
-        }
 
         var existing = await context.Entites.FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken);
         if (existing is null)

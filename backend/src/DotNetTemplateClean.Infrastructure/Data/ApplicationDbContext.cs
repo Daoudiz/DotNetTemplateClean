@@ -83,12 +83,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .Where(e => e.Entity is IAuditableEntity &&
                        (e.State == EntityState.Added || e.State == EntityState.Modified));
 
-       //var User = _httpContextAccessor?.HttpContext?.User;
-       // var identityName = User?.Identity?.Name
-       //        ?? User?.FindFirst("name")?.Value
-       //        ?? User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
-       //        ?? "System";
-        //var identityName = User.Identity?.Name ?? "System";
         var now = DateTime.UtcNow;
 
         foreach (var entry in entries)
