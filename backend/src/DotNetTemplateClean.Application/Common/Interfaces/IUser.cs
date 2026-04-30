@@ -3,6 +3,7 @@ namespace DotNetTemplateClean.Application;
 public interface IUser
 {
     string? Id { get; }
+    string? Name { get; }
 
 #pragma warning disable CA1002 
     List<string>? Roles { get; }

@@ -26,9 +26,9 @@ public class PerformanceBehaviour<TRequest, TResponse>(
         {
             var requestName = typeof(TRequest).Name;
             var userId = user.Id ?? string.Empty;
-            var userName = string.Empty;
+            var userName = user.Name ?? string.Empty;
 
-            if (!string.IsNullOrEmpty(userId))
+            if (string.IsNullOrWhiteSpace(userName) && !string.IsNullOrEmpty(userId))
             {
                 userName = await userService.GetUserNameAsync(userId);
             }

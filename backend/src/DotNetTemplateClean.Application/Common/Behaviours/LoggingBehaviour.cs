@@ -12,9 +12,9 @@ public class LoggingBehaviour<TRequest>(ILogger<TRequest> logger, IUser user, IU
     {
         var requestName = typeof(TRequest).Name;
         var userId = user.Id ?? string.Empty;
-        string? userName = string.Empty;
+        var userName = user.Name ?? string.Empty;
 
-        if (!string.IsNullOrEmpty(userId))
+        if (string.IsNullOrWhiteSpace(userName) && !string.IsNullOrEmpty(userId))
         {
             userName = await userService.GetUserNameAsync(userId);
         }
