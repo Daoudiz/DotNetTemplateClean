@@ -24,6 +24,9 @@ public static class DependencyInjection
 
         builder.Services.AddMediatR(cfg => {
             cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+            // Pipeline order is intentional:
+            // UnhandledException wraps the chain, then Authorization, Validation, and Performance.
+            // Keep this order stable to preserve fail-fast authorization/validation and consistent timing/exception behavior.
             cfg.AddOpenRequestPreProcessor(typeof(LoggingBehaviour<>));
             cfg.AddOpenBehavior(typeof(UnhandledExceptionBehaviour<,>));
             cfg.AddOpenBehavior(typeof(AuthorizationBehaviour<,>));
