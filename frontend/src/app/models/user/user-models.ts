@@ -62,3 +62,14 @@ export interface UserSearchResultDto {
   roles: string;
   roleId: string;
 }
+
+export interface AdminResetPasswordRequest {
+  newPassword: string;
+  confirmPassword: string;
+}
+
+export interface AdminResetPasswordResponse {
+  userId: string;
+  temporaryPassword: string;
+  mustChangePassword: boolean;
+}

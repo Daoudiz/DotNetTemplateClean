@@ -10,6 +10,7 @@ public interface IUserService
     Task<ServiceResult<object?>> DeleteUserAsync(string id, string currentUserId);
     Task<ServiceResult<string>> UpdateUserAsync(UserUpdateDto dto, CancellationToken ct);
     Task<ServiceResult<object?>> ChangePasswordAsync(string userId, ChangePasswordViewModel model);
+    Task<ServiceResult<AdminResetPasswordResponseDto>> AdminResetPasswordAsync(string userId, AdminResetPasswordViewModel model);
     Task<ServiceResult<bool>> UnlockUserAsync(string userId);
     Task<ServiceResult<ProfilViewModel>> GetUserProfileAsync(string userId, string userRole);
     Task<ServiceResult<LoginResponseDto>> LoginAsync(LoginViewModel model);

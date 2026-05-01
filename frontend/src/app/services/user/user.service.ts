@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
+  AdminResetPasswordRequest,
+  AdminResetPasswordResponse,
   ApplicationUser,
   CreateUserViewModel,
   PagedResult,
@@ -53,5 +55,11 @@ export class UserService {
 
   updateUser(id: string, userData: UpdateUserViewModel): Observable<unknown> {
     return this.http.put(`${this.apiUrl}/user/${id}`, userData);
+  }
+
+  resetUserPassword(id: string, payload: AdminResetPasswordRequest): Observable<AdminResetPasswordResponse> {
+    return this.http
+      .post<{ data: AdminResetPasswordResponse }>(`${this.apiUrl}/user/${id}/reset-password`, payload)
+      .pipe(map((response) => response.data));
   }
 }

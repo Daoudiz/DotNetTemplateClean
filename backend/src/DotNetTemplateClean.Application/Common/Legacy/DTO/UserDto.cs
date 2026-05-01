@@ -57,6 +57,19 @@ public class FirstLoginChangePasswordViewModel
     public string ConfirmPassword { get; set; } = string.Empty;
 }
 
+public class AdminResetPasswordViewModel
+{
+    public string NewPassword { get; set; } = string.Empty;
+    public string ConfirmPassword { get; set; } = string.Empty;
+}
+
+public class AdminResetPasswordResponseDto
+{
+    public string UserId { get; set; } = string.Empty;
+    public string TemporaryPassword { get; set; } = string.Empty;
+    public bool MustChangePassword { get; set; }
+}
+
 public class ProfilViewModel
 {
     public string Id { get; set; } = string.Empty;

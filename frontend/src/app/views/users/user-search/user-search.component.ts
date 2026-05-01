@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, ElementRef, OnInit, ViewChild, inject, signal } from '@angular/core';
 import { CommonModule, UpperCasePipe } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { Observable, Subject, merge, of } from 'rxjs';
 import { catchError, finalize, map, switchMap, tap } from 'rxjs/operators';
 import { Table, TableLazyLoadEvent, TableModule } from 'primeng/table';
@@ -8,7 +8,7 @@ import { Table, TableLazyLoadEvent, TableModule } from 'primeng/table';
 import { UserCreateComponent } from '../user-create/user-create.component';
 import { NotificationService } from '../../../services/notification.service';
 import { UserService } from '../../../services/user/user.service';
-import { ApplicationUser, UserSearchCriteria } from '../../../models/user/user-models';
+import { AdminResetPasswordResponse, ApplicationUser, UserSearchCriteria } from '../../../models/user/user-models';
 
 import {
   AlertModule,
@@ -62,11 +62,16 @@ export class UserSearchComponent implements OnInit {
   readonly selectedUser = signal<ApplicationUser | null>(null);
   readonly isEditMode = signal<boolean>(false);
   readonly isUserModalOpen = signal<boolean>(false);
+  readonly isResetPasswordModalOpen = signal<boolean>(false);
+  readonly isResetPasswordResultModalOpen = signal<boolean>(false);
+  readonly selectedUserForPasswordReset = signal<ApplicationUser | null>(null);
+  readonly resetPasswordResult = signal<AdminResetPasswordResponse | null>(null);
 
   private readonly searchAction$ = new Subject<UserSearchCriteria>();
   private readonly resetAction$ = new Subject<void>();
 
   searchForm!: FormGroup;
+  resetPasswordForm!: FormGroup;
 
   readonly users$: Observable<ApplicationUser[]> = merge(
     this.searchAction$.pipe(
@@ -105,6 +110,28 @@ export class UserSearchComponent implements OnInit {
       nom: [''],
       prenom: ['']
     });
+
+    this.resetPasswordForm = this.fb.group(
+      {
+        newPassword: ['', Validators.required],
+        confirmPassword: ['', Validators.required]
+      },
+      {
+        validators: this.passwordsMatchValidator()
+      }
+    );
+  }
+
+  private passwordsMatchValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const newPassword = control.get('newPassword')?.value;
+      const confirmPassword = control.get('confirmPassword')?.value;
+      if (!newPassword || !confirmPassword) {
+        return null;
+      }
+
+      return newPassword === confirmPassword ? null : { passwordMismatch: true };
+    };
   }
 
   onSearch(): void {
@@ -214,5 +241,58 @@ export class UserSearchComponent implements OnInit {
   onUserCreatedSuccess(): void {
     this.isUserModalOpen.set(false);
     this.onSearch();
+  }
+
+  openResetPasswordModal(user: ApplicationUser): void {
+    this.selectedUserForPasswordReset.set(user);
+    this.resetPasswordForm.reset({
+      newPassword: '',
+      confirmPassword: ''
+    });
+    this.isResetPasswordModalOpen.set(true);
+  }
+
+  closeResetPasswordModal(): void {
+    this.isResetPasswordModalOpen.set(false);
+    this.selectedUserForPasswordReset.set(null);
+    this.resetPasswordForm.reset({
+      newPassword: '',
+      confirmPassword: ''
+    });
+  }
+
+  submitResetPassword(): void {
+    if (this.resetPasswordForm.invalid) {
+      this.resetPasswordForm.markAllAsTouched();
+      return;
+    }
+
+    const { newPassword, confirmPassword } = this.resetPasswordForm.getRawValue();
+    if (newPassword !== confirmPassword) {
+      this.notification.error('La confirmation du mot de passe ne correspond pas.');
+      return;
+    }
+
+    const user = this.selectedUserForPasswordReset();
+    if (!user) {
+      return;
+    }
+
+    this.loading.set(true);
+    this.userService.resetUserPassword(user.id, { newPassword, confirmPassword })
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (result) => {
+          this.closeResetPasswordModal();
+          this.resetPasswordResult.set(result);
+          this.isResetPasswordResultModalOpen.set(true);
+          this.notification.success('Mot de passe reinitialise avec succes.');
+        }
+      });
+  }
+
+  closeResetPasswordResultModal(): void {
+    this.isResetPasswordResultModalOpen.set(false);
+    this.resetPasswordResult.set(null);
   }
 }

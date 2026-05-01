@@ -80,7 +80,7 @@
               {{ user.isLocked ? 'Verrouille' : 'Actif' }}
             </span>
           </td>
-          <td class="text-center">
+          <td class="text-center text-nowrap">
             <button cButton color="warning" size="sm" variant="outline" class="me-1" (click)="openEditModal(user)">
               <svg cIcon name="cilPencil"></svg>
             </button>
@@ -90,10 +90,23 @@
               [color]="user.isLocked ? 'success' : 'danger'"
               size="sm"
               variant="outline"
+              class="me-1"
               (click)="onToggleUserStatus(user)"
               [cTooltip]="user.isLocked ? 'Activer l\'utilisateur' : 'Desactiver l\'utilisateur'"
             >
               <svg cIcon [name]="user.isLocked ? 'cilUserFollow' : 'cilUserUnfollow'"></svg>
+            </button>
+
+            <button
+              cButton
+              color="info"
+              size="sm"
+              variant="outline"
+              class="me-1"
+              (click)="openResetPasswordModal(user)"
+              cTooltip="Reinitialiser le mot de passe"
+            >
+              <svg cIcon name="cilLockLocked"></svg>
             </button>
           </td>
         </tr>
@@ -156,5 +169,78 @@
       {{ isEditMode() ? 'Enregistrer les modifications' : 'Creer l\'utilisateur' }}
       }
     </button>
+  </c-modal-footer>
+</c-modal>
+
+<c-modal
+  id="resetPasswordModal"
+  [visible]="isResetPasswordModalOpen()"
+  (visibleChange)="!$event && closeResetPasswordModal()"
+  alignment="center"
+>
+  <c-modal-header class="bg-info text-white">
+    <h5 cModalTitle>
+      <svg cIcon name="cilLockLocked" class="me-2"></svg>
+      Reinitialiser mot passe
+    </h5>
+    <button cButtonClose white (click)="closeResetPasswordModal()"></button>
+  </c-modal-header>
+  <c-modal-body>
+    <form [formGroup]="resetPasswordForm" class="row g-3">
+      <div class="col-12">
+        <label cLabel>Nouveau mot de passe temporaire</label>
+        <input cFormControl type="password" formControlName="newPassword" />
+      </div>
+      <div class="col-12">
+        <label cLabel>Confirmer le mot de passe</label>
+        <input cFormControl type="password" formControlName="confirmPassword" />
+      </div>
+      @if (resetPasswordForm.errors?.['passwordMismatch'] && (resetPasswordForm.touched || resetPasswordForm.dirty)) {
+      <div class="col-12">
+        <c-alert color="danger" class="mb-0">
+          La confirmation du mot de passe ne correspond pas.
+        </c-alert>
+      </div>
+      }
+    </form>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closeResetPasswordModal()">Annuler</button>
+    <button cButton color="info" class="text-white" [disabled]="loading()" (click)="submitResetPassword()">
+      @if (loading()) {
+      <c-spinner size="sm" class="me-2"></c-spinner>
+      En cours...
+      } @else {
+      Valider
+      }
+    </button>
+  </c-modal-footer>
+</c-modal>
+
+<c-modal
+  id="resetPasswordResultModal"
+  [visible]="isResetPasswordResultModalOpen()"
+  (visibleChange)="!$event && closeResetPasswordResultModal()"
+  alignment="center"
+>
+  <c-modal-header class="bg-success text-white">
+    <h5 cModalTitle>
+      <svg cIcon name="cilCheckCircle" class="me-2"></svg>
+      Mot de passe temporaire
+    </h5>
+    <button cButtonClose white (click)="closeResetPasswordResultModal()"></button>
+  </c-modal-header>
+  <c-modal-body>
+    <p class="mb-2">Le mot de passe temporaire a ete defini avec succes.</p>
+    <c-alert color="warning" class="mb-3">
+      Ce mot de passe est temporaire. Communiquez-le de maniere securisee a l'utilisateur.
+      L'utilisateur devra le changer a la prochaine connexion.
+    </c-alert>
+    <div class="border rounded p-3 bg-light">
+      <strong>{{ resetPasswordResult()?.temporaryPassword }}</strong>
+    </div>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="primary" (click)="closeResetPasswordResultModal()">Fermer</button>
   </c-modal-footer>
 </c-modal>

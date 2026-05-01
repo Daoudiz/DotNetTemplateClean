@@ -234,6 +234,45 @@ public class UserService(
         return ServiceResult.Success();
     }
 
+    public async Task<ServiceResult<AdminResetPasswordResponseDto>> AdminResetPasswordAsync(string userId, AdminResetPasswordViewModel model)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+
+        var user = await userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return ServiceResult.Failure<AdminResetPasswordResponseDto>(UserErrors.UserNotFound, 404);
+        }
+
+        if (!string.Equals(model.NewPassword, model.ConfirmPassword, StringComparison.Ordinal))
+        {
+            return ServiceResult.Failure<AdminResetPasswordResponseDto>("La confirmation du mot de passe ne correspond pas.", 400);
+        }
+
+        var resetToken = await userManager.GeneratePasswordResetTokenAsync(user);
+        var resetResult = await userManager.ResetPasswordAsync(user, resetToken, model.NewPassword);
+        if (!resetResult.Succeeded)
+        {
+            var errors = string.Join(" | ", resetResult.Errors.Select(e => e.Description));
+            return ServiceResult.Failure<AdminResetPasswordResponseDto>(errors, 400);
+        }
+
+        user.MustChangePassword = true;
+        var updateResult = await userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+        {
+            var errors = string.Join(" | ", updateResult.Errors.Select(e => e.Description));
+            return ServiceResult.Failure<AdminResetPasswordResponseDto>(errors, 400);
+        }
+
+        return ServiceResult.Success(new AdminResetPasswordResponseDto
+        {
+            UserId = user.Id,
+            TemporaryPassword = model.NewPassword,
+            MustChangePassword = true
+        });
+    }
+
     public async Task<ServiceResult<bool>> UnlockUserAsync(string userId)
     {
         var user = await userManager.FindByIdAsync(userId);
