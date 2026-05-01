@@ -1,13 +1,14 @@
-
 namespace DotNetTemplateClean.Application;
 
 public class UserMappingProfile : Profile
 {
     public UserMappingProfile()
     {
-        // Règle pour la CREATION d'un utilisateur
-        CreateMap<CreateViewModel, UserCreationDto>();
-        CreateMap<UpdateUserViewModel, UserUpdateDto>();
+        CreateMap<CreateViewModel, UserCreationDto>()
+            .ForMember(
+                destination => destination.MustChangePasswordOnFirstLogin,
+                options => options.MapFrom(_ => false));
 
+        CreateMap<UpdateUserViewModel, UserUpdateDto>();
     }
 }

@@ -78,9 +78,12 @@ public class CreatePersonnelTemporaryPasswordTests : TestBase
 
         Assert.Multiple(() =>
         {
-            Assert.That(loginResult.IsSuccess, Is.False);
-            Assert.That(loginResult.StatusCode, Is.EqualTo(403));
-            Assert.That(loginResult.ErrorMessage, Does.Contain("Changement de mot de passe requis").IgnoreCase);
+            Assert.That(loginResult.IsSuccess, Is.True);
+            Assert.That(loginResult.StatusCode, Is.EqualTo(200));
+            Assert.That(loginResult.Value, Is.Not.Null);
+            Assert.That(loginResult.Value!.PasswordChangeRequired, Is.True);
+            Assert.That(loginResult.Value.Token, Is.Null.Or.Empty);
+            Assert.That(loginResult.Value.Roles, Is.Empty);
         });
     }
 
