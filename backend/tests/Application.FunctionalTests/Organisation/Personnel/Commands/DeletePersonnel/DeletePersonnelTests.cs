@@ -36,7 +36,8 @@ public class DeletePersonnelTests : TestBase
             ]
         };
 
-        var personnelId = await TestApp.SendAsync(createCommand);
+        var createResult = await TestApp.SendAsync(createCommand);
+        var personnelId = createResult.PersonnelId;
         await TestApp.SendAsync(new DeletePersonnelCommand(personnelId));
 
         using var scope = FunctionalTestSetup.ScopeFactory.CreateScope();

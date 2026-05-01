@@ -1,6 +1,6 @@
 namespace DotNetTemplateClean.Application;
 
-public record CreatePersonnelCommand : IRequest<int>, IAuthorizeRequest
+public record CreatePersonnelCommand : IRequest<CreatePersonnelResult>, IAuthorizeRequest
 {
     public required string Matricule { get; init; }
     public required string Nom { get; init; }
@@ -21,15 +21,20 @@ public record CreatePersonnelCommand : IRequest<int>, IAuthorizeRequest
 }
 
 public record CreateAffectationDto(int EntiteId, int FonctionId, DateTime DateDebut, string Nature);
+public record CreatePersonnelResult(int PersonnelId, string? TemporaryPassword);
 
-public class CreatePersonnelCommandHandler(IApplicationDbContext context, IUserService userService)
-    : IRequestHandler<CreatePersonnelCommand, int>
+public class CreatePersonnelCommandHandler(
+    IApplicationDbContext context,
+    IUserService userService,
+    ITemporaryPasswordGenerator temporaryPasswordGenerator)
+    : IRequestHandler<CreatePersonnelCommand, CreatePersonnelResult>
 {
-    public async Task<int> Handle(CreatePersonnelCommand request, CancellationToken cancellationToken)
+    public async Task<CreatePersonnelResult> Handle(CreatePersonnelCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request, nameof(request));
 
         int personnelId = 0;
+        string? temporaryPassword = null;
 
         await context.ExecuteInTransactionAsync(async () =>
         {
@@ -66,15 +71,18 @@ public class CreatePersonnelCommandHandler(IApplicationDbContext context, IUserS
 
             if (request.CreateUser)
             {
+                temporaryPassword = temporaryPasswordGenerator.Generate();
+
                 var user = new UserCreationDto
                 {
                     FirstName = request.Prenom,
                     LastName = request.Nom,
                     Email = request.Email,
                     UserName = request.Email,
-                    Password = request.Prenom + "@2026",
+                    Password = temporaryPassword,
                     UserRole = request.UserRole!,
-                    TwoFactorEnabled = false
+                    TwoFactorEnabled = false,
+                    MustChangePasswordOnFirstLogin = true
                 };
 
                 var result = await userService.CreateUserWithRoleAsync(user);
@@ -93,6 +101,6 @@ public class CreatePersonnelCommandHandler(IApplicationDbContext context, IUserS
 
         }, cancellationToken);
 
-        return personnelId;
+        return new CreatePersonnelResult(personnelId, temporaryPassword);
     }
 }

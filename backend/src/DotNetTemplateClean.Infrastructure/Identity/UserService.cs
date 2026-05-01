@@ -80,7 +80,8 @@ public class UserService(
             Email = userCreationDto.Email,
             FirstName = userCreationDto.FirstName,
             LastName = userCreationDto.LastName,
-            TwoFactorEnabled = userCreationDto.TwoFactorEnabled
+            TwoFactorEnabled = userCreationDto.TwoFactorEnabled,
+            MustChangePassword = userCreationDto.MustChangePasswordOnFirstLogin
         };
 
         var createResult = await userManager.CreateAsync(user, userCreationDto.Password);
@@ -219,6 +220,17 @@ public class UserService(
             return ServiceResult.Failure(errors, 400);
         }
 
+        if (user.MustChangePassword)
+        {
+            user.MustChangePassword = false;
+            var clearFlagResult = await userManager.UpdateAsync(user);
+            if (!clearFlagResult.Succeeded)
+            {
+                var errors = string.Join(" | ", clearFlagResult.Errors.Select(e => e.Description));
+                return ServiceResult.Failure(errors, 400);
+            }
+        }
+
         return ServiceResult.Success();
     }
 
@@ -296,10 +308,74 @@ public class UserService(
             return ServiceResult.Failure<LoginResponseDto>(Auth.InvalidCredentials, 401);
         }
 
+        if (user.MustChangePassword)
+        {
+            return ServiceResult.Success(new LoginResponseDto
+            {
+                PasswordChangeRequired = true,
+                Username = user.UserName ?? string.Empty
+            });
+        }
+
         var tokenData = await tokenService.GenerateTokenAsync(user);
 
         var response = new LoginResponseDto
         {
+            PasswordChangeRequired = false,
+            Token = tokenData.Token,
+            Expires = tokenData.ExpiresAt,
+            Username = user.UserName ?? string.Empty,
+            Roles = tokenData.Roles
+        };
+
+        return ServiceResult.Success(response);
+    }
+
+    public async Task<ServiceResult<LoginResponseDto>> FirstLoginChangePasswordAndLoginAsync(FirstLoginChangePasswordViewModel model)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+
+        var user = await userManager.FindByNameAsync(model.UserName);
+        if (user is null)
+        {
+            return ServiceResult.Failure<LoginResponseDto>(Auth.InvalidCredentials, 401);
+        }
+
+        if (!user.MustChangePassword)
+        {
+            return ServiceResult.Failure<LoginResponseDto>(Auth.PasswordChangeRequired, 400);
+        }
+
+        if (!string.Equals(model.NewPassword, model.ConfirmPassword, StringComparison.Ordinal))
+        {
+            return ServiceResult.Failure<LoginResponseDto>("La confirmation du mot de passe ne correspond pas.", 400);
+        }
+
+        var check = await signInManager.CheckPasswordSignInAsync(user, model.OldPassword, false);
+        if (!check.Succeeded)
+        {
+            return ServiceResult.Failure<LoginResponseDto>(Auth.InvalidCredentials, 401);
+        }
+
+        var changeResult = await userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+        if (!changeResult.Succeeded)
+        {
+            var errors = string.Join(" | ", changeResult.Errors.Select(e => e.Description));
+            return ServiceResult.Failure<LoginResponseDto>(errors, 400);
+        }
+
+        user.MustChangePassword = false;
+        var updateResult = await userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+        {
+            var errors = string.Join(" | ", updateResult.Errors.Select(e => e.Description));
+            return ServiceResult.Failure<LoginResponseDto>(errors, 400);
+        }
+
+        var tokenData = await tokenService.GenerateTokenAsync(user);
+        var response = new LoginResponseDto
+        {
+            PasswordChangeRequired = false,
             Token = tokenData.Token,
             Expires = tokenData.ExpiresAt,
             Username = user.UserName ?? string.Empty,

@@ -31,6 +31,17 @@ public class AccountController(IUserService UserService) : ApiBaseController
         return HandleResult(result);
     }
 
+    [HttpPost("first-login/change-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> FirstLoginChangePassword([FromBody] FirstLoginChangePasswordViewModel model)
+    {
+        if (model is null) return BadRequest("Invalid payload.");
+        if (!ModelState.IsValid) return ValidationProblem(ModelState);
+
+        var result = await UserService.FirstLoginChangePasswordAndLoginAsync(model);
+        return HandleResult(result);
+    }
+
     // POST api/account/logout
     [HttpPost("logout")]
     [Authorize]

@@ -1,11 +1,11 @@
-import { Component, inject , ChangeDetectorRef } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 import {
   ContainerComponent, RowComponent, ColComponent, CardGroupComponent,
   CardComponent, CardBodyComponent, InputGroupComponent, InputGroupTextDirective,
-  FormControlDirective, ButtonDirective, SpinnerComponent, AlertComponent
+  FormControlDirective, ButtonDirective, SpinnerComponent
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { AuthService } from '../../../services/user/auth.service';
@@ -20,7 +20,7 @@ import { AsyncPipe } from '@angular/common';
     FormsModule,
     ContainerComponent,
     RowComponent,
-    ColComponent, 
+    ColComponent,
     CardGroupComponent,
     CardComponent,
     CardBodyComponent,
@@ -29,43 +29,49 @@ import { AsyncPipe } from '@angular/common';
     FormControlDirective,
     ButtonDirective,
     IconDirective,
-    SpinnerComponent,   
+    SpinnerComponent,
     AsyncPipe
   ]
 })
 export class LoginComponent {
   public authService = inject(AuthService);
   private router = inject(Router);
- 
-  // Utilisation de l'interface modèle
+
   public loginData: LoginRequest = {
     userName: '',
     password: ''
   };
-    
-  public isLoading$ = new BehaviorSubject<boolean>(false);
- 
-  onLogin(): void {
 
-    if (this.isLoading$.value) return;    
-        
+  public isLoading$ = new BehaviorSubject<boolean>(false);
+
+  constructor() {
+    this.authService.loginError.set(null);
+  }
+
+  onLogin(): void {
+    if (this.isLoading$.value) return;
+
     this.isLoading$.next(true);
-   
+
     this.authService.login(this.loginData).subscribe({
       next: (response) => {
-        //this.isLoading = false; // Arrêt du chargement en cas de succès
-        this.isLoading$.next(false);        
-        this.router.navigate(['/dashboard']);        
+        this.isLoading$.next(false);
+
+        if (response.passwordChangeRequired) {
+          this.authService.loginError.set('Vous devez changer votre mot de passe lors de la première connexion.');
+          this.router.navigate(['/first-login-change-password']);
+          return;
+        }
+
+        this.router.navigate(['/dashboard']);
       },
-      
-      error: (err) => {              
-        this.isLoading$.next(false); // Arrêt du chargement en cas d'erreur    
-        // On récupère le message du backend ou un message par défaut
+      error: (err) => {
+        this.isLoading$.next(false);
         if (err.status === 401) {
-        const errorMessage = err.error?.message || 'Identifiants ou mot de passe incorrects';
-        this.authService.loginError.set(errorMessage);    
-        } 
-      }      
+          const errorMessage = err.error?.message || 'Identifiants ou mot de passe incorrects';
+          this.authService.loginError.set(errorMessage);
+        }
+      }
     });
-  } 
+  }
 }

@@ -5,10 +5,18 @@ export interface LoginRequest {
 }
 
 export interface AuthResponse {
-  token: string;
-  expires: string;
+  passwordChangeRequired?: boolean;
+  token?: string;
+  expires?: string;
   username: string;
-  roles: string[];
+  roles?: string[];
+}
+
+export interface FirstLoginChangePasswordRequest {
+  userName: string;
+  oldPassword: string;
+  newPassword: string;
+  confirmPassword: string;
 }
 
 // Model user to display user profile information

@@ -4,6 +4,7 @@ import { Observable, catchError, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { WebUtilsService } from '../helpers/web-utils.service';
 import {
+    CreatePersonnelResponse,
     CreatePersonnelRequest,
     GetPersonnelsWithFiltersQuery,
     NatureFonction,
@@ -31,8 +32,8 @@ export class PersonnelService {
         return this.http.get<PersonnelDetailsDto>(`${this.apiUrl}/${id}`);
     }
 
-    createPersonnel(data: CreatePersonnelRequest): Observable<number> {
-        return this.http.post<number>(this.apiUrl, data);
+    createPersonnel(data: CreatePersonnelRequest): Observable<CreatePersonnelResponse | number> {
+        return this.http.post<CreatePersonnelResponse | number>(this.apiUrl, data);
     }
 
     updatePersonnel(id: number, data: UpdatePersonnelRequest): Observable<void> {

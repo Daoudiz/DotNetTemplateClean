@@ -21,6 +21,7 @@ public static class DependencyInjection
            cfg.AddMaps(Assembly.GetExecutingAssembly()));
 
         builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+        builder.Services.AddScoped<ITemporaryPasswordGenerator, TemporaryPasswordGenerator>();
 
         builder.Services.AddMediatR(cfg => {
             cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());

@@ -158,7 +158,8 @@ public class CreatePersonnelTests : TestBase
             ]
         };
 
-        var personnelId = await TestApp.SendAsync(command);
+        var createResult = await TestApp.SendAsync(command);
+        var personnelId = createResult.PersonnelId;
 
         var personnel = await TestApp.FindAsync<DotNetTemplateClean.Domain.Personnel>(personnelId);
 
@@ -170,6 +171,7 @@ public class CreatePersonnelTests : TestBase
             Assert.That(personnel.Prenom, Is.EqualTo(command.Prenom));
             Assert.That(personnel.EntiteId, Is.EqualTo(entite.Id));
             Assert.That(personnel.IdentityId, Is.Null);
+            Assert.That(createResult.TemporaryPassword, Is.Null);
         });
 
         var affectationCount = await TestApp.CountAsync<AffectationPersonnel>();

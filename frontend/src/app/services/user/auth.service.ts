@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
-import { LoginRequest, AuthResponse } from '../../models/user/auth.model';
+import { map, Observable, tap } from 'rxjs';
+import { FirstLoginChangePasswordRequest, LoginRequest, AuthResponse } from '../../models/user/auth.model';
 import { jwtDecode } from 'jwt-decode';
 import { environment } from '../../../environments/environment';
 
@@ -11,6 +11,7 @@ export class AuthService {
     // Le Signal qui surveille l'expiration
     sessionExpired = signal<boolean>(false);
     public loginError = signal<string | null>(null);
+    public pendingFirstLoginUserName = signal<string | null>(null);
     
     private readonly apiUrl = `${environment.apiUrl}/Account`;
 
@@ -26,21 +27,36 @@ export class AuthService {
     // et que l'Observable retournera une AuthResponse
     login(credentials: LoginRequest): Observable<AuthResponse> {
         this.loginError.set(null);
-        return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
+        return this.http.post<unknown>(`${this.apiUrl}/login`, credentials).pipe(
+            map((rawResponse) => this.normalizeAuthResponse(rawResponse)),
             tap(response => {
-                if (response.token) {
-                    localStorage.setItem('token', response.token);
-                    localStorage.setItem('user', JSON.stringify(response));
-                    this.userName.set(this.getUserNameFromToken());
+                if (response.passwordChangeRequired) {
+                    this.pendingFirstLoginUserName.set(response.username);
+                    return;
                 }
+
+                this.persistAuthentication(response);
             })
         );
     }
+
+    completeFirstLoginPasswordChange(request: FirstLoginChangePasswordRequest): Observable<AuthResponse> {
+        return this.http.post<unknown>(`${this.apiUrl}/first-login/change-password`, request).pipe(
+            map((rawResponse) => this.normalizeAuthResponse(rawResponse)),
+            tap((response) => {
+                this.persistAuthentication(response);
+                this.pendingFirstLoginUserName.set(null);
+            })
+        );
+    }
+
     logout() {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         this.userName.set(null);
         this.isAuthenticated.set(false);
+        this.pendingFirstLoginUserName.set(null);
+        this.loginError.set(null);
     }
 
     isLoggedIn(): boolean {
@@ -96,5 +112,22 @@ export class AuthService {
         } catch (error) {            
             return null;
         }
+    }
+
+    private normalizeAuthResponse(rawResponse: unknown): AuthResponse {
+        const wrapped = rawResponse as { data?: AuthResponse };
+        return wrapped?.data ?? (rawResponse as AuthResponse);
+    }
+
+    private persistAuthentication(response: AuthResponse): void {
+        if (!response.token) {
+            return;
+        }
+
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user', JSON.stringify(response));
+        this.userName.set(this.getUserNameFromToken());
+        this.isAuthenticated.set(true);
+        this.sessionExpired.set(false);
     }
 }

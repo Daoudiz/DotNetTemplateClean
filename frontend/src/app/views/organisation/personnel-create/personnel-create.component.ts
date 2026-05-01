@@ -33,6 +33,7 @@ import { NotificationService } from '../../../services/notification.service';
 import { ValidationService } from '../../../services/user/validation.service';
 
 import {
+    CreatePersonnelResponse,
     CreateAffectationRequest,
     CreatePersonnelRequest,
     NatureFonction,
@@ -86,6 +87,8 @@ export class PersonnelCreateComponent {
     readonly isEndAffectationDialogOpen = signal(false);
     readonly selectedAffectationIndex = signal<number | null>(null);
     readonly endAffectationDate = signal('');
+    readonly isTemporaryPasswordDialogOpen = signal(false);
+    readonly temporaryPassword = signal<string | null>(null);
 
     @Output() cancel = new EventEmitter<void>();
     @Output() personnelSaved = new EventEmitter<void>();
@@ -452,18 +455,27 @@ export class PersonnelCreateComponent {
                 takeUntilDestroyed(this.destroyRef),
                 finalize(() => this.loading.set(false))
             )
-            .subscribe(() => {
+            .subscribe((response) => {
+                const temporaryPassword = this.extractTemporaryPassword(response);
+
                 this.notification.success(
                     this.isEditMode()
                         ? 'Personnel mis a jour avec succes'
                         : 'Personnel cree avec succes'
                 );
-                this.personnelSaved.emit();
-                this.onCancel();
+
+                if (!this.isEditMode() && temporaryPassword) {
+                    this.temporaryPassword.set(temporaryPassword);
+                    this.isTemporaryPasswordDialogOpen.set(true);
+                    return;
+                }
+
+                this.finalizeSuccessfulSave();
             });
     }
 
     onCancel(): void {
+        this.clearTemporaryPasswordState();
         this.currentStep.set(1);
         if (this.isEditMode()) {
             this.clearAffectations();
@@ -472,6 +484,12 @@ export class PersonnelCreateComponent {
             this.resetCreateForm();
         }
         this.cancel.emit();
+    }
+
+    closeTemporaryPasswordDialog(): void {
+        this.isTemporaryPasswordDialogOpen.set(false);
+        this.clearTemporaryPasswordState();
+        this.finalizeSuccessfulSave();
     }
 
     isFieldInvalid(fieldName: string): boolean {
@@ -935,5 +953,24 @@ export class PersonnelCreateComponent {
         }
 
         return value.split('T')[0];
+    }
+
+    private extractTemporaryPassword(response: unknown): string | null {
+        if (!response || typeof response !== 'object') {
+            return null;
+        }
+
+        const createResponse = response as CreatePersonnelResponse;
+        return createResponse.temporaryPassword ?? null;
+    }
+
+    private clearTemporaryPasswordState(): void {
+        this.temporaryPassword.set(null);
+        this.isTemporaryPasswordDialogOpen.set(false);
+    }
+
+    private finalizeSuccessfulSave(): void {
+        this.personnelSaved.emit();
+        this.onCancel();
     }
 }

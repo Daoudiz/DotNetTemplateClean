@@ -50,13 +50,13 @@ public class Personnel: IEndpointGroup
 
     [EndpointSummary("Create a new Personnel")]
     [EndpointDescription("Creates a new Personnel  using the provided data and returns the ID of the created personnel.")]
-    public static async Task<Created<int>> CreatePersonnel(ISender sender, CreatePersonnelCommand command)
+    public static async Task<Created<CreatePersonnelResult>> CreatePersonnel(ISender sender, CreatePersonnelCommand command)
     {
         ArgumentNullException.ThrowIfNull(sender);
 
-        var id = await sender.Send(command);
+        var result = await sender.Send(command);
 
-        return TypedResults.Created($"/{nameof(Personnel)}/{id}", id);
+        return TypedResults.Created($"/{nameof(Personnel)}/{result.PersonnelId}", result);
     }
 
     [EndpointSummary("Update a Personnel by ID")]

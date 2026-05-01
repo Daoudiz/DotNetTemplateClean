@@ -57,6 +57,14 @@ export const routes: Routes = [
     data: {
       title: 'Login Page'
     }
-  }, 
+  },
+  {
+    path: 'first-login-change-password',
+    loadComponent: () => import('./views/pages/first-login-change-password/first-login-change-password.component')
+      .then(m => m.FirstLoginChangePasswordComponent),
+    data: {
+      title: 'First Login Password Change'
+    }
+  },
   { path: '**', redirectTo: 'dashboard' }
 ];

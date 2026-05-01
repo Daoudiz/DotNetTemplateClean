@@ -56,6 +56,11 @@ export interface CreatePersonnelRequest {
     affectations: CreateAffectationRequest[];
 }
 
+export interface CreatePersonnelResponse {
+    personnelId: number;
+    temporaryPassword?: string | null;
+}
+
 export interface UpdatePersonnelRequest {
     matricule: string;
     nom: string;
