@@ -1,4 +1,3 @@
-using DotNetTemplateClean.Domain;
 using DotNetTemplateClean.Infrastructure;
 
 using MediatR;

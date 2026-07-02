@@ -39,6 +39,9 @@ public class EntiteEndpointGroup : IEndpointGroup
 
     public static async Task<Ok<PagedResult<OrganizationUnitResponseDto>>> GetUnits(ISender sender, [AsParameters] OrganizationSearchFilters filters)
     {
+        ArgumentNullException.ThrowIfNull(sender, nameof(sender));
+        ArgumentNullException.ThrowIfNull(filters, nameof(filters));
+
         var result = await sender.Send(new SearchEntitesQuery
         {
             SearchTerm = filters.SearchTerm,
@@ -53,12 +56,16 @@ public class EntiteEndpointGroup : IEndpointGroup
 
     public static async Task<Ok<List<Entite>>> GetAllDirections(ISender sender)
     {
+        ArgumentNullException.ThrowIfNull(sender, nameof(sender));
+
         var results = await sender.Send(new GetEntitesByTypeQuery(EntityTypes.Direction, SelectIdAndCodeOnly: true));
         return TypedResults.Ok(results);
     }
 
     public static async Task<Results<Ok<List<Entite>>, BadRequest<string>>> GetDivisionsByDirection(ISender sender, int directionId)
     {
+        ArgumentNullException.ThrowIfNull(sender, nameof(sender));
+
         if (directionId <= 0)
         {
             return TypedResults.BadRequest("ID de direction invalide.");
@@ -70,6 +77,8 @@ public class EntiteEndpointGroup : IEndpointGroup
 
     public static async Task<Results<Ok<List<Entite>>, BadRequest<string>>> GetServicesByRattachement(ISender sender, int rattachementId)
     {
+        ArgumentNullException.ThrowIfNull(sender, nameof(sender));
+
         if (rattachementId <= 0)
         {
             return TypedResults.BadRequest("ID de division invalide.");
@@ -81,6 +90,9 @@ public class EntiteEndpointGroup : IEndpointGroup
 
     public static async Task<IResult> Create(ISender sender, HttpContext httpContext, OrganizationUnitSaveDto dto, CancellationToken ct)
     {
+        ArgumentNullException.ThrowIfNull(sender, nameof(sender));
+        ArgumentNullException.ThrowIfNull(httpContext, nameof(httpContext));
+
         var result = await sender.Send(new CreateEntiteCommand(dto), ct);
         return result.IsSuccess
             ? HandleResult(result)
@@ -89,6 +101,9 @@ public class EntiteEndpointGroup : IEndpointGroup
 
     public static async Task<IResult> Update(ISender sender, HttpContext httpContext, int id, OrganizationUnitSaveDto dto, CancellationToken ct)
     {
+        ArgumentNullException.ThrowIfNull(sender, nameof(sender));
+        ArgumentNullException.ThrowIfNull(httpContext, nameof(httpContext));
+
         if (dto is null)
         {
             return TypedResults.BadRequest();
@@ -110,6 +125,9 @@ public class EntiteEndpointGroup : IEndpointGroup
 
     public static async Task<IResult> Delete(ISender sender, HttpContext httpContext, int id, CancellationToken ct)
     {
+        ArgumentNullException.ThrowIfNull(sender, nameof(sender));
+        ArgumentNullException.ThrowIfNull(httpContext, nameof(httpContext));
+
         if (id <= 0)
         {
             return TypedResults.BadRequest("Invalid identifier.");
@@ -126,18 +144,24 @@ public class EntiteEndpointGroup : IEndpointGroup
 
     public static async Task<Ok<List<TypeEntiteDto>>> GetAllTypes(ISender sender)
     {
+        ArgumentNullException.ThrowIfNull(sender, nameof(sender));
+
         var results = await sender.Send(new GetTypeEntitesQuery());
         return TypedResults.Ok(results);
     }
 
     public static async Task<Ok<List<TreeNodeDto>>> GetTree(ISender sender)
     {
+        ArgumentNullException.ThrowIfNull(sender, nameof(sender));
+
         var tree = await sender.Send(new GetOrganisationTreeQuery());
         return TypedResults.Ok(tree);
     }
 
     public static async Task<IResult> GetEntiteById(ISender sender, int id)
     {
+        ArgumentNullException.ThrowIfNull(sender, nameof(sender));
+
         if (id <= 0)
         {
             return TypedResults.BadRequest("Invalid identifier.");

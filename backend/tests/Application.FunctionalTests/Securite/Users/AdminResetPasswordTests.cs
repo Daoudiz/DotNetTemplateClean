@@ -10,7 +10,7 @@ namespace DotNetTemplateClean.Application.FunctionalTests.Securite.Users;
 public class AdminResetPasswordTests : TestBase
 {
     [Test]
-    public async Task AdminResetPassword_ShouldResetPassword_AndRequirePasswordChange()
+    public async Task AdminResetPasswordShouldResetPasswordAndRequirePasswordChange()
     {
         var userId = await CreateUserAsync("reset-ok@local", "Initial1234!");
         var newPassword = "TempReset#2026A";
@@ -45,7 +45,7 @@ public class AdminResetPasswordTests : TestBase
     }
 
     [Test]
-    public async Task AdminResetPassword_ShouldReturnNotFound_WhenUserDoesNotExist()
+    public async Task AdminResetPasswordShouldReturnNotFoundWhenUserDoesNotExist()
     {
         using var scope = FunctionalTestSetup.ScopeFactory.CreateScope();
         var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
@@ -65,7 +65,7 @@ public class AdminResetPasswordTests : TestBase
     }
 
     [Test]
-    public async Task AdminResetPassword_ShouldReturnValidationError_WhenPasswordPolicyFails()
+    public async Task AdminResetPasswordShouldReturnValidationErrorWhenPasswordPolicyFails()
     {
         var userId = await CreateUserAsync("reset-policy@local", "Initial1234!");
 

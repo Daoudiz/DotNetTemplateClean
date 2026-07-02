@@ -37,7 +37,7 @@ public class PersonnelMatriculeUniquenessValidationTests
     }
 
     [Test]
-    public async Task Create_Should_Fail_When_Matricule_Already_Exists()
+    public async Task CreateShouldFailWhenMatriculeAlreadyExists()
     {
         await using var context = new TestApplicationDbContext(_dbOptions);
         await EnsureEntiteExistsAsync(context, 10);
@@ -57,7 +57,7 @@ public class PersonnelMatriculeUniquenessValidationTests
     }
 
     [Test]
-    public async Task Update_Should_Succeed_When_Keeping_Same_Matricule()
+    public async Task UpdateShouldSucceedWhenKeepingSameMatricule()
     {
         await using var context = new TestApplicationDbContext(_dbOptions);
         await EnsureEntiteExistsAsync(context, 10);
@@ -75,7 +75,7 @@ public class PersonnelMatriculeUniquenessValidationTests
     }
 
     [Test]
-    public async Task Update_Should_Fail_When_Matricule_Belongs_To_Another_Personnel()
+    public async Task UpdateShouldFailWhenMatriculeBelongsToAnotherPersonnel()
     {
         await using var context = new TestApplicationDbContext(_dbOptions);
         await EnsureEntiteExistsAsync(context, 10);

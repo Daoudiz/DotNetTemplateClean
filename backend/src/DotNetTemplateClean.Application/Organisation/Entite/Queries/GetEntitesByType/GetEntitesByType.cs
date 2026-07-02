@@ -7,6 +7,8 @@ public class GetEntitesByTypeQueryHandler(IApplicationDbContext context)
 {
     public async Task<List<Entite>> Handle(GetEntitesByTypeQuery request, CancellationToken cancellationToken)
     {
+        ArgumentNullException.ThrowIfNull(request, nameof(request));
+
         var baseQuery = context.Entites
             .AsNoTracking()
             .Where(e => EF.Functions.Like(e.TypeEntite.Libelle, request.TypeEntiteLibelle));

@@ -26,6 +26,9 @@ public class EntiteRulesService(IApplicationDbContext context) : IEntiteRulesSer
 
     public async Task<ServiceResult<string>?> ValidateUpdateUniquenessAsync(Entite existing, OrganizationUnitSaveDto dto, CancellationToken cancellationToken)
     {
+        ArgumentNullException.ThrowIfNull(existing, nameof(existing));
+        ArgumentNullException.ThrowIfNull(dto, nameof(dto));
+
         if (!string.Equals(existing.Libelle, dto.Libelle, StringComparison.OrdinalIgnoreCase))
         {
             if (!await IsLibelleUniqueAsync(dto.Libelle, cancellationToken).ConfigureAwait(false))

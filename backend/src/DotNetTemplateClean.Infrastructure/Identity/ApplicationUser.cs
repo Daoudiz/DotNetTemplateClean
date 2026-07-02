@@ -1,4 +1,3 @@
-using DotNetTemplateClean.Domain;
 
 namespace DotNetTemplateClean.Infrastructure;
 

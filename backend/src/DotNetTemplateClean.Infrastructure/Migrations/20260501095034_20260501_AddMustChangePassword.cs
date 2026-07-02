@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -10,6 +10,8 @@ public partial class _20260501_AddMustChangePassword : Migration
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
     {
+        ArgumentNullException.ThrowIfNull(migrationBuilder, nameof(migrationBuilder));
+
         migrationBuilder.AddColumn<bool>(
             name: "MustChangePassword",
             table: "AspNetUsers",
@@ -21,6 +23,8 @@ public partial class _20260501_AddMustChangePassword : Migration
     /// <inheritdoc />
     protected override void Down(MigrationBuilder migrationBuilder)
     {
+        ArgumentNullException.ThrowIfNull(migrationBuilder, nameof(migrationBuilder));
+
         migrationBuilder.DropColumn(
             name: "MustChangePassword",
             table: "AspNetUsers");
