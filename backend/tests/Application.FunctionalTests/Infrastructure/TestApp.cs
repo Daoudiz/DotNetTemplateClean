@@ -27,19 +27,13 @@ public static class TestApp
         await mediator.Send(request);
     }
 
-    public static string? GetUserId() => _userId;
+    public static string? UserId => _userId;
 
-    public static List<string>? GetRoles() => _roles;
+    public static IReadOnlyCollection<string>? Roles => _roles;
 
-    public static async Task<string> RunAsDefaultUserAsync()
-    {
-        return await RunAsUserAsync("test@local", "Testing1234!", []);
-    }
+    public static async Task<string> RunAsDefaultUserAsync() => await RunAsUserAsync("test@local", "Testing1234!", []);
 
-    public static async Task<string> RunAsAdministratorAsync()
-    {
-        return await RunAsUserAsync("administrator@local", "Administrator1234!", ["Admin"]);
-    }
+    public static async Task<string> RunAsAdministratorAsync() => await RunAsUserAsync("administrator@local", "Administrator1234!", ["Admin"]);
 
     public static async Task<string> RunAsUserAsync(string userName, string password, string[] roles)
     {
@@ -86,7 +80,7 @@ public static class TestApp
         }
 
         _userId = user.Id;
-        _roles = new List<string>(roles);
+        _roles = [.. roles];
         return _userId;
     }
 

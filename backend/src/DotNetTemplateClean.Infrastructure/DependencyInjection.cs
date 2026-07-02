@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
-public static class DependencyInjection
+public static class InfrastructureServiceCollectionExtensions
 {
     private static readonly Action<ILogger, string, string, string?, string, Exception?> JwtAuthenticationFailed =
         LoggerMessage.Define<string, string, string?, string>(

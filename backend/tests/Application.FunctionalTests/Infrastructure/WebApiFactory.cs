@@ -24,8 +24,8 @@ public class WebApiFactory(string connectionString) : WebApplicationFactory<Prog
             services.AddTransient(_ =>
             {
                 var mock = new Mock<IUser>();
-                mock.SetupGet(x => x.Roles).Returns(TestApp.GetRoles());
-                mock.SetupGet(x => x.Id).Returns(TestApp.GetUserId());
+                mock.SetupGet(x => x.Roles).Returns(TestApp.Roles?.ToList());
+                mock.SetupGet(x => x.Id).Returns(TestApp.UserId);
                 return mock.Object;
             });
 

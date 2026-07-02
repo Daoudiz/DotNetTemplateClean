@@ -11,9 +11,9 @@ using NUnit.Framework;
 namespace DotNetTemplateClean.UnitTest;
 
 [TestFixture]
-public class PersonnelMatriculeUniquenessValidationTests
+public sealed class PersonnelMatriculeUniquenessValidationTests : IDisposable
 {
-    private SqliteConnection _connection = null!;
+    private SqliteConnection? _connection;
     private DbContextOptions<TestApplicationDbContext> _dbOptions = null!;
 
     [SetUp]
@@ -31,9 +31,23 @@ public class PersonnelMatriculeUniquenessValidationTests
     }
 
     [TearDown]
-    public void TearDown()
+    public void TearDown() => Dispose();
+
+    public void Dispose()
     {
-        _connection.Dispose();
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    private void Dispose(bool disposing)
+    {
+        if (!disposing)
+        {
+            return;
+        }
+
+        _connection?.Dispose();
+        _connection = null;
     }
 
     [Test]
@@ -180,10 +194,7 @@ public class PersonnelMatriculeUniquenessValidationTests
         public DbSet<TypeEntite> TypeEntites => Set<TypeEntite>();
         public DbSet<Personnel> Personnels => Set<Personnel>();
 
-        public async Task ExecuteInTransactionAsync(Func<Task> action, CancellationToken cancellationToken)
-        {
-            await action();
-        }
+        public async Task ExecuteInTransactionAsync(Func<Task> action, CancellationToken cancellationToken) => await action();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
