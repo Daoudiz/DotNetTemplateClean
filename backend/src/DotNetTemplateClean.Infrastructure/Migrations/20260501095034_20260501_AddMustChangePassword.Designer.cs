@@ -13,7 +13,7 @@ namespace DotNetTemplateClean.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20260501095034_20260501_AddMustChangePassword")]
-    partial class _20260501_AddMustChangePassword
+    partial class AddMustChangePassword20260501
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

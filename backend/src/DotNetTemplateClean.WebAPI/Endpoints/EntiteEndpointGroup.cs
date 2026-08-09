@@ -169,7 +169,7 @@ public class EntiteEndpointGroup : IEndpointGroup
         return HandleResult(result);
     }
 
-    private static IResult ToProblemDetails(ServiceResult<string> result, HttpContext httpContext)
+    private static JsonHttpResult<ProblemDetails> ToProblemDetails(ServiceResult<string> result, HttpContext httpContext)
     {
         var problemDetails = new ProblemDetails
         {

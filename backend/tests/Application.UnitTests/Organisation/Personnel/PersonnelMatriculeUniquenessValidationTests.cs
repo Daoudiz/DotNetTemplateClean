@@ -11,7 +11,7 @@ using NUnit.Framework;
 namespace DotNetTemplateClean.UnitTest;
 
 [TestFixture]
-public class PersonnelMatriculeUniquenessValidationTests
+public sealed class PersonnelMatriculeUniquenessValidationTests : IDisposable
 {
     private SqliteConnection _connection = null!;
     private DbContextOptions<TestApplicationDbContext> _dbOptions = null!;
@@ -34,7 +34,7 @@ public class PersonnelMatriculeUniquenessValidationTests
     public void TearDown() => _connection.Dispose();
 
     [Test]
-    public async Task Create_Should_Fail_When_Matricule_Already_Exists()
+    public async Task CreateFailsWhenMatriculeAlreadyExists()
     {
         await using var context = new TestApplicationDbContext(_dbOptions);
         await EnsureEntiteExistsAsync(context, 10);
@@ -54,7 +54,7 @@ public class PersonnelMatriculeUniquenessValidationTests
     }
 
     [Test]
-    public async Task Update_Should_Succeed_When_Keeping_Same_Matricule()
+    public async Task UpdateSucceedsWhenKeepingSameMatricule()
     {
         await using var context = new TestApplicationDbContext(_dbOptions);
         await EnsureEntiteExistsAsync(context, 10);
@@ -72,7 +72,7 @@ public class PersonnelMatriculeUniquenessValidationTests
     }
 
     [Test]
-    public async Task Update_Should_Fail_When_Matricule_Belongs_To_Another_Personnel()
+    public async Task UpdateFailsWhenMatriculeBelongsToAnotherPersonnel()
     {
         await using var context = new TestApplicationDbContext(_dbOptions);
         await EnsureEntiteExistsAsync(context, 10);
@@ -168,6 +168,8 @@ public class PersonnelMatriculeUniquenessValidationTests
         await context.SaveChangesAsync();
     }
 
+    public void Dispose() => _connection?.Dispose();
+
     private sealed class TestApplicationDbContext(DbContextOptions<TestApplicationDbContext> options)
         : DbContext(options), IApplicationDbContext
     {
@@ -177,10 +179,7 @@ public class PersonnelMatriculeUniquenessValidationTests
         public DbSet<TypeEntite> TypeEntites => Set<TypeEntite>();
         public DbSet<Personnel> Personnels => Set<Personnel>();
 
-        public async Task ExecuteInTransactionAsync(Func<Task> action, CancellationToken cancellationToken)
-        {
-            await action();
-        }
+        public async Task ExecuteInTransactionAsync(Func<Task> action, CancellationToken cancellationToken) => await action();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

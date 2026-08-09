@@ -38,18 +38,19 @@ public class PersonnelDetailsDto
     public string? Grade { get; init; }
     public IReadOnlyCollection<PersonnelAffectationDetailsDto> Affectations { get; init; } = [];
 
-    private class Mapping : Profile
+}
+
+public sealed class PersonnelDetailsDtoMapping : Profile
+{
+    public PersonnelDetailsDtoMapping()
     {
-        public Mapping()
-        {
-            CreateMap<Personnel, PersonnelDetailsDto>()
+        CreateMap<Personnel, PersonnelDetailsDto>()
                  .ForMember(
                 dest => dest.DateNaissance,
                 opt => opt.MapFrom(src => src.DateNaissance == null
                     ? (DateTime?)null
                     : src.DateNaissance.Value.ToDateTime(TimeOnly.MinValue))
             ); 
-        }
     }
 }
 
@@ -62,12 +63,13 @@ public class PersonnelAffectationDetailsDto
     public DateTime? DateFinAffectation { get; init; }
     public required string Nature { get; init; }
 
-    private class Mapping : Profile
+}
+
+public sealed class PersonnelAffectationDetailsDtoMapping : Profile
+{
+    public PersonnelAffectationDetailsDtoMapping()
     {
-        public Mapping()
-        {
-            CreateMap<AffectationPersonnel, PersonnelAffectationDetailsDto>()
+        CreateMap<AffectationPersonnel, PersonnelAffectationDetailsDto>()
                 .ForMember(d => d.DateDebut, opt => opt.MapFrom(s => s.DateDebutAffectation));
-        }
     }
 }

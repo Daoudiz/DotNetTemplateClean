@@ -35,7 +35,7 @@ public static class InitialiserExtensions
     }
 }
 
-internal class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitialiser> logger,
+public sealed class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitialiser> logger,
                                                 ApplicationDbContext context,
                                                 UserManager<ApplicationUser> userManager,
                                                 RoleManager<IdentityRole> roleManager)

@@ -16,15 +16,16 @@ public class PersonnelListDto
     // La liste des affectations liées
     public IReadOnlyCollection<AffectationDto> Affectations { get; init; } = [];
 
-    private class Mapping : Profile
+}
+
+public sealed class PersonnelListDtoMapping : Profile
+{
+    public PersonnelListDtoMapping()
     {
-        public Mapping()
-        {
-            CreateMap<Personnel, PersonnelListDto>()
+        CreateMap<Personnel, PersonnelListDto>()
                 .ForMember(
                     dest => dest.DateNaissance,
                     opt => opt.MapFrom(src => src.DateNaissance == null ? (DateOnly?)null : src.DateNaissance.Value)
                 );
-        }
     }
 }

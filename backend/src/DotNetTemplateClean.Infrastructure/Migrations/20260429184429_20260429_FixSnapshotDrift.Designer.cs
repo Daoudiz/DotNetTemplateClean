@@ -13,7 +13,7 @@ namespace DotNetTemplateClean.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20260429184429_20260429_FixSnapshotDrift")]
-    partial class _20260429_FixSnapshotDrift
+    partial class FixSnapshotDrift20260429
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

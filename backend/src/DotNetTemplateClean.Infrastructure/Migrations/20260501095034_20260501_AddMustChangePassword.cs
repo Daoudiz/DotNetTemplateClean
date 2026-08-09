@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DotNetTemplateClean.Infrastructure.Migrations
 ;
 /// <inheritdoc />
-public partial class _20260501_AddMustChangePassword : Migration
+    public partial class AddMustChangePassword20260501 : Migration
 {
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)

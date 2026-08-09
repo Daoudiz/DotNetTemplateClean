@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DotNetTemplateClean.Infrastructure.Migrations;
 
     /// <inheritdoc />
-    public partial class _20260429_FixSnapshotDrift : Migration
+    public partial class FixSnapshotDrift20260429 : Migration
     {
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder) => ArgumentNullException.ThrowIfNull(migrationBuilder, nameof(migrationBuilder));// No-op migration: aligns snapshot with the current model after previous drift.
