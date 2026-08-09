@@ -11,9 +11,9 @@ using NUnit.Framework;
 namespace DotNetTemplateClean.UnitTest;
 
 [TestFixture]
-public sealed class PersonnelMatriculeUniquenessValidationTests : IDisposable
+public class PersonnelMatriculeUniquenessValidationTests
 {
-    private SqliteConnection? _connection;
+    private SqliteConnection _connection = null!;
     private DbContextOptions<TestApplicationDbContext> _dbOptions = null!;
 
     [SetUp]
@@ -31,27 +31,10 @@ public sealed class PersonnelMatriculeUniquenessValidationTests : IDisposable
     }
 
     [TearDown]
-    public void TearDown() => Dispose();
-
-    public void Dispose()
-    {
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
-    }
-
-    private void Dispose(bool disposing)
-    {
-        if (!disposing)
-        {
-            return;
-        }
-
-        _connection?.Dispose();
-        _connection = null;
-    }
+    public void TearDown() => _connection.Dispose();
 
     [Test]
-    public async Task CreateShouldFailWhenMatriculeAlreadyExists()
+    public async Task Create_Should_Fail_When_Matricule_Already_Exists()
     {
         await using var context = new TestApplicationDbContext(_dbOptions);
         await EnsureEntiteExistsAsync(context, 10);
@@ -71,7 +54,7 @@ public sealed class PersonnelMatriculeUniquenessValidationTests : IDisposable
     }
 
     [Test]
-    public async Task UpdateShouldSucceedWhenKeepingSameMatricule()
+    public async Task Update_Should_Succeed_When_Keeping_Same_Matricule()
     {
         await using var context = new TestApplicationDbContext(_dbOptions);
         await EnsureEntiteExistsAsync(context, 10);
@@ -89,7 +72,7 @@ public sealed class PersonnelMatriculeUniquenessValidationTests : IDisposable
     }
 
     [Test]
-    public async Task UpdateShouldFailWhenMatriculeBelongsToAnotherPersonnel()
+    public async Task Update_Should_Fail_When_Matricule_Belongs_To_Another_Personnel()
     {
         await using var context = new TestApplicationDbContext(_dbOptions);
         await EnsureEntiteExistsAsync(context, 10);
@@ -194,7 +177,10 @@ public sealed class PersonnelMatriculeUniquenessValidationTests : IDisposable
         public DbSet<TypeEntite> TypeEntites => Set<TypeEntite>();
         public DbSet<Personnel> Personnels => Set<Personnel>();
 
-        public async Task ExecuteInTransactionAsync(Func<Task> action, CancellationToken cancellationToken) => await action();
+        public async Task ExecuteInTransactionAsync(Func<Task> action, CancellationToken cancellationToken)
+        {
+            await action();
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

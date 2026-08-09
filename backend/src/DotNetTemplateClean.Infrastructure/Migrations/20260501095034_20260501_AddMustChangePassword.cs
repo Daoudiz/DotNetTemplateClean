@@ -11,7 +11,6 @@ public partial class _20260501_AddMustChangePassword : Migration
     protected override void Up(MigrationBuilder migrationBuilder)
     {
         ArgumentNullException.ThrowIfNull(migrationBuilder, nameof(migrationBuilder));
-
         migrationBuilder.AddColumn<bool>(
             name: "MustChangePassword",
             table: "AspNetUsers",

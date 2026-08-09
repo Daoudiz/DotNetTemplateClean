@@ -57,7 +57,6 @@ public class EntiteEndpointGroup : IEndpointGroup
     public static async Task<Ok<List<Entite>>> GetAllDirections(ISender sender)
     {
         ArgumentNullException.ThrowIfNull(sender, nameof(sender));
-
         var results = await sender.Send(new GetEntitesByTypeQuery(EntityTypes.Direction, SelectIdAndCodeOnly: true));
         return TypedResults.Ok(results);
     }
@@ -92,6 +91,7 @@ public class EntiteEndpointGroup : IEndpointGroup
     {
         ArgumentNullException.ThrowIfNull(sender, nameof(sender));
         ArgumentNullException.ThrowIfNull(httpContext, nameof(httpContext));
+        ArgumentNullException.ThrowIfNull(dto, nameof(dto));
 
         var result = await sender.Send(new CreateEntiteCommand(dto), ct);
         return result.IsSuccess
@@ -103,6 +103,7 @@ public class EntiteEndpointGroup : IEndpointGroup
     {
         ArgumentNullException.ThrowIfNull(sender, nameof(sender));
         ArgumentNullException.ThrowIfNull(httpContext, nameof(httpContext));
+        ArgumentNullException.ThrowIfNull(dto, nameof(dto));
 
         if (dto is null)
         {
@@ -145,7 +146,6 @@ public class EntiteEndpointGroup : IEndpointGroup
     public static async Task<Ok<List<TypeEntiteDto>>> GetAllTypes(ISender sender)
     {
         ArgumentNullException.ThrowIfNull(sender, nameof(sender));
-
         var results = await sender.Send(new GetTypeEntitesQuery());
         return TypedResults.Ok(results);
     }
@@ -153,7 +153,6 @@ public class EntiteEndpointGroup : IEndpointGroup
     public static async Task<Ok<List<TreeNodeDto>>> GetTree(ISender sender)
     {
         ArgumentNullException.ThrowIfNull(sender, nameof(sender));
-
         var tree = await sender.Send(new GetOrganisationTreeQuery());
         return TypedResults.Ok(tree);
     }
@@ -161,7 +160,6 @@ public class EntiteEndpointGroup : IEndpointGroup
     public static async Task<IResult> GetEntiteById(ISender sender, int id)
     {
         ArgumentNullException.ThrowIfNull(sender, nameof(sender));
-
         if (id <= 0)
         {
             return TypedResults.BadRequest("Invalid identifier.");

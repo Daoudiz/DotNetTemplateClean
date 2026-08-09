@@ -19,7 +19,6 @@ public class SearchEntitesQueryHandler(
     public async Task<PagedResult<OrganizationUnitResponseDto>> Handle(SearchEntitesQuery request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request, nameof(request));
-
         var query = context.Entites.AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))
