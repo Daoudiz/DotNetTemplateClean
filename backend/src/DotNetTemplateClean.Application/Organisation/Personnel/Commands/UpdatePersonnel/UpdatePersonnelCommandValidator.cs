@@ -3,12 +3,15 @@ namespace DotNetTemplateClean.Application;
 public class UpdatePersonnelCommandValidator : AbstractValidator<UpdatePersonnelCommand>
 {
     private readonly IApplicationDbContext _context;
+    private readonly IEntiteHierarchyService _entiteHierarchyService;
 
     public UpdatePersonnelCommandValidator(
         IApplicationDbContext context,
-        IPersonnelMatriculeUniquenessService matriculeUniquenessService)
+        IPersonnelMatriculeUniquenessService matriculeUniquenessService,
+        IEntiteHierarchyService entiteHierarchyService)
     {
         _context = context;
+        _entiteHierarchyService = entiteHierarchyService;
 
         RuleFor(v => v.Matricule)
             .NotEmpty().WithMessage("Le matricule est obligatoire.")
@@ -38,11 +41,13 @@ public class UpdatePersonnelCommandValidator : AbstractValidator<UpdatePersonnel
             .WithMessage(PersonnelAffectationValidationExtensions.AffectationEndBeforeRecruitmentDateMessage);
 
         RuleFor(v => v)
-            .MustAsync(HaveAffectationForInitialEntite)
-            .WithMessage(PersonnelAffectationValidationExtensions.MissingActiveInitialEntiteAffectationMessage);
+            .MustAsync(HaveAffectationForRattachementHierarchy)
+            .WithMessage(PersonnelAffectationValidationExtensions.MissingActiveRattachementHierarchyAffectationMessage);
     }
 
-    private async Task<bool> HaveAffectationForInitialEntite(UpdatePersonnelCommand command, CancellationToken cancellationToken)
+    private async Task<bool> HaveAffectationForRattachementHierarchy(
+        UpdatePersonnelCommand command,
+        CancellationToken cancellationToken)
     {
         var initialEntiteId = await _context.Personnels
             .Where(personnel => personnel.Id == command.Id)
@@ -54,9 +59,13 @@ public class UpdatePersonnelCommandValidator : AbstractValidator<UpdatePersonnel
             return true;
         }
 
-        return PersonnelAffectationValidationExtensions.HasActiveAffectationForEntite(
+        var allowedEntiteIds = await _entiteHierarchyService
+            .GetFlattenedChildEntityIds(initialEntiteId.Value)
+            .ConfigureAwait(false);
+
+        return PersonnelAffectationValidationExtensions.HasActiveAffectationForAnyEntite(
             command.Affectations,
-            initialEntiteId.Value,
+            allowedEntiteIds,
             affectation => affectation.EntiteId,
             affectation => affectation.DateFinAffectation);
     }

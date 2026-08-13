@@ -2,7 +2,9 @@ namespace DotNetTemplateClean.Application;
 
 public class CreatePersonnelCommandValidator : AbstractValidator<CreatePersonnelCommand>
 {
-    public CreatePersonnelCommandValidator(IPersonnelMatriculeUniquenessService matriculeUniquenessService)
+    public CreatePersonnelCommandValidator(
+        IPersonnelMatriculeUniquenessService matriculeUniquenessService,
+        IEntiteHierarchyService entiteHierarchyService)
     {
         RuleFor(v => v.Nom)
             .MaximumLength(100).WithMessage("Le nom ne doit pas depasser 100 caracteres.")
@@ -72,11 +74,18 @@ public class CreatePersonnelCommandValidator : AbstractValidator<CreatePersonnel
             .WithMessage(PersonnelAffectationValidationExtensions.AffectationStartBeforeRecruitmentDateMessage);
 
         RuleFor(v => v)
-            .Must(command => PersonnelAffectationValidationExtensions.HasActiveAffectationForEntite(
-                command.Affectations,
-                command.EntiteId,
-                affectation => affectation.EntiteId,
-                _ => null))
-            .WithMessage(PersonnelAffectationValidationExtensions.MissingActiveInitialEntiteAffectationMessage);
+            .MustAsync(async (command, _) =>
+            {
+                var allowedEntiteIds = await entiteHierarchyService
+                    .GetFlattenedChildEntityIds(command.EntiteId)
+                    .ConfigureAwait(false);
+
+                return PersonnelAffectationValidationExtensions.HasActiveAffectationForAnyEntite(
+                    command.Affectations,
+                    allowedEntiteIds,
+                    affectation => affectation.EntiteId,
+                    _ => null);
+            })
+            .WithMessage(PersonnelAffectationValidationExtensions.MissingActiveRattachementHierarchyAffectationMessage);
     }
 }

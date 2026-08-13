@@ -58,7 +58,7 @@ import { OrganizationTreeNode } from '../../../models/organisation/organisation-
 })
 export class PersonnelCreateComponent {
     private static readonly overlappingAffectationsErrorKey = 'overlappingAffectations';
-    private static readonly missingInitialEntiteAffectationErrorKey = 'missingInitialEntiteAffectation';
+    private static readonly missingRattachementHierarchyAffectationErrorKey = 'missingRattachementHierarchyAffectation';
 
     private readonly fb = inject(FormBuilder);
     private readonly personnelService = inject(PersonnelService);
@@ -82,8 +82,8 @@ export class PersonnelCreateComponent {
     private readonly defaultNature = 'Titulaire';
     private readonly overlappingAffectationsMessage =
         'Un personnel ne peut pas avoir deux affectations avec la meme entite et la meme fonction sur des periodes qui se chevauchent.';
-    private readonly missingInitialEntiteAffectationMessage =
-        "Au moins une affectation doit correspondre a l'entite initiale du personnel.";
+    private readonly missingRattachementHierarchyAffectationMessage =
+        "Au moins une affectation doit concerner l'entite de rattachement du personnel ou l'une de ses entites rattachees.";
     readonly isEndAffectationDialogOpen = signal(false);
     readonly selectedAffectationIndex = signal<number | null>(null);
     readonly endAffectationDate = signal('');
@@ -116,7 +116,7 @@ export class PersonnelCreateComponent {
         userRole: [{ value: '', disabled: true }],
         affectations: this.createAffectationsFormArray()
     }, {
-        validators: [(control: AbstractControl) => this.validateInitialEntiteAffectation(control)]
+        validators: [(control: AbstractControl) => this.validateRattachementHierarchyAffectation(control)]
     });
 
     get affectationsFormArray(): FormArray {
@@ -137,7 +137,7 @@ export class PersonnelCreateComponent {
         this.formStatusChanged();
         return this.affectationsFormArray.length > 0
             && this.affectationsFormArray.valid
-            && !this.hasMissingInitialEntiteAffectationError();
+            && !this.hasMissingRattachementHierarchyAffectationError();
     });
 
     readonly canGoNext = computed(() => {
@@ -343,8 +343,8 @@ export class PersonnelCreateComponent {
         return this.affectationsFormArray.hasError(PersonnelCreateComponent.overlappingAffectationsErrorKey);
     }
 
-    hasMissingInitialEntiteAffectationError(): boolean {
-        return this.form.hasError(PersonnelCreateComponent.missingInitialEntiteAffectationErrorKey);
+    hasMissingRattachementHierarchyAffectationError(): boolean {
+        return this.form.hasError(PersonnelCreateComponent.missingRattachementHierarchyAffectationErrorKey);
     }
 
     getOverlappingAffectationsErrorMessage(): string {
@@ -355,12 +355,12 @@ export class PersonnelCreateComponent {
         return error?.message ?? this.overlappingAffectationsMessage;
     }
 
-    getMissingInitialEntiteAffectationErrorMessage(): string {
-        const error = this.form.getError(PersonnelCreateComponent.missingInitialEntiteAffectationErrorKey) as
+    getMissingRattachementHierarchyAffectationErrorMessage(): string {
+        const error = this.form.getError(PersonnelCreateComponent.missingRattachementHierarchyAffectationErrorKey) as
             | { message?: string }
             | undefined;
 
-        return error?.message ?? this.missingInitialEntiteAffectationMessage;
+        return error?.message ?? this.missingRattachementHierarchyAffectationMessage;
     }
 
     isOverlappingAffectation(index: number): boolean {
@@ -437,8 +437,8 @@ export class PersonnelCreateComponent {
             this.notification.error(
                 this.hasOverlappingAffectationsError()
                     ? this.getOverlappingAffectationsErrorMessage()
-                    : this.hasMissingInitialEntiteAffectationError()
-                        ? this.getMissingInitialEntiteAffectationErrorMessage()
+                    : this.hasMissingRattachementHierarchyAffectationError()
+                        ? this.getMissingRattachementHierarchyAffectationErrorMessage()
                     : 'Veuillez remplir tous les champs requis'
             );
             return;
@@ -763,26 +763,36 @@ export class PersonnelCreateComponent {
         };
     }
 
-    private validateInitialEntiteAffectation(control: AbstractControl): ValidationErrors | null {
-        const initialEntiteId = this.extractNodeId(control.get('entiteId')?.value);
+    private validateRattachementHierarchyAffectation(control: AbstractControl): ValidationErrors | null {
+        const rattachementEntiteId = this.extractNodeId(control.get('entiteId')?.value);
         const affectationsControl = control.get('affectations');
 
-        if (initialEntiteId == null || !(affectationsControl instanceof FormArray)) {
+        if (rattachementEntiteId == null || !(affectationsControl instanceof FormArray)) {
             return null;
         }
 
-        const hasAffectationInInitialEntite = affectationsControl.controls.some((group) => {
+        const rattachementNode = this.organisationService.findNodeById(
+            this.organizationTree(),
+            rattachementEntiteId
+        );
+
+        if (!rattachementNode) {
+            return null;
+        }
+
+        const hasAffectationInRattachementHierarchy = affectationsControl.controls.some((group) => {
             const affectationEntiteId = this.extractNodeId(group.get('entiteId')?.value);
-            return affectationEntiteId === initialEntiteId;
+            return affectationEntiteId != null
+                && this.organisationService.findNodeById([rattachementNode], affectationEntiteId) != null;
         });
 
-        if (hasAffectationInInitialEntite) {
+        if (hasAffectationInRattachementHierarchy) {
             return null;
         }
 
         return {
-            [PersonnelCreateComponent.missingInitialEntiteAffectationErrorKey]: {
-                message: this.missingInitialEntiteAffectationMessage
+            [PersonnelCreateComponent.missingRattachementHierarchyAffectationErrorKey]: {
+                message: this.missingRattachementHierarchyAffectationMessage
             }
         };
     }

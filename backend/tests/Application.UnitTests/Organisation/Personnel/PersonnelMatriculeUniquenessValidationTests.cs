@@ -42,7 +42,8 @@ public sealed class PersonnelMatriculeUniquenessValidationTests : IDisposable
         await context.SaveChangesAsync();
 
         var uniquenessService = new PersonnelMatriculeUniquenessService(context);
-        var validator = new CreatePersonnelCommandValidator(uniquenessService);
+        var hierarchyService = new EntiteHierarchyService(context);
+        var validator = new CreatePersonnelCommandValidator(uniquenessService, hierarchyService);
 
         var command = CreateValidCreateCommand("MAT-001", 10);
         var result = await validator.ValidateAsync(command);
@@ -62,7 +63,8 @@ public sealed class PersonnelMatriculeUniquenessValidationTests : IDisposable
         await context.SaveChangesAsync();
 
         var uniquenessService = new PersonnelMatriculeUniquenessService(context);
-        var validator = new UpdatePersonnelCommandValidator(context, uniquenessService);
+        var hierarchyService = new EntiteHierarchyService(context);
+        var validator = new UpdatePersonnelCommandValidator(context, uniquenessService, hierarchyService);
 
         var command = CreateValidUpdateCommand(1, "MAT-001", 10);
         var result = await validator.ValidateAsync(command);
@@ -81,7 +83,8 @@ public sealed class PersonnelMatriculeUniquenessValidationTests : IDisposable
         await context.SaveChangesAsync();
 
         var uniquenessService = new PersonnelMatriculeUniquenessService(context);
-        var validator = new UpdatePersonnelCommandValidator(context, uniquenessService);
+        var hierarchyService = new EntiteHierarchyService(context);
+        var validator = new UpdatePersonnelCommandValidator(context, uniquenessService, hierarchyService);
 
         var command = CreateValidUpdateCommand(1, "MAT-002", 10);
         var result = await validator.ValidateAsync(command);

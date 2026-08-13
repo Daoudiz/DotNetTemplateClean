@@ -4,26 +4,28 @@ public static class PersonnelAffectationValidationExtensions
 {
     private const string OverlappingAffectationsMessage =
         "Un personnel ne peut pas avoir deux affectations avec le meme couple entiteId/fonctionId sur des periodes qui se chevauchent.";
-    public const string MissingActiveInitialEntiteAffectationMessage =
-        "Le personnel doit avoir au moins une affectation active dans son entite initiale.";
+    public const string MissingActiveRattachementHierarchyAffectationMessage =
+        "Le personnel doit avoir au moins une affectation active dans son entite de rattachement ou dans l'une de ses entites rattachees.";
     public const string AffectationStartBeforeRecruitmentDateMessage =
         "La date de debut d'affectation doit etre superieure ou egale a la date de recrutement.";
     public const string AffectationEndBeforeRecruitmentDateMessage =
         "La date de fin d'affectation doit etre superieure ou egale a la date de recrutement.";
 
-    public static bool HasActiveAffectationForEntite<TAffectation>(
+    public static bool HasActiveAffectationForAnyEntite<TAffectation>(
         IEnumerable<TAffectation>? affectations,
-        int entiteId,
+        IEnumerable<int> allowedEntiteIds,
         Func<TAffectation, int> entiteIdSelector,
         Func<TAffectation, DateTime?> dateFinSelector)
     {
-        if (entiteId <= 0 || affectations is null)
+        if (affectations is null)
         {
             return false;
         }
 
+        var allowedEntiteIdsSet = allowedEntiteIds.ToHashSet();
+
         return affectations.Any(affectation =>
-            entiteIdSelector(affectation) == entiteId
+            allowedEntiteIdsSet.Contains(entiteIdSelector(affectation))
             && dateFinSelector(affectation) is null);
     }
 
